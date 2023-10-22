@@ -20,10 +20,6 @@ from systembridgeshared.models.database_data import System as DatabaseModel
 
 from ..._version import __version__
 
-SERVER_SOFTWARE = "{0}/{1} aiohttp/{2} Python/{3[0]}.{3[1]}".format(
-    "SystemBridge", __version__, aiohttp.__version__, sys.version_info
-)
-
 
 class System(Base):
     """System"""
@@ -87,10 +83,7 @@ class System(Base):
             )
 
             try:
-                async with GitHubAPI(
-                    token="",
-                    **{"client_name": SERVER_SOFTWARE},  # type: ignore
-                ) as github:
+                async with GitHubAPI() as github:
                     releases = await github.repos.releases.list(
                         "timmo001/system-bridge"
                     )
