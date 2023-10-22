@@ -541,7 +541,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_OPENED,
                             EVENT_MESSAGE: "URL opened",
-                            EVENT_URL: model.url,
+                            EVENT_URL: model.url,  # pylint: disable=no-member
                         }
                     )
                 )
