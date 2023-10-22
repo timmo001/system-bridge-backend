@@ -505,7 +505,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     return
-                open_path(model.path) # pylint: disable=no-member
+                open_path(model.path)  # pylint: disable=no-member
                 await self._send_response(
                     Response(
                         **{
@@ -534,7 +534,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     return
-                open_url(model.url) # pylint: disable=no-member
+                open_url(model.url)  # pylint: disable=no-member
                 await self._send_response(
                     Response(
                         **{
