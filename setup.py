@@ -27,7 +27,7 @@ setup(
     author="Aidan Timson (Timmo)",
     author_email="aidan@timmo.dev",
     license="MIT",
-    url="https://github.com/timmo001/system-bridge",
+    url="https://github.com/timmo001/system-bridge-backend",
     packages=find_packages(exclude=["tests", "generator"]),
     package_data={"": package_data},
     install_requires=requirements,
