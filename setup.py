@@ -23,7 +23,7 @@ package_data = ["icon.png", "icon.ico"]
 setup(
     name="systembridgebackend",
     description="System Bridge Backend",
-    keywords="system bridge backend",
+    keywords="system-bridge",
     author="Aidan Timson (Timmo)",
     author_email="aidan@timmo.dev",
     license="MIT",
