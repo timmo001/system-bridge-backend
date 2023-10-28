@@ -30,6 +30,7 @@ from systembridgeshared.settings import Settings
 
 from .._version import __version__
 from ..gui import GUI
+from ..modules import MODULES
 from ..modules.listeners import Listeners
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
@@ -156,7 +157,6 @@ class API(FastAPI):
         self.callback_exit: Callable[[], None]
         self.callback_open_gui: Callable[[str, str], None]
         self.listeners: Listeners
-        self.implemented_modules: list[str] = []
         self.loop: asyncio.AbstractEventLoop = asyncio_get_loop()
 
 
@@ -187,7 +187,7 @@ def get_api_root() -> dict[str, str]:
 def get_data(module: str) -> DataDict:
     """Get data from module."""
     table_module = TABLE_MAP.get(module)
-    if module not in app.implemented_modules or table_module is None:
+    if module not in MODULES or table_module is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
@@ -202,7 +202,7 @@ def get_data_by_key(
 ) -> dict[str, Any]:
     """Get data from module by key."""
     table_module = TABLE_MAP.get(module)
-    if module not in app.implemented_modules or table_module is None:
+    if module not in MODULES or table_module is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
@@ -700,7 +700,6 @@ async def websocket_endpoint(websocket: WebSocket):
         database,
         settings,
         app.listeners,
-        app.implemented_modules,
         websocket,
         app.callback_exit,
         app.callback_open_gui,

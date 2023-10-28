@@ -36,8 +36,7 @@ class Listeners(Base):
         """Initialize"""
         super().__init__()
         self._database: Database = database
-        self._implemented_modules: list[str] = MODULES
-        self._data: dict = {module: {} for module in self._implemented_modules}
+        self._data: dict = {module: {} for module in MODULES}
         # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
 
@@ -84,7 +83,7 @@ class Listeners(Base):
     ) -> None:
         """Refresh data by module"""
         self._logger.info("Refresh data by module: %s", module)
-        if module not in self._implemented_modules:
+        if module not in MODULES:
             self._logger.warning("Module to refresh not implemented: %s", module)
             return
 

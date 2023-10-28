@@ -53,7 +53,6 @@ class Server(Base):
         database: Database,
         settings: Settings,
         listeners: Listeners,
-        implemented_modules: list[str],
         no_frontend: bool = False,
         no_gui: bool = False,
     ) -> None:
@@ -76,7 +75,6 @@ class Server(Base):
         api_app.callback_exit = self.exit_application
         api_app.callback_open_gui = self.callback_open_gui
         api_app.listeners = listeners
-        api_app.implemented_modules = implemented_modules
         api_app.loop = asyncio.get_event_loop()
 
         self._logger.info("Setup API server")
