@@ -30,6 +30,7 @@ class Battery(Base):
         except ValueError:
             return None
 
+
 class BatteryUpdate(ModuleUpdateBase):
     """Battery Update"""
 
