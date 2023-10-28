@@ -17,11 +17,11 @@ from .base import ModuleUpdateBase
 class Disk(Base):
     """Disk"""
 
-    def io_counters(self) -> sdiskio:
+    def io_counters(self) -> Optional[sdiskio]:
         """Disk IO counters"""
         return disk_io_counters()
 
-    def io_counters_per_disk(self) -> sdiskio:
+    def io_counters_per_disk(self) -> dict[str, sdiskio]:
         """Disk IO counters per disk"""
         return disk_io_counters(perdisk=True)
 
@@ -51,14 +51,15 @@ class DiskUpdate(ModuleUpdateBase):
 
     async def update_io_counters(self) -> None:
         """Update IO counters"""
-        for key, value in self._disk.io_counters()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"io_counters_{key}",
-                    value=value,
-                ),
-            )
+        if io_counters := self._disk.io_counters():
+            for key, value in io_counters._asdict().items():
+                self._database.update_data(
+                    DatabaseModel,
+                    DatabaseModel(
+                        key=f"io_counters_{key}",
+                        value=value,
+                    ),
+                )
 
     async def update_io_counters_per_disk(self) -> None:
         """Update IO counters per disk"""

@@ -31,6 +31,7 @@ class Network(Base):
         """IO Counters"""
         return net_io_counters()
 
+
 class NetworkUpdate(ModuleUpdateBase):
     """Network Update"""
 

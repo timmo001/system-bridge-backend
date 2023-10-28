@@ -120,6 +120,7 @@ class System(Base):
             return parse_version(latest_version) > parse_version(version)
         return None
 
+
 class SystemUpdate(ModuleUpdateBase):
     """System Update"""
 

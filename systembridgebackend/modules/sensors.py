@@ -68,6 +68,7 @@ class Sensors(Base):
             self._logger.error(error)
             return None
 
+
 class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update"""
 
