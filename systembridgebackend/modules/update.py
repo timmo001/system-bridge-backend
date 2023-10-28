@@ -5,15 +5,15 @@ from collections.abc import Awaitable, Callable
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from .battery.update import BatteryUpdate
-from .cpu.update import CPUUpdate
-from .disk.update import DiskUpdate
-from .display.update import DisplayUpdate
-from .gpu.update import GPUUpdate
-from .memory.update import MemoryUpdate
-from .network.update import NetworkUpdate
-from .sensors.update import SensorsUpdate
-from .system.update import SystemUpdate
+from .battery import BatteryUpdate
+from .cpu import CPUUpdate
+from .disk import DiskUpdate
+from .display import DisplayUpdate
+from .gpu import GPUUpdate
+from .memory import MemoryUpdate
+from .network import NetworkUpdate
+from .sensors import SensorsUpdate
+from .system import SystemUpdate
 
 
 class Update(Base):
@@ -27,7 +27,7 @@ class Update(Base):
         """Initialize"""
         super().__init__()
         self._database = database  # pylint: disable=duplicate-code
-        self.updated_callback = updated_callback
+        selfd_callback = updated_callback
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
@@ -47,8 +47,8 @@ class Update(Base):
         class_obj: dict,
     ) -> None:
         """Update"""
-        await class_obj["cls"].update_all_data()
-        await self.updated_callback(class_obj["name"])
+        await class_obj["cls"]_all_data()
+        await selfd_callback(class_obj["name"])
 
     async def update_data(self) -> None:
         """Update Data"""
@@ -64,8 +64,8 @@ class Update(Base):
         self._logger.info("Update frequent data")
 
         sensors_update = SensorsUpdate(self._database)
-        await sensors_update.update_all_data()
-        await self.updated_callback("sensors")
+        await sensors_update_all_data()
+        await selfd_callback("sensors")
 
         tasks = [self._update(cls) for cls in self._classes_frequent]
         await asyncio.gather(*tasks)
