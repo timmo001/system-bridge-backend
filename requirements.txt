@@ -10,7 +10,6 @@ plyer==2.1.0
 psutil==5.9.6
 python-multipart==0.0.6
 screeninfo==0.8.1
-systembridgemodels==3.9.2
 systembridgeshared==3.9.0
 typer==0.9.0
 uvicorn[standard]==0.23.2
