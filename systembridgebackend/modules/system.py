@@ -9,6 +9,12 @@ import socket
 import uuid
 from typing import Any, Optional
 
+from aiogithubapi import (
+    GitHubAPI,
+    GitHubConnectionException,
+    GitHubException,
+    GitHubRatelimitException,
+)
 from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
@@ -74,31 +80,20 @@ class System(Base):
     async def version_latest(self) -> Optional[Any]:
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
-        try:
-            from aiogithubapi import (  # pylint: disable=import-outside-toplevel
-                GitHubAPI,
-                GitHubConnectionException,
-                GitHubException,
-                GitHubRatelimitException,
-            )
 
-            try:
-                async with GitHubAPI() as github:
-                    releases = await github.repos.releases.list(
-                        "timmo001/system-bridge"
-                    )
-                return releases.data[0] if releases.data else None
-            except (
-                GitHubConnectionException,
-                GitHubRatelimitException,
-            ) as error:
-                self._logger.error("Error getting data from GitHub: %s", error)
-            except GitHubException as error:
-                self._logger.exception(
-                    "Unexpected error getting data from GitHub: %s", error
-                )
-        except ImportError as error:
-            self._logger.error("Unable to import aiogithubapi: %s", error)
+        try:
+            async with GitHubAPI() as github:
+                releases = await github.repos.releases.list("timmo001/system-bridge")
+            return releases.data[0] if releases.data else None
+        except (
+            GitHubConnectionException,
+            GitHubRatelimitException,
+        ) as error:
+            self._logger.error("Error getting data from GitHub: %s", error)
+        except GitHubException as error:
+            self._logger.exception(
+                "Unexpected error getting data from GitHub: %s", error
+            )
         return None
 
     def version_newer_available(
