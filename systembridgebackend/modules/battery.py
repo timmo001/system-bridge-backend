@@ -1,13 +1,34 @@
-"""System Bridge: Update Battery"""
-import asyncio
+"""System Bridge: Battery"""
+from __future__ import annotations
 
+import asyncio
+from typing import Optional
+
+import psutil
+from plyer import battery
 from systembridgemodels.database_data import Battery as DatabaseModel
+from systembridgeshared.base import Base
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
 
-from ..base import ModuleUpdateBase
-from . import Battery
+from .base import ModuleUpdateBase
 
+
+class Battery(Base):
+    """Battery"""
+
+    def sensors(self) -> Optional[psutil._common.sbattery]:  # type: ignore
+        """Get battery sensors"""
+        if not hasattr(psutil, "sensors_battery"):
+            return None
+        return psutil.sensors_battery()  # type: ignore
+
+    def status(self) -> Optional[dict]:
+        """Get battery status"""
+        try:
+            return battery.status
+        except ValueError:
+            return None
 
 class BatteryUpdate(ModuleUpdateBase):
     """Battery Update"""

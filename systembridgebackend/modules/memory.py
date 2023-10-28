@@ -1,11 +1,27 @@
-"""System Bridge: Update Memory"""
+"""System Bridge: Memory"""
 import asyncio
+from typing import NamedTuple
 
+from psutil import swap_memory, virtual_memory
+from psutil._common import sswap
 from systembridgemodels.database_data import Memory as DatabaseModel
+from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from ..base import ModuleUpdateBase
-from . import Memory
+from .base import ModuleUpdateBase
+from .memory import Memory
+
+
+class Memory(Base):
+    """Memory"""
+
+    def swap(self) -> sswap:
+        """Swap memory"""
+        return swap_memory()
+
+    def virtual(self) -> NamedTuple:  # svmem:
+        """Virtual memory"""
+        return virtual_memory()
 
 
 class MemoryUpdate(ModuleUpdateBase):
