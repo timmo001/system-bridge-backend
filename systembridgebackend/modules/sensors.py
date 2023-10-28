@@ -14,7 +14,6 @@ from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
 from .base import ModuleUpdateBase
-from .sensors import Sensors
 
 
 class Sensors(Base):

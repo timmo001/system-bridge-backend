@@ -9,7 +9,6 @@ from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
 from .base import ModuleUpdateBase
-from .memory import Memory
 
 
 class Memory(Base):
