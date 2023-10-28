@@ -1,6 +1,7 @@
 """System Bridge: Action Utilities"""
 from typing import Any
 
+from systembridgemodels.action import Action
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
 from systembridgeshared.exceptions import (
@@ -8,7 +9,6 @@ from systembridgeshared.exceptions import (
     ConnectionErrorException,
 )
 from systembridgeshared.http_client import HTTPClient
-from systembridgeshared.models.action import Action
 from systembridgeshared.settings import Settings
 
 

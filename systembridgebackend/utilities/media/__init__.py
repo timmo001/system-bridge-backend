@@ -20,6 +20,8 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 from mutagen._file import File as MutagenFile
 from plyer import storagepath
+from systembridgemodels.media_files import File as MediaFile
+from systembridgemodels.media_play import MediaPlay
 from systembridgeshared.const import (
     QUERY_API_KEY,
     QUERY_API_PORT,
@@ -32,8 +34,6 @@ from systembridgeshared.const import (
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_PORT_API,
 )
-from systembridgeshared.models.media_files import File as MediaFile
-from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 from ..keyboard import keyboard_keypress

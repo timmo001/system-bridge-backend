@@ -8,10 +8,10 @@ from collections.abc import Awaitable, Callable
 from typing import Optional
 
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
+from systembridgemodels.database_data import Media as DatabaseModel
+from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Media as DatabaseModel
-from systembridgeshared.models.media import Media as MediaInfo
 from winsdk.windows.foundation import (  # pylint: disable=import-error
     EventRegistrationToken,
 )

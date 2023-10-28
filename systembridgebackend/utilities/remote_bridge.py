@@ -1,6 +1,6 @@
 """System Bridge: Remote Bridge Utilities"""
+from systembridgemodels.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 
 
 def get_remote_bridges(

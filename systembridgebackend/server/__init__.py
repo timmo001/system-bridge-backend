@@ -6,6 +6,7 @@ from json import loads
 from typing import Optional
 
 import uvicorn
+from systembridgemodels.action import Action
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     SETTING_KEYBOARD_HOTKEYS,
@@ -13,7 +14,6 @@ from systembridgeshared.const import (
     SETTING_PORT_API,
 )
 from systembridgeshared.database import Database
-from systembridgeshared.models.action import Action
 from systembridgeshared.settings import Settings
 
 from ..data import Data

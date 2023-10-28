@@ -3,10 +3,10 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 
+from systembridgemodels.data import DataDict
 from systembridgeshared.base import Base
 from systembridgeshared.const import MODEL_MAP
 from systembridgeshared.database import TABLE_MAP, Database
-from systembridgeshared.models.data import DataDict
 
 
 class Listener:

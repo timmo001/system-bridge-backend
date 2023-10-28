@@ -3,9 +3,9 @@ import asyncio
 from json import dumps
 from typing import Optional
 
+from systembridgemodels.database_data import Display as DatabaseModel
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Display as DatabaseModel
 
 from ..base import ModuleUpdateBase
 from . import Display

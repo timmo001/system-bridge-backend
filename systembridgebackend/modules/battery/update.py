@@ -1,9 +1,9 @@
 """System Bridge: Update Battery"""
 import asyncio
 
+from systembridgemodels.database_data import Battery as DatabaseModel
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Battery as DatabaseModel
 
 from ..base import ModuleUpdateBase
 from . import Battery

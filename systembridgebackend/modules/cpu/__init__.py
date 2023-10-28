@@ -13,11 +13,9 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
+from systembridgemodels.database_data_sensors import Sensors as SensorsDatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data_sensors import (
-    Sensors as SensorsDatabaseModel,
-)
 
 
 class CPU(Base):

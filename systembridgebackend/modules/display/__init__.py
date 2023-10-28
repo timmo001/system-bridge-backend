@@ -5,12 +5,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 from screeninfo import get_monitors
+from systembridgemodels.database_data_sensors import Sensors as SensorsDatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data_sensors import (
-    Sensors as SensorsDatabaseModel,
-)
 
 
 class DisplayModel(BaseModel):

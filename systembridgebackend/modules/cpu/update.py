@@ -1,11 +1,11 @@
 """System Bridge: Update CPU"""
 import asyncio
 
+from systembridgemodels.database_data import CPU as DatabaseModel
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import CPU as DatabaseModel
 
-from . import CPU
 from ..base import ModuleUpdateBase
+from . import CPU
 
 
 class CPUUpdate(ModuleUpdateBase):

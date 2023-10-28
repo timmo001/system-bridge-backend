@@ -2,11 +2,11 @@
 import asyncio
 from json import dumps
 
+from systembridgemodels.database_data import Disk as DatabaseModel
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Disk as DatabaseModel
 
-from . import Disk
 from ..base import ModuleUpdateBase
+from . import Disk
 
 
 class DiskUpdate(ModuleUpdateBase):

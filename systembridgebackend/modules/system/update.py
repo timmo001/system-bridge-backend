@@ -1,11 +1,11 @@
 """System Bridge: Update System"""
 import asyncio
 
+from systembridgemodels.database_data import System as DatabaseModel
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import System as DatabaseModel
 
-from . import System
 from ..base import ModuleUpdateBase
+from . import System
 
 
 class SystemUpdate(ModuleUpdateBase):
