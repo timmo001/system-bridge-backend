@@ -1,21 +1,15 @@
 """System Bridge: Display"""
 from __future__ import annotations
 
-from typing import Optional
-
-from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
-from screeninfo import get_monitors
-from systembridgemodels.database_data_sensors import Sensors as SensorsDatabaseModel
-from systembridgeshared.base import Base
-from systembridgeshared.common import make_key
-from systembridgeshared.database import Database
-
-"""System Bridge: Update Display"""
 import asyncio
 from json import dumps
 from typing import Optional
 
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
+from screeninfo import get_monitors
 from systembridgemodels.database_data import Display as DatabaseModel
+from systembridgemodels.database_data_sensors import Sensors as SensorsDatabaseModel
+from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
