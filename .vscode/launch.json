@@ -8,7 +8,7 @@
       "module": "systembridgebackend",
       "preLaunchTask": "pip install",
       "justMyCode": false,
-      "args": ["version"]
+      "args": []
     }
   ]
 }
