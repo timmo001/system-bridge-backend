@@ -1,12 +1,41 @@
-"""System Bridge: Update Disk"""
+"""System Bridge: Disk"""
+from __future__ import annotations
+
 import asyncio
 from json import dumps
+from typing import NamedTuple, Optional
 
+from psutil import disk_io_counters, disk_partitions, disk_usage
+from psutil._common import sdiskio, sdiskpart
 from systembridgemodels.database_data import Disk as DatabaseModel
+from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from ..base import ModuleUpdateBase
-from . import Disk
+from .base import ModuleUpdateBase
+
+
+class Disk(Base):
+    """Disk"""
+
+    def io_counters(self) -> Optional[sdiskio]:
+        """Disk IO counters"""
+        return disk_io_counters()
+
+    def io_counters_per_disk(self) -> dict[str, sdiskio]:
+        """Disk IO counters per disk"""
+        return disk_io_counters(perdisk=True)
+
+    def partitions(self) -> list[sdiskpart]:
+        """Disk partitions"""
+        return disk_partitions(all=True)
+
+    def usage(self, path: str) -> Optional[NamedTuple]:
+        """Disk usage"""
+        try:
+            return disk_usage(path)
+        except PermissionError as error:
+            self._logger.error("PermissionError: %s", error)
+            return None
 
 
 class DiskUpdate(ModuleUpdateBase):
@@ -22,14 +51,15 @@ class DiskUpdate(ModuleUpdateBase):
 
     async def update_io_counters(self) -> None:
         """Update IO counters"""
-        for key, value in self._disk.io_counters()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"io_counters_{key}",
-                    value=value,
-                ),
-            )
+        if io_counters := self._disk.io_counters():
+            for key, value in io_counters._asdict().items():
+                self._database.update_data(
+                    DatabaseModel,
+                    DatabaseModel(
+                        key=f"io_counters_{key}",
+                        value=value,
+                    ),
+                )
 
     async def update_io_counters_per_disk(self) -> None:
         """Update IO counters per disk"""

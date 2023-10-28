@@ -114,6 +114,7 @@ from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
+from ..modules import MODULES
 from ..modules.listeners import Listeners
 from ..utilities.autostart import autostart_disable, autostart_enable
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
@@ -148,7 +149,6 @@ class WebSocketHandler(Base):
         database: Database,
         settings: Settings,
         listeners: Listeners,
-        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket: WebSocket,
         callback_exit_application: Callable[[], None],
         callback_open_gui: Callable[[str, str], None],
@@ -158,7 +158,6 @@ class WebSocketHandler(Base):
         self._database = database
         self._settings = settings
         self._listeners = listeners
-        self._implemented_modules = implemented_modules
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
         self._callback_open_gui = callback_open_gui
@@ -181,7 +180,7 @@ class WebSocketHandler(Base):
         data: DataDict,
     ) -> None:
         """Data changed"""
-        if module not in self._implemented_modules:
+        if module not in MODULES:
             self._logger.info("Data module %s not in registered modules", module)
             return
         await self._send_response(
