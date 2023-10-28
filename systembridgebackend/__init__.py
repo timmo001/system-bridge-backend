@@ -49,12 +49,7 @@ class Application(Base):
             else:
                 autostart_disable()
 
-        implemented_modules = []
-        for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "./modules")):
-            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-            break
-
-        listeners = Listeners(database, implemented_modules)
+        listeners = Listeners(database)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -63,7 +58,6 @@ class Application(Base):
             database,
             settings,
             listeners,
-            implemented_modules,
             no_frontend=no_frontend,
             no_gui=no_gui,
         )

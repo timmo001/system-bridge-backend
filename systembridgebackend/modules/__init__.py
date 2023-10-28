@@ -15,6 +15,19 @@ from .network import NetworkUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
 
+MODULES = [
+    "battery",
+    "cpu",
+    "disk",
+    "display",
+    "gpu",
+    "media",
+    "memory",
+    "network",
+    "sensors",
+    "system",
+]
+
 
 class Update(Base):
     """Modules Update"""

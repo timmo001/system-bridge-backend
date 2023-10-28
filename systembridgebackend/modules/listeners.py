@@ -8,6 +8,8 @@ from systembridgemodels.data import DataDict
 from systembridgeshared.base import Base
 from systembridgeshared.database import TABLE_MAP, Database
 
+from . import MODULES
+
 
 class Listener:
     """Listener"""
@@ -30,12 +32,11 @@ class Listeners(Base):
     def __init__(
         self,
         database: Database,
-        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
         super().__init__()
         self._database: Database = database
-        self._implemented_modules: list[str] = implemented_modules
+        self._implemented_modules: list[str] = MODULES
         self._data: dict = {module: {} for module in self._implemented_modules}
         # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
