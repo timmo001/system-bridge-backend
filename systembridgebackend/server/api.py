@@ -12,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from systembridgemodels.data import DataDict
-from systembridgemodels.database_data_remote_bridge import RemoteBridge
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import Action as MediaAction
@@ -26,6 +25,7 @@ from systembridgemodels.open_url import OpenUrl
 from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
 from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
 from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.settings import Settings
 
 from .._version import __version__

@@ -7,7 +7,6 @@ from uuid import uuid4
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
 from systembridgemodels.data import DataDict
-from systembridgemodels.database_data_remote_bridge import RemoteBridge
 from systembridgemodels.get_data import GetData
 from systembridgemodels.get_setting import GetSetting
 from systembridgemodels.keyboard_key import KeyboardKey
@@ -111,6 +110,7 @@ from systembridgeshared.const import (
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 

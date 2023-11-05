@@ -7,9 +7,9 @@ from typing import NamedTuple, Optional
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart
-from systembridgemodels.database_data import Disk as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import Disk as DatabaseModel
 
 from .base import ModuleUpdateBase
 

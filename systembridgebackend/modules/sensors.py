@@ -8,10 +8,10 @@ import sys
 from typing import Optional
 
 import psutil
-from systembridgemodels.database_data_sensors import Sensors as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data_sensors import Sensors as DatabaseModel
 
 from .base import ModuleUpdateBase
 

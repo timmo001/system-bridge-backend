@@ -6,10 +6,10 @@ from typing import Optional
 
 import psutil
 from plyer import battery
-from systembridgemodels.database_data import Battery as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import Battery as DatabaseModel
 
 from .base import ModuleUpdateBase
 
