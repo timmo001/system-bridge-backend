@@ -36,22 +36,33 @@ class ProcessesUpdate(ModuleUpdateBase):
         # Get names of processes
         items = []
         for process in processes:
+            model = ProcessModel(
+                id=process.pid,
+                name="",
+                cpu_usage=None,
+                created=None,
+                memory_usage=None,
+                path=None,
+                status=None,
+                username=None,
+                working_directory=None,
+            )
+
             try:
-                items.append(
-                    ProcessModel(
-                        id=process.pid,
-                        name=process.name(),
-                        cpu_usage=process.cpu_percent(),
-                        created=process.create_time(),
-                        memory_usage=process.memory_percent(),
-                        path=process.exe(),
-                        status=process.status(),
-                        username=process.username(),
-                        working_directory=process.cwd(),
-                    )
+                model.name = process.name()
+                model.cpu_usage = process.cpu_percent()
+                model.created = process.create_time()
+                model.memory_usage = process.memory_percent()
+                model.path = process.exe()
+                model.status = process.status()
+                model.username = process.username()
+            except (AccessDenied, NoSuchProcess, OSError) as error:
+                self._logger.debug(
+                    "Failed to get process information for PID %s",
+                    process.pid,
+                    exc_info=error,
                 )
-            except (AccessDenied, NoSuchProcess, OSError):
-                continue
+            items.append(model)
         # Sort by name
         items = sorted(items, key=lambda item: item.name)
         # Update data
