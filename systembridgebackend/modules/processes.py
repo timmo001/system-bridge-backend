@@ -33,12 +33,13 @@ class ProcessesUpdate(ModuleUpdateBase):
         processes: Iterator[Process],
     ) -> None:
         """Update processes"""
-        names = sorted([process.name() for process in processes])
+        names: list[str] = [process.name() for process in processes]
+        names_sorted: list[str] = sorted(names, key=str.casefold)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
                 key="processes",
-                value=dumps(names),
+                value=dumps(names_sorted),
             ),
         )
 
