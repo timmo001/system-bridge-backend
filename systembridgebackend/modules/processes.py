@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterator
 from json import dumps
 
 from psutil import Process, process_iter
+from systembridgemodels.processes import Process as ProcessModel
 from systembridgeshared.models.database_data import Processes as DatabaseModel
 
 from .._version import __version__
@@ -17,7 +17,7 @@ class ProcessesUpdate(ModuleUpdateBase):
 
     async def update_count(
         self,
-        processes: Iterator[Process],
+        processes: list[Process],
     ) -> None:
         """Update count"""
         self._database.update_data(
@@ -30,22 +30,43 @@ class ProcessesUpdate(ModuleUpdateBase):
 
     async def update_processes(
         self,
-        processes: Iterator[Process],
+        processes: list[Process],
     ) -> None:
         """Update processes"""
-        names: list[str] = [process.name() for process in processes]
-        names_sorted: list[str] = sorted(names, key=str.casefold)
+        # Get names of processes
+        items = [
+            ProcessModel(
+                id=process.pid,
+                name=process.name(),
+                cpu_usage=None,
+                created=None,
+                memory_usage=None,
+                path=None,
+                status=None,
+                username=None,
+                working_directory=None,
+                # cpu_usage=process.cpu_percent(),
+                # created=process.create_time(),
+                # memory_usage=process.memory_percent(),
+                # path=process.exe(),
+                # status=process.status(),
+                # username=process.username(),
+                # working_directory=process.cwd(),
+            )
+            for process in processes
+        ] or []
+        # Update data
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
                 key="processes",
-                value=dumps(names_sorted),
+                value=dumps(items),
             ),
         )
 
     async def update_all_data(self) -> None:
         """Update data"""
-        processes = process_iter()
+        processes = list(process_iter())
         await asyncio.gather(
             *[
                 self.update_count(processes),
