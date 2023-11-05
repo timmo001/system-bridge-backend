@@ -44,9 +44,21 @@ class System(Base):
 
     def ip_address_4(self) -> str:
         """Get IPv4 address"""
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("8.8.8.8", 80))
-        return sock.getsockname()[0]
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.connect(("8.8.8.8", 80))
+            return sock.getsockname()[0]
+        except OSError:
+            return ""
+
+    def ip_address_6(self) -> str:
+        """Get IPv6 address"""
+        try:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+            sock.connect(("2001:4860:4860::8888", 80))
+            return sock.getsockname()[0]
+        except OSError:
+            return ""
 
     def mac_address(self) -> str:
         """Get MAC address"""
@@ -167,6 +179,16 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_ip_address_6(self) -> None:
+        """Update IP address 6"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="ip_address_6",
+                value=self._system.ip_address_6(),
+            ),
+        )
+
     async def update_mac_address(self) -> None:
         """Update MAC address"""
         self._database.update_data(
@@ -272,6 +294,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_fqdn(),
                 self.update_hostname(),
                 self.update_ip_address_4(),
+                self.update_ip_address_6(),
                 self.update_mac_address(),
                 self.update_platform(),
                 self.update_platform_version(),
