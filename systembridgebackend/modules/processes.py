@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from json import dumps
 
 from psutil import Process, process_iter
-from systembridgeshared.models.database_data import System as DatabaseModel
+from systembridgeshared.models.database_data import Processes as DatabaseModel
 
 from .._version import __version__
 from .base import ModuleUpdateBase
