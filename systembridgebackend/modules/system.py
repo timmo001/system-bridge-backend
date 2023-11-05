@@ -83,7 +83,7 @@ class System(Base):
 
     def uptime(self) -> float:
         """Get uptime"""
-        return os.times()[0]
+        return os.times().system
 
     def users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
         """Get users"""
