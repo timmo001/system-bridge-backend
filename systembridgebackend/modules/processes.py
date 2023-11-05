@@ -52,6 +52,8 @@ class ProcessesUpdate(ModuleUpdateBase):
                 )
             except (AccessDenied, NoSuchProcess, OSError):
                 continue
+        # Sort by name
+        items = sorted(items, key=lambda item: item.name)
         # Update data
         self._database.update_data(
             DatabaseModel,
