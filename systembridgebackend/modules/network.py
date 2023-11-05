@@ -3,9 +3,9 @@ import asyncio
 
 from psutil import net_connections, net_if_addrs, net_if_stats, net_io_counters
 from psutil._common import sconn, snetio, snicaddr, snicstats
-from systembridgemodels.database_data import Network as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import Network as DatabaseModel
 
 from .base import ModuleUpdateBase
 

@@ -19,9 +19,9 @@ from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgemodels.database_data import System as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import System as DatabaseModel
 
 from .._version import __version__
 from .base import ModuleUpdateBase

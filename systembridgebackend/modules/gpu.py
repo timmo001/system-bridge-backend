@@ -5,11 +5,13 @@ import asyncio
 from json import dumps
 from typing import Optional
 
-from systembridgemodels.database_data import GPU as DatabaseModel
-from systembridgemodels.database_data_sensors import Sensors as SensorsDatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import GPU as DatabaseModel
+from systembridgeshared.models.database_data_sensors import (
+    Sensors as SensorsDatabaseModel,
+)
 
 from .base import ModuleUpdateBase
 

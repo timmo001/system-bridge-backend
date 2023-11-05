@@ -4,9 +4,9 @@ from typing import NamedTuple
 
 from psutil import swap_memory, virtual_memory
 from psutil._common import sswap
-from systembridgemodels.database_data import Memory as DatabaseModel
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import Memory as DatabaseModel
 
 from .base import ModuleUpdateBase
 
