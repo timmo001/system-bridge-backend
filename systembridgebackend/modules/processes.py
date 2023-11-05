@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from json import dumps
 
-from psutil import NoSuchProcess, Process, process_iter
+from psutil import AccessDenied, NoSuchProcess, Process, process_iter
 from systembridgemodels.processes import Process as ProcessModel
 from systembridgeshared.models.database_data import Processes as DatabaseModel
 
@@ -50,7 +50,7 @@ class ProcessesUpdate(ModuleUpdateBase):
                         working_directory=process.cwd(),
                     )
                 )
-            except NoSuchProcess:
+            except (AccessDenied, NoSuchProcess, OSError):
                 continue
         # Update data
         self._database.update_data(
