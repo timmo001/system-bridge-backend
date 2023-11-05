@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from json import dumps
 
-from psutil import Process, process_iter
+from psutil import NoSuchProcess, Process, process_iter
 from systembridgemodels.processes import Process as ProcessModel
 from systembridgeshared.models.database_data import Processes as DatabaseModel
 
@@ -34,33 +34,30 @@ class ProcessesUpdate(ModuleUpdateBase):
     ) -> None:
         """Update processes"""
         # Get names of processes
-        items = [
-            ProcessModel(
-                id=process.pid,
-                name=process.name(),
-                cpu_usage=None,
-                created=None,
-                memory_usage=None,
-                path=None,
-                status=None,
-                username=None,
-                working_directory=None,
-                # cpu_usage=process.cpu_percent(),
-                # created=process.create_time(),
-                # memory_usage=process.memory_percent(),
-                # path=process.exe(),
-                # status=process.status(),
-                # username=process.username(),
-                # working_directory=process.cwd(),
-            )
-            for process in processes
-        ] or []
+        items = []
+        for process in processes:
+            try:
+                items.append(
+                    ProcessModel(
+                        id=process.pid,
+                        name=process.name(),
+                        cpu_usage=process.cpu_percent(),
+                        created=process.create_time(),
+                        memory_usage=process.memory_percent(),
+                        path=process.exe(),
+                        status=process.status(),
+                        username=process.username(),
+                        working_directory=process.cwd(),
+                    )
+                )
+            except NoSuchProcess:
+                continue
         # Update data
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
                 key="processes",
-                value=dumps(items),
+                value=dumps([item.dict(exclude_none=True) for item in items]),
             ),
         )
 
