@@ -30,6 +30,14 @@ from .base import ModuleUpdateBase
 class System(Base):
     """System"""
 
+    def active_user_id(self) -> int:
+        """Get active user ID"""
+        return os.getpid()
+
+    def active_user_name(self) -> str:
+        """Get active user"""
+        return os.getlogin()
+
     def boot_time(self) -> float:
         """Get boot time"""
         return boot_time()
@@ -138,6 +146,26 @@ class SystemUpdate(ModuleUpdateBase):
         """Initialize"""
         super().__init__(database)
         self._system = System()
+
+    async def update_active_user_id(self) -> None:
+        """Update active user ID"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="active_user_id",
+                value=str(self._system.active_user_id()),
+            ),
+        )
+
+    async def update_active_user_name(self) -> None:
+        """Update active user"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="active_user",
+                value=self._system.active_user_name(),
+            ),
+        )
 
     async def update_boot_time(self) -> None:
         """Update boot time"""
@@ -290,6 +318,8 @@ class SystemUpdate(ModuleUpdateBase):
         """Update data"""
         await asyncio.gather(
             *[
+                self.update_active_user_id(),
+                self.update_active_user_name(),
                 self.update_boot_time(),
                 self.update_fqdn(),
                 self.update_hostname(),
