@@ -158,11 +158,11 @@ class SystemUpdate(ModuleUpdateBase):
         )
 
     async def update_active_user_name(self) -> None:
-        """Update active user"""
+        """Update active user name"""
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
-                key="active_user",
+                key="active_user_name",
                 value=self._system.active_user_name(),
             ),
         )

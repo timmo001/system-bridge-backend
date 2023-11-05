@@ -12,6 +12,7 @@ from .display import DisplayUpdate
 from .gpu import GPUUpdate
 from .memory import MemoryUpdate
 from .network import NetworkUpdate
+from .processes import ProcessesUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
 
@@ -24,6 +25,7 @@ MODULES = [
     "media",
     "memory",
     "network",
+    "processes",
     "sensors",
     "system",
 ]
@@ -53,6 +55,7 @@ class Update(Base):
             {"name": "gpu", "cls": GPUUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
             {"name": "network", "cls": NetworkUpdate(self._database)},
+            {"name": "processes", "cls": ProcessesUpdate(self._database)},
         ]
 
     async def _update(
