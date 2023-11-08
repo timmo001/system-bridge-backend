@@ -103,11 +103,11 @@ class Server(Base):
                     name="API",
                 ),
                 api_app.loop.create_task(
-                    self.update_data(),
+                    self.indefinite_func_wrapper(self.update_data),
                     name="Update data",
                 ),
                 api_app.loop.create_task(
-                    self.update_frequent_data(),
+                    self.indefinite_func_wrapper(self.update_frequent_data),
                     name="Update frequent data",
                 ),
                 api_app.loop.create_task(
@@ -175,6 +175,10 @@ class Server(Base):
                 )
             )
 
+    async def indefinite_func_wrapper(self, func) -> None:
+        while True:
+            await func()
+            
     def exit_application(self) -> None:
         """Exit application"""
         self._logger.info("Exiting application")
@@ -225,7 +229,6 @@ class Server(Base):
         self._data.request_update_data()
         self._logger.info("Schedule next update in 2 minutes")
         await asyncio.sleep(120)
-        await self.update_data()
 
     async def update_events_data(self) -> None:
         """Update events data"""
@@ -239,4 +242,3 @@ class Server(Base):
         self._data.request_update_frequent_data()
         self._logger.info("Schedule next frequent update in 30 seconds")
         await asyncio.sleep(30)
-        await self.update_frequent_data()
