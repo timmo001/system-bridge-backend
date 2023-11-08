@@ -14,4 +14,4 @@ screeninfo==0.8.1
 systembridgeshared==3.10.4
 typer==0.9.0
 uvicorn[standard]==0.24.0.post1
-zeroconf==0.120.0
+zeroconf==0.121.0
