@@ -178,7 +178,7 @@ class Server(Base):
     async def indefinite_func_wrapper(self, func) -> None:
         while True:
             await func()
-            
+
     def exit_application(self) -> None:
         """Exit application"""
         self._logger.info("Exiting application")
