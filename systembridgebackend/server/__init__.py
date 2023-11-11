@@ -176,6 +176,7 @@ class Server(Base):
             )
 
     async def indefinite_func_wrapper(self, func) -> None:
+        """Indefinite function wrapper"""
         while True:
             await func()
 
