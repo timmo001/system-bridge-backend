@@ -8,6 +8,7 @@ import re
 import socket
 import sys
 import uuid
+from json import dumps
 from typing import Any, Optional
 
 from aiogithubapi import (
@@ -69,7 +70,7 @@ class System(Base):
                 # A value of 0 means the camera is currently in use.
                 for idx in range(subkey_count):
                     subkey_name = winreg.EnumKey(key, idx)
-                    subkey_name_full = r"{subkey_path}\{subkey_name}"
+                    subkey_name_full = f"{subkey_path}\\{subkey_name}"
                     subkey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey_name_full)
                     if subkey_name == "NonPackaged":
                         # Enumerate over the subkeys of the "NonPackaged" key
@@ -77,7 +78,7 @@ class System(Base):
                         for np_idx in range(subkey_count):
                             subkey_name_np = winreg.EnumKey(subkey, np_idx)
                             subkey_name_full_np = (
-                                r"{subkey_path}\NonPackaged\{subkey_name_np}"
+                                f"{subkey_path}\\NonPackaged\\{subkey_name_np}"
                             )
                             subkey_np = winreg.OpenKey(
                                 winreg.HKEY_CURRENT_USER, subkey_name_full_np
@@ -296,6 +297,16 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_camera_usage(self) -> None:
+        """Update camera usage"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="camera_usage",
+                value=dumps(self._system.camera_usage()),
+            ),
+        )
+
     async def update_fqdn(self) -> None:
         """Update FQDN"""
         self._database.update_data(
@@ -450,6 +461,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_active_user_id(),
                 self.update_active_user_name(),
                 self.update_boot_time(),
+                self.update_camera_usage(),
                 self.update_fqdn(),
                 self.update_hostname(),
                 self.update_ip_address_4(),
