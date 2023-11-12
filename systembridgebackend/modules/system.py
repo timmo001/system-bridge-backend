@@ -8,6 +8,7 @@ import re
 import socket
 import sys
 import uuid
+from json import dumps
 from typing import Any, Optional
 
 from aiogithubapi import (
@@ -42,6 +43,59 @@ class System(Base):
     def boot_time(self) -> float:
         """Get boot time"""
         return boot_time()
+
+    def camera_usage(self) -> list[str]:
+        """Returns a list of apps that are currently using the webcam."""
+        active_apps = []
+        if sys.platform == "win32":
+            # Read from registry for camera usage
+            import winreg  # pylint: disable=import-error,import-outside-toplevel
+
+            subkey_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam"
+
+            def get_subkey_timestamp(subkey) -> int | None:
+                """Returns the timestamp of the subkey"""
+                try:
+                    value, _ = winreg.QueryValueEx(subkey, "LastUsedTimeStop")
+                    return value
+                except OSError:
+                    pass
+                return None
+
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey_path)
+                # Enumerate over the subkeys of the webcam key
+                subkey_count, _, _ = winreg.QueryInfoKey(key)
+                # Recursively open each subkey and check the "LastUsedTimeStop" value.
+                # A value of 0 means the camera is currently in use.
+                for idx in range(subkey_count):
+                    subkey_name = winreg.EnumKey(key, idx)
+                    subkey_name_full = f"{subkey_path}\\{subkey_name}"
+                    subkey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey_name_full)
+                    if subkey_name == "NonPackaged":
+                        # Enumerate over the subkeys of the "NonPackaged" key
+                        subkey_count, _, _ = winreg.QueryInfoKey(subkey)
+                        for np_idx in range(subkey_count):
+                            subkey_name_np = winreg.EnumKey(subkey, np_idx)
+                            subkey_name_full_np = (
+                                f"{subkey_path}\\NonPackaged\\{subkey_name_np}"
+                            )
+                            subkey_np = winreg.OpenKey(
+                                winreg.HKEY_CURRENT_USER, subkey_name_full_np
+                            )
+                            if get_subkey_timestamp(subkey_np) == 0:
+                                active_apps.append(subkey_name_np)
+                    else:
+                        if get_subkey_timestamp(subkey) == 0:
+                            active_apps.append(subkey_name)
+                    winreg.CloseKey(subkey)
+                winreg.CloseKey(key)
+            except OSError:
+                pass
+        elif sys.platform in ["darwin", "linux"]:
+            # Unknown, please open an issue or PR if you know how to do this
+            pass
+        return active_apps
 
     def fqdn(self) -> str:
         """Get FQDN"""
@@ -243,6 +297,16 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_camera_usage(self) -> None:
+        """Update camera usage"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="camera_usage",
+                value=dumps(self._system.camera_usage()),
+            ),
+        )
+
     async def update_fqdn(self) -> None:
         """Update FQDN"""
         self._database.update_data(
@@ -397,6 +461,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_active_user_id(),
                 self.update_active_user_name(),
                 self.update_boot_time(),
+                self.update_camera_usage(),
                 self.update_fqdn(),
                 self.update_hostname(),
                 self.update_ip_address_4(),
