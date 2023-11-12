@@ -293,6 +293,16 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_pending_restart(self) -> None:
+        """Update pending restart"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="pending_restart",
+                value=str(self._system.pending_restart()),
+            ),
+        )
+
     async def update_platform(self) -> None:
         """Update platform"""
         self._database.update_data(
@@ -392,6 +402,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_ip_address_4(),
                 self.update_ip_address_6(),
                 self.update_mac_address(),
+                self.update_pending_restart(),
                 self.update_platform(),
                 self.update_platform_version(),
                 self.update_uptime(),
