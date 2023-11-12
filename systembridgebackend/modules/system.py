@@ -6,6 +6,7 @@ import os
 import platform
 import re
 import socket
+import sys
 import uuid
 from typing import Any, Optional
 
@@ -72,6 +73,71 @@ class System(Base):
         """Get MAC address"""
         # pylint: disable=consider-using-f-string
         return ":".join(re.findall("..", "%012x" % uuid.getnode()))
+
+    def pending_restart(self) -> bool:
+        """Check if there is a pending restart"""
+        if sys.platform == "win32":
+            # Read from registry for pending restart
+            import winreg  # pylint: disable=import-error,import-outside-toplevel
+
+            reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+            # Check for "Reboot Required" keys
+            try:
+                key = winreg.OpenKey(
+                    reg,
+                    r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired",
+                )
+                winreg.CloseKey(key)
+                return True
+            except OSError:
+                pass
+            try:
+                key = winreg.OpenKey(
+                    reg,
+                    r"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending",
+                )
+                winreg.CloseKey(key)
+                return True
+            except OSError:
+                pass
+            # Check for recent installation requiring reboot
+            try:
+                key = winreg.OpenKey(
+                    reg,
+                    r"SOFTWARE\Microsoft\Updates\UpdateExeVolatile",
+                )
+                winreg.CloseKey(key)
+                return True
+            except OSError:
+                pass
+            # Check for System Center Configuration Manager
+            try:
+                key = winreg.OpenKey(
+                    reg,
+                    r"SOFTWARE\Microsoft\SMS\Mobile Client\Reboot Management\RebootData",
+                )
+                winreg.CloseKey(key)
+                return True
+            except OSError:
+                pass
+            # Check for pending file rename operations
+            try:
+                key = winreg.OpenKey(
+                    reg,
+                    r"SYSTEM\CurrentControlSet\Control\Session Manager",
+                )
+                value, _ = winreg.QueryValueEx(key, "PendingFileRenameOperations")
+                winreg.CloseKey(key)
+                if value:
+                    return True
+            except OSError:
+                pass
+        elif sys.platform in ["darwin", "linux"]:
+            if os.path.exists("/var/run/reboot-required"):
+                return True
+            if os.path.exists("/var/run/reboot-required.pkgs"):
+                return True
+        return False
 
     def platform(self) -> str:
         """Get platform"""
@@ -227,6 +293,16 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_pending_restart(self) -> None:
+        """Update pending restart"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="pending_restart",
+                value=str(self._system.pending_restart()),
+            ),
+        )
+
     async def update_platform(self) -> None:
         """Update platform"""
         self._database.update_data(
@@ -326,6 +402,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_ip_address_4(),
                 self.update_ip_address_6(),
                 self.update_mac_address(),
+                self.update_pending_restart(),
                 self.update_platform(),
                 self.update_platform_version(),
                 self.update_uptime(),
