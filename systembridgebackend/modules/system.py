@@ -128,10 +128,10 @@ class System(Base):
         # pylint: disable=consider-using-f-string
         return ":".join(re.findall("..", "%012x" % uuid.getnode()))
 
-    def pending_restart(self) -> bool:
-        """Check if there is a pending restart"""
+    def pending_reboot(self) -> bool:
+        """Check if there is a pending reboot"""
         if sys.platform == "win32":
-            # Read from registry for pending restart
+            # Read from registry for pending reboot
             import winreg  # pylint: disable=import-error,import-outside-toplevel
 
             reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
@@ -357,13 +357,13 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_pending_restart(self) -> None:
-        """Update pending restart"""
+    async def update_pending_reboot(self) -> None:
+        """Update pending reboot"""
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
-                key="pending_restart",
-                value=str(self._system.pending_restart()),
+                key="pending_reboot",
+                value=str(self._system.pending_reboot()),
             ),
         )
 
@@ -467,7 +467,7 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_ip_address_4(),
                 self.update_ip_address_6(),
                 self.update_mac_address(),
-                self.update_pending_restart(),
+                self.update_pending_reboot(),
                 self.update_platform(),
                 self.update_platform_version(),
                 self.update_uptime(),
