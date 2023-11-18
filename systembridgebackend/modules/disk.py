@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from json import dumps
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart
@@ -17,7 +17,7 @@ from .base import ModuleUpdateBase
 class Disk(Base):
     """Disk"""
 
-    def io_counters(self) -> Optional[sdiskio]:
+    def io_counters(self) -> sdiskio | None:
         """Disk IO counters"""
         return disk_io_counters()
 
@@ -29,7 +29,7 @@ class Disk(Base):
         """Disk partitions"""
         return disk_partitions(all=True)
 
-    def usage(self, path: str) -> Optional[NamedTuple]:
+    def usage(self, path: str) -> NamedTuple | None:
         """Disk usage"""
         try:
             return disk_usage(path)

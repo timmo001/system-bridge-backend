@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Optional
 
 from psutil import (
     cpu_count,
@@ -48,7 +47,7 @@ class CPU(Base):
     def power_package(
         self,
         database: Database,
-    ) -> Optional[float]:
+    ) -> float | None:
         """CPU package power"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -66,7 +65,7 @@ class CPU(Base):
     def power_per_cpu(
         self,
         database: Database,
-    ) -> Optional[list[tuple[int, float]]]:
+    ) -> list[tuple[int, float]] | None:
         """CPU package power"""
         result: list[tuple[int, float]] = []
         for item in database.get_data(SensorsDatabaseModel):
@@ -94,7 +93,7 @@ class CPU(Base):
     def temperature(
         self,
         database: Database,
-    ) -> Optional[float]:
+    ) -> float | None:
         """CPU temperature"""
         for item in database.get_data(SensorsDatabaseModel):
             if item.hardware_type is not None and (
@@ -146,7 +145,7 @@ class CPU(Base):
     def voltage(
         self,
         database: Database,
-    ) -> Optional[float]:
+    ) -> float | None:
         """CPU voltage"""
         for item in database.get_data(SensorsDatabaseModel):
             if (

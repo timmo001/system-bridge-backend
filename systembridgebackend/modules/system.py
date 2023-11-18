@@ -9,7 +9,7 @@ import socket
 import sys
 import uuid
 from json import dumps
-from typing import Any, Optional
+from typing import Any
 
 from aiogithubapi import (
     GitHubAPI,
@@ -217,7 +217,7 @@ class System(Base):
         """Get version"""
         return __version__.public()
 
-    async def version_latest(self) -> Optional[Any]:
+    async def version_latest(self) -> Any | None:
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
 
@@ -239,7 +239,7 @@ class System(Base):
     def version_newer_available(
         self,
         database: Database,
-    ) -> Optional[bool]:
+    ) -> bool | None:
         """Check if newer version is available"""
         version_record = database.get_data_item_by_key(DatabaseModel, "version")
         if version_record is None:

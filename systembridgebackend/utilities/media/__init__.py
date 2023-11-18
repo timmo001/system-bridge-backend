@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import io
 import mimetypes
 import os
 import platform
@@ -10,7 +9,7 @@ import re
 import tempfile
 from collections.abc import Callable
 from datetime import datetime
-from typing import Optional, cast
+from typing import cast
 from urllib.parse import urlencode
 
 import aiofiles
@@ -252,7 +251,7 @@ def get_files(
 def get_file(
     base_path: str,
     filepath: str,
-) -> Optional[MediaFile]:
+) -> MediaFile | None:
     """Get file from path"""
     try:
         stat = os.stat(filepath)
@@ -298,14 +297,14 @@ async def write_file(
 async def play_media(
     settings: Settings,
     callback: Callable[[str, MediaPlay], None],
-    query_autoplay: Optional[bool] = False,
-    query_base: Optional[str] = None,
-    query_path: Optional[str] = None,
-    query_type: Optional[str] = "video",
-    query_url: Optional[str] = None,
-    query_volume: Optional[float] = 40,
-    request_host: Optional[str] = None,
-    request_scheme: Optional[str] = "http",
+    query_autoplay: bool | None = False,
+    query_base: str | None = None,
+    query_path: str | None = None,
+    query_type: str | None = "video",
+    query_url: str | None = None,
+    query_volume: float | None = 40,
+    request_host: str | None = None,
+    request_scheme: str | None = "http",
 ):
     """Handler for media play requests"""
     mime_type = None
@@ -535,7 +534,7 @@ async def _delete_cover_delayed(
 def _save_cover_from_binary(
     data: bytes,
     mime_type: str,
-    name: Optional[str],
+    name: str | None,
 ) -> str:
     """Save cover from binary."""
     cover_extension = mimetypes.guess_extension(mime_type)
@@ -548,6 +547,6 @@ def _save_cover_from_binary(
         storagepath.get_pictures_dir(),  # type: ignore
         file_name,
     )
-    with io.open(file_path, "wb") as cover_file:
+    with open(file_path, "wb") as cover_file:
         cover_file.write(data)
     return file_name

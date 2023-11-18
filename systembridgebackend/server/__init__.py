@@ -3,7 +3,6 @@ import asyncio
 import sys
 from collections.abc import Callable
 from json import loads
-from typing import Optional
 
 import uvicorn
 from systembridgemodels.action import Action

@@ -1,12 +1,10 @@
 """System Bridge: Update Utilities"""
-from typing import Optional
-
 from systembridgeshared.update import Update
 
 
 def version_update(
     version: str,
-) -> dict[str, Optional[str]]:
+) -> dict[str, str | None]:
     """Handle the update request."""
     versions = Update().update(
         version,

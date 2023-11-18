@@ -3,7 +3,7 @@ import asyncio
 import subprocess
 import sys
 from threading import Event, Thread
-from typing import Callable, Optional
+from typing import Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
