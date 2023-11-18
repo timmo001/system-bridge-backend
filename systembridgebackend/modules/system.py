@@ -11,12 +11,7 @@ import uuid
 from json import dumps
 from typing import Any
 
-from aiogithubapi import (
-    GitHubAPI,
-    GitHubConnectionException,
-    GitHubException,
-    GitHubRatelimitException,
-)
+import aiohttp
 from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
@@ -221,19 +216,18 @@ class System(Base):
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
 
-        try:
-            async with GitHubAPI() as github:
-                releases = await github.repos.releases.list("timmo001/system-bridge")
-            return releases.data[0] if releases.data else None
-        except (
-            GitHubConnectionException,
-            GitHubRatelimitException,
-        ) as error:
-            self._logger.error("Error getting data from GitHub: %s", error)
-        except GitHubException as error:
-            self._logger.exception(
-                "Unexpected error getting data from GitHub: %s", error
-            )
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://api.github.com/repos/timmo001/system-bridge/releases/latest"
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if (
+                        data is not None
+                        and (tag_name := data.get("tag_name")) is not None
+                    ):
+                        return tag_name.replace("v", "")
+
         return None
 
     def version_newer_available(
@@ -431,17 +425,13 @@ class SystemUpdate(ModuleUpdateBase):
 
     async def update_version_latest(self) -> None:
         """Update latest version"""
-        release = await self._system.version_latest()
-        if release and release.tag_name:
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key="version_latest",
-                    value=release.tag_name.replace("v", "")
-                    if release is not None
-                    else None,
-                ),
-            )
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="version_latest",
+                value=await self._system.version_latest(),
+            ),
+        )
 
     async def update_version_newer_available(self) -> None:
         """Update newer version available"""
