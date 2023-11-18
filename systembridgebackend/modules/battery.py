@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Optional
 
 import psutil
 from plyer import battery
@@ -17,13 +16,13 @@ from .base import ModuleUpdateBase
 class Battery(Base):
     """Battery"""
 
-    def sensors(self) -> Optional[psutil._common.sbattery]:  # type: ignore
+    def sensors(self) -> psutil._common.sbattery | None:  # type: ignore
         """Get battery sensors"""
         if not hasattr(psutil, "sensors_battery"):
             return None
         return psutil.sensors_battery()  # type: ignore
 
-    def status(self) -> Optional[dict]:
+    def status(self) -> dict | None:
         """Get battery status"""
         try:
             return battery.status

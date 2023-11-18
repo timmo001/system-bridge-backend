@@ -5,7 +5,6 @@ import asyncio
 import json
 import subprocess
 import sys
-from typing import Optional
 
 import psutil
 from systembridgeshared.base import Base
@@ -19,19 +18,19 @@ from .base import ModuleUpdateBase
 class Sensors(Base):
     """Sensors"""
 
-    def fans(self) -> Optional[dict]:
+    def fans(self) -> dict | None:
         """Get fans"""
         if not hasattr(psutil, "sensors_fans"):
             return None
         return psutil.sensors_fans()  # type: ignore
 
-    def temperatures(self) -> Optional[dict]:
+    def temperatures(self) -> dict | None:
         """Get temperatures"""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
         return psutil.sensors_temperatures()  # type: ignore
 
-    def windows_sensors(self) -> Optional[dict]:
+    def windows_sensors(self) -> dict | None:
         """Get windows sensors"""
         if sys.platform != "win32":
             return None

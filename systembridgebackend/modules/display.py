@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 from json import dumps
-from typing import Optional
 
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 from screeninfo import get_monitors
@@ -22,8 +21,8 @@ class DisplayModel(BaseModel):
     """Display Model"""
 
     name: str = Field(..., description="Display name")
-    pixel_clock: Optional[float] = Field(None, description="Pixel clock")
-    refresh_rate: Optional[float] = Field(None, description="Refresh rate")
+    pixel_clock: float | None = Field(None, description="Pixel clock")
+    refresh_rate: float | None = Field(None, description="Refresh rate")
     resolution_horizontal: int = Field(..., description="Resolution horizontal")
     resolution_vertical: int = Field(..., description="Resolution vertical")
 
@@ -64,7 +63,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """Display pixel clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -86,7 +85,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """Display refresh rate"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -108,7 +107,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> Optional[int]:
+    ) -> int | None:
         """Display resolution horizontal"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -130,7 +129,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> Optional[int]:
+    ) -> int | None:
         """Display resolution vertical"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -177,7 +176,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_pixel_clock(
         self,
         display_key: str,
-        value: Optional[float] = None,
+        value: float | None = None,
     ) -> None:
         """Update pixel clock"""
         if value is None:
@@ -193,7 +192,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_refresh_rate(
         self,
         display_key: str,
-        value: Optional[float] = None,
+        value: float | None = None,
     ) -> None:
         """Update refresh rate"""
         if value is None:
@@ -209,7 +208,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_horizontal(
         self,
         display_key: str,
-        value: Optional[int] = None,
+        value: int | None = None,
     ) -> None:
         """Update resolution horizontal"""
         if value is None:
@@ -227,7 +226,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_vertical(
         self,
         display_key: str,
-        value: Optional[int] = None,
+        value: int | None = None,
     ) -> None:
         """Update resolution vertical"""
         if value is None:

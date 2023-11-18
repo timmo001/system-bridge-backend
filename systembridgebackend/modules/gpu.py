@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 from json import dumps
-from typing import Optional
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
@@ -38,7 +37,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU core clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -60,7 +59,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU core load"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -78,7 +77,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU fan speed"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -95,7 +94,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU memory clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -117,7 +116,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU memory load"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -139,7 +138,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU memory free"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -161,7 +160,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU memory used"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -183,7 +182,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU memory total"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -205,7 +204,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU power usage"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
@@ -222,7 +221,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         """GPU temperature"""
         for item in database.get_data(SensorsDatabaseModel):
             if (

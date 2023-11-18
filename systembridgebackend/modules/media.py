@@ -5,7 +5,6 @@ import asyncio
 import datetime
 import platform
 from collections.abc import Awaitable, Callable
-from typing import Optional
 
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.media import Media as MediaInfo
@@ -28,19 +27,17 @@ class Media(Base):
         self._database = database
         self._changed_callback = changed_callback
 
-        self.sessions: Optional[
+        self.sessions: None | (
             wmc.GlobalSystemMediaTransportControlsSessionManager
-        ] = None
-        self.current_session: Optional[
+        ) = None
+        self.current_session: None | (
             wmc.GlobalSystemMediaTransportControlsSession
-        ] = None
-        self.current_session_changed_handler_token: Optional[
+        ) = None
+        self.current_session_changed_handler_token: None | (
             EventRegistrationToken
-        ] = None
-        self.properties_changed_handler_token: Optional[EventRegistrationToken] = None
-        self.playback_info_changed_handler_token: Optional[
-            EventRegistrationToken
-        ] = None
+        ) = None
+        self.properties_changed_handler_token: EventRegistrationToken | None = None
+        self.playback_info_changed_handler_token: None | (EventRegistrationToken) = None
 
     def _current_session_changed_handler(
         self,
@@ -74,7 +71,7 @@ class Media(Base):
 
     async def _update_data(
         self,
-        media_info: Optional[MediaInfo] = None,
+        media_info: MediaInfo | None = None,
     ) -> None:
         """Update data"""
         self._logger.info("Updating media data")
