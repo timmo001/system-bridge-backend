@@ -11,8 +11,8 @@ from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Media as DatabaseModel
-from winsdk.windows.foundation import (
-    EventRegistrationToken,  # pylint: disable=import-error
+from winsdk.windows.foundation import (  # pylint: disable=import-error
+    EventRegistrationToken,
 )
 
 
