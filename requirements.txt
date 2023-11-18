@@ -1,5 +1,4 @@
 aiofiles==23.2.1
-aiogithubapi==23.11.0
 fastapi==0.104.1
 incremental==22.10.0
 keyboard==0.13.5
