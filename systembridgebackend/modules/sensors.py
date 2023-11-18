@@ -190,7 +190,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def _update_all_data(self) -> None:
+    async def update_all_data(self) -> None:
         """Update data"""
 
         # Clear table in case of hardware changes since last run
