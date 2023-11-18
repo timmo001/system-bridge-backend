@@ -23,7 +23,7 @@ class ProcessesUpdate(ModuleUpdateBase):
         """Initialize"""
         super().__init__(database, DatabaseModel)
 
-    async def update_count(
+    async def _update_count(
         self,
         processes: list[Process],
     ) -> None:
@@ -36,7 +36,7 @@ class ProcessesUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_processes(
+    async def _update_processes(
         self,
         processes: list[Process],
     ) -> None:
@@ -83,7 +83,7 @@ class ProcessesUpdate(ModuleUpdateBase):
         processes = list(process_iter())
         await asyncio.gather(
             *[
-                self.update_count(processes),
-                self.update_processes(processes),
+                self._update_count(processes),
+                self._update_processes(processes),
             ]
         )

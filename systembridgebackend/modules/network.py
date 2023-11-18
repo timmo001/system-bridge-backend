@@ -43,7 +43,7 @@ class NetworkUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._network = Network()
 
-    async def update_stats(self) -> None:
+    async def _update_stats(self) -> None:
         """Update stats"""
         for key, value in self._network.stats().items():
             for subkey, subvalue in value._asdict().items():
@@ -55,7 +55,7 @@ class NetworkUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_io_counters(self) -> None:
+    async def _update_io_counters(self) -> None:
         """Update IO counters"""
         for key, value in self._network.io_counters()._asdict().items():
             self._database.update_data(
@@ -66,11 +66,11 @@ class NetworkUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_stats(),
-                self.update_io_counters(),
+                self._update_stats(),
+                self._update_io_counters(),
             ]
         )

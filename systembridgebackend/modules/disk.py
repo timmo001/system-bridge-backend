@@ -49,7 +49,7 @@ class DiskUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._disk = Disk()
 
-    async def update_io_counters(self) -> None:
+    async def _update_io_counters(self) -> None:
         """Update IO counters"""
         if io_counters := self._disk.io_counters():
             for key, value in io_counters._asdict().items():
@@ -61,7 +61,7 @@ class DiskUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_io_counters_per_disk(self) -> None:
+    async def _update_io_counters_per_disk(self) -> None:
         """Update IO counters per disk"""
         for key, value in self._disk.io_counters_per_disk().items():  # type: ignore
             for subkey, subvalue in value._asdict().items():
@@ -73,7 +73,7 @@ class DiskUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_partitions(self) -> None:
+    async def _update_partitions(self) -> None:
         """Update partitions"""
         device_list = []
         partition_list = []
@@ -104,7 +104,7 @@ class DiskUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_usage(self) -> None:
+    async def _update_usage(self) -> None:
         """Update usage"""
         for partition in self._disk.partitions():
             if data := self._disk.usage(partition.mountpoint):
@@ -121,9 +121,9 @@ class DiskUpdate(ModuleUpdateBase):
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_io_counters(),
-                self.update_io_counters_per_disk(),
-                self.update_partitions(),
-                self.update_usage(),
+                self._update_io_counters(),
+                self._update_io_counters_per_disk(),
+                self._update_partitions(),
+                self._update_usage(),
             ]
         )

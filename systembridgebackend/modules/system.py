@@ -261,7 +261,7 @@ class SystemUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._system = System()
 
-    async def update_active_user_id(self) -> None:
+    async def _update_active_user_id(self) -> None:
         """Update active user ID"""
         self._database.update_data(
             DatabaseModel,
@@ -271,7 +271,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_active_user_name(self) -> None:
+    async def _update_active_user_name(self) -> None:
         """Update active user name"""
         self._database.update_data(
             DatabaseModel,
@@ -281,7 +281,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_boot_time(self) -> None:
+    async def _update_boot_time(self) -> None:
         """Update boot time"""
         self._database.update_data(
             DatabaseModel,
@@ -291,7 +291,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_camera_usage(self) -> None:
+    async def _update_camera_usage(self) -> None:
         """Update camera usage"""
         self._database.update_data(
             DatabaseModel,
@@ -301,7 +301,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_fqdn(self) -> None:
+    async def _update_fqdn(self) -> None:
         """Update FQDN"""
         self._database.update_data(
             DatabaseModel,
@@ -311,7 +311,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_hostname(self) -> None:
+    async def _update_hostname(self) -> None:
         """Update hostname"""
         self._database.update_data(
             DatabaseModel,
@@ -321,7 +321,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_ip_address_4(self) -> None:
+    async def _update_ip_address_4(self) -> None:
         """Update IP address 4"""
         self._database.update_data(
             DatabaseModel,
@@ -331,7 +331,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_ip_address_6(self) -> None:
+    async def _update_ip_address_6(self) -> None:
         """Update IP address 6"""
         self._database.update_data(
             DatabaseModel,
@@ -341,7 +341,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_mac_address(self) -> None:
+    async def _update_mac_address(self) -> None:
         """Update MAC address"""
         self._database.update_data(
             DatabaseModel,
@@ -351,7 +351,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_pending_reboot(self) -> None:
+    async def _update_pending_reboot(self) -> None:
         """Update pending reboot"""
         self._database.update_data(
             DatabaseModel,
@@ -361,7 +361,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_platform(self) -> None:
+    async def _update_platform(self) -> None:
         """Update platform"""
         self._database.update_data(
             DatabaseModel,
@@ -371,7 +371,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_platform_version(self) -> None:
+    async def _update_platform_version(self) -> None:
         """Update platform version"""
         self._database.update_data(
             DatabaseModel,
@@ -381,7 +381,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_uptime(self) -> None:
+    async def _update_uptime(self) -> None:
         """Update uptime"""
         self._database.update_data(
             DatabaseModel,
@@ -391,7 +391,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_users(self) -> None:
+    async def _update_users(self) -> None:
         """Update users"""
         for user in self._system.users():
             for key, value in user._asdict().items():
@@ -403,7 +403,7 @@ class SystemUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_uuid(self) -> None:
+    async def _update_uuid(self) -> None:
         """Update UUID"""
         self._database.update_data(
             DatabaseModel,
@@ -413,7 +413,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_version(self) -> None:
+    async def _update_version(self) -> None:
         """Update version"""
         self._database.update_data(
             DatabaseModel,
@@ -423,7 +423,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_version_latest(self) -> None:
+    async def _update_version_latest(self) -> None:
         """Update latest version"""
         self._database.update_data(
             DatabaseModel,
@@ -433,7 +433,7 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_version_newer_available(self) -> None:
+    async def _update_version_newer_available(self) -> None:
         """Update newer version available"""
         value = self._system.version_newer_available(self._database)
         self._database.update_data(
@@ -444,28 +444,28 @@ class SystemUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_active_user_id(),
-                self.update_active_user_name(),
-                self.update_boot_time(),
-                self.update_camera_usage(),
-                self.update_fqdn(),
-                self.update_hostname(),
-                self.update_ip_address_4(),
-                self.update_ip_address_6(),
-                self.update_mac_address(),
-                self.update_pending_reboot(),
-                self.update_platform(),
-                self.update_platform_version(),
-                self.update_uptime(),
-                self.update_users(),
-                self.update_uuid(),
-                self.update_version(),
-                self.update_version_latest(),
+                self._update_active_user_id(),
+                self._update_active_user_name(),
+                self._update_boot_time(),
+                self._update_camera_usage(),
+                self._update_fqdn(),
+                self._update_hostname(),
+                self._update_ip_address_4(),
+                self._update_ip_address_6(),
+                self._update_mac_address(),
+                self._update_pending_reboot(),
+                self._update_platform(),
+                self._update_platform_version(),
+                self._update_uptime(),
+                self._update_users(),
+                self._update_uuid(),
+                self._update_version(),
+                self._update_version_latest(),
             ]
         )
         # Run after other version updates
-        await self.update_version_newer_available()
+        await self._update_version_newer_available()

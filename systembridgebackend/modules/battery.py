@@ -41,7 +41,7 @@ class BatteryUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._battery = Battery()
 
-    async def update_sensors(self) -> None:
+    async def _update_sensors(self) -> None:
         """Update Battery Sensors"""
         if data := self._battery.sensors():
             for key, value in data._asdict().items():
@@ -58,7 +58,7 @@ class BatteryUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_status(self) -> None:
+    async def _update_status(self) -> None:
         """Update Battery Status"""
         if data := self._battery.status():
             for key, value in data.items():
@@ -74,7 +74,7 @@ class BatteryUpdate(ModuleUpdateBase):
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_sensors(),
-                self.update_status(),
+                self._update_sensors(),
+                self._update_status(),
             ]
         )

@@ -34,7 +34,7 @@ class MemoryUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._memory = Memory()
 
-    async def update_swap(self) -> None:
+    async def _update_swap(self) -> None:
         """Update Swap Memory"""
         for key, value in self._memory.swap()._asdict().items():
             self._database.update_data(
@@ -45,7 +45,7 @@ class MemoryUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_virtual(self) -> None:
+    async def _update_virtual(self) -> None:
         """Update Virtual Memory"""
         for key, value in self._memory.virtual()._asdict().items():
             self._database.update_data(
@@ -56,11 +56,11 @@ class MemoryUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_swap(),
-                self.update_virtual(),
+                self._update_swap(),
+                self._update_virtual(),
             ]
         )

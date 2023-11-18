@@ -42,7 +42,7 @@ class Update(Base):
         """Initialize"""
         super().__init__()
         self._database = database  # pylint: disable=duplicate-code
-        self.updated_callback = updated_callback
+        self._updated_callback = updated_callback
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
@@ -64,7 +64,7 @@ class Update(Base):
     ) -> None:
         """Update"""
         await class_obj["cls"].update_all_data()
-        await self.updated_callback(class_obj["name"])
+        await self._updated_callback(class_obj["name"])
 
     async def update_data(self) -> None:
         """Update Data"""
@@ -81,7 +81,7 @@ class Update(Base):
 
         sensors_update = SensorsUpdate(self._database)
         await sensors_update.update_all_data()
-        await self.updated_callback("sensors")
+        await self._updated_callback("sensors")
 
         tasks = [self._update(cls) for cls in self._classes_frequent]
         await asyncio.gather(*tasks)

@@ -251,7 +251,7 @@ class GPUUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._gpu = GPU()
 
-    async def update_name(
+    async def _update_name(
         self,
         gpu_key: str,
         gpu_name: str,
@@ -265,7 +265,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_core_clock(
+    async def _update_core_clock(
         self,
         gpu_key: str,
     ) -> None:
@@ -279,7 +279,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_core_load(
+    async def _update_core_load(
         self,
         gpu_key: str,
     ) -> None:
@@ -293,7 +293,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_fan_speed(
+    async def _update_fan_speed(
         self,
         gpu_key: str,
     ) -> None:
@@ -307,7 +307,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_memory_clock(
+    async def _update_memory_clock(
         self,
         gpu_key: str,
     ) -> None:
@@ -321,7 +321,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_memory_load(
+    async def _update_memory_load(
         self,
         gpu_key: str,
     ) -> None:
@@ -335,7 +335,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_memory_free(
+    async def _update_memory_free(
         self,
         gpu_key: str,
     ) -> None:
@@ -349,7 +349,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_memory_used(
+    async def _update_memory_used(
         self,
         gpu_key: str,
     ) -> None:
@@ -363,7 +363,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_memory_total(
+    async def _update_memory_total(
         self,
         gpu_key: str,
     ) -> None:
@@ -377,7 +377,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_power(
+    async def _update_power(
         self,
         gpu_key: str,
     ) -> None:
@@ -391,7 +391,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_temperature(
+    async def _update_temperature(
         self,
         gpu_key: str,
     ) -> None:
@@ -418,17 +418,17 @@ class GPUUpdate(ModuleUpdateBase):
                 gpu_list.append(gpu_key)
                 await asyncio.gather(
                     *[
-                        self.update_name(gpu_key, gpu_name),
-                        self.update_core_clock(gpu_key),
-                        self.update_core_load(gpu_key),
-                        self.update_fan_speed(gpu_key),
-                        self.update_memory_clock(gpu_key),
-                        self.update_memory_load(gpu_key),
-                        self.update_memory_free(gpu_key),
-                        self.update_memory_used(gpu_key),
-                        self.update_memory_total(gpu_key),
-                        self.update_power(gpu_key),
-                        self.update_temperature(gpu_key),
+                        self._update_name(gpu_key, gpu_name),
+                        self._update_core_clock(gpu_key),
+                        self._update_core_load(gpu_key),
+                        self._update_fan_speed(gpu_key),
+                        self._update_memory_clock(gpu_key),
+                        self._update_memory_load(gpu_key),
+                        self._update_memory_free(gpu_key),
+                        self._update_memory_used(gpu_key),
+                        self._update_memory_total(gpu_key),
+                        self._update_power(gpu_key),
+                        self._update_temperature(gpu_key),
                     ]
                 )
             self._database.update_data(

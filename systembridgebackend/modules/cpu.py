@@ -169,7 +169,7 @@ class CPUUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._cpu = CPU()
 
-    async def update_count(self) -> None:
+    async def _update_count(self) -> None:
         """Update CPU count"""
         self._database.update_data(
             DatabaseModel,
@@ -179,7 +179,7 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_frequency(self) -> None:
+    async def _update_frequency(self) -> None:
         """Update CPU frequency"""
         for key, value in self._cpu.freq()._asdict().items():
             self._database.update_data(
@@ -190,7 +190,7 @@ class CPUUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_frequency_per_cpu(self) -> None:
+    async def _update_frequency_per_cpu(self) -> None:
         """Update CPU frequency per CPU"""
         count = 0
         for data in [freq._asdict() for freq in self._cpu.freq_per_cpu()]:
@@ -204,7 +204,7 @@ class CPUUpdate(ModuleUpdateBase):
                 )
             count += 1
 
-    async def update_load_average(self) -> None:
+    async def _update_load_average(self) -> None:
         """Update load average"""
         avg_tuple = self._cpu.load_average()
         result = sum([avg_tuple[0], avg_tuple[1], avg_tuple[2]]) / 3
@@ -216,7 +216,7 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_power_package(self) -> None:
+    async def _update_power_package(self) -> None:
         """Update package power"""
         self._database.update_data(
             DatabaseModel,
@@ -226,7 +226,7 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_power_per_cpu(self) -> None:
+    async def _update_power_per_cpu(self) -> None:
         """Update per cpu power"""
         if (result := self._cpu.power_per_cpu(self._database)) is None:
             return None
@@ -239,7 +239,7 @@ class CPUUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_stats(self) -> None:
+    async def _update_stats(self) -> None:
         """Update stats"""
         for key, value in self._cpu.stats()._asdict().items():
             self._database.update_data(
@@ -250,7 +250,7 @@ class CPUUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_temperature(self) -> None:
+    async def _update_temperature(self) -> None:
         """Update temperature"""
         self._database.update_data(
             DatabaseModel,
@@ -260,7 +260,7 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_times(self) -> None:
+    async def _update_times(self) -> None:
         """Update times"""
         for key, value in self._cpu.times()._asdict().items():
             self._database.update_data(
@@ -271,7 +271,7 @@ class CPUUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_times_percent(self) -> None:
+    async def _update_times_percent(self) -> None:
         """Update times percent"""
         for key, value in self._cpu.times_percent()._asdict().items():
             self._database.update_data(
@@ -282,7 +282,7 @@ class CPUUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_times_per_cpu(self) -> None:
+    async def _update_times_per_cpu(self) -> None:
         """Update times per CPU"""
         count = 0
         for data in [freq._asdict() for freq in self._cpu.times_per_cpu()]:
@@ -296,7 +296,7 @@ class CPUUpdate(ModuleUpdateBase):
                 )
             count += 1
 
-    async def update_times_per_cpu_percent(self) -> None:
+    async def _update_times_per_cpu_percent(self) -> None:
         """Update times per CPU percent"""
         count = 0
         for data in [freq._asdict() for freq in self._cpu.times_per_cpu_percent()]:
@@ -310,7 +310,7 @@ class CPUUpdate(ModuleUpdateBase):
                 )
             count += 1
 
-    async def update_usage(self) -> None:
+    async def _update_usage(self) -> None:
         """Update usage"""
         self._database.update_data(
             DatabaseModel,
@@ -320,7 +320,7 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_usage_per_cpu(self) -> None:
+    async def _update_usage_per_cpu(self) -> None:
         """Update usage per CPU"""
         count = 0
         for value in self._cpu.usage_per_cpu():
@@ -333,7 +333,7 @@ class CPUUpdate(ModuleUpdateBase):
             )
             count += 1
 
-    async def update_voltage(self) -> None:
+    async def _update_voltage(self) -> None:
         """Update voltage"""
         self._database.update_data(
             DatabaseModel,
@@ -347,20 +347,20 @@ class CPUUpdate(ModuleUpdateBase):
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_count(),
-                self.update_frequency(),
-                self.update_frequency_per_cpu(),
-                self.update_load_average(),
-                self.update_power_package(),
-                self.update_power_per_cpu(),
-                self.update_stats(),
-                self.update_temperature(),
-                self.update_times(),
-                self.update_times_percent(),
-                self.update_times_per_cpu(),
-                self.update_times_per_cpu_percent(),
-                self.update_usage(),
-                self.update_usage_per_cpu(),
-                self.update_voltage(),
+                self._update_count(),
+                self._update_frequency(),
+                self._update_frequency_per_cpu(),
+                self._update_load_average(),
+                self._update_power_package(),
+                self._update_power_per_cpu(),
+                self._update_stats(),
+                self._update_temperature(),
+                self._update_times(),
+                self._update_times_percent(),
+                self._update_times_per_cpu(),
+                self._update_times_per_cpu_percent(),
+                self._update_usage(),
+                self._update_usage_per_cpu(),
+                self._update_voltage(),
             ]
         )

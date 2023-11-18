@@ -159,7 +159,7 @@ class DisplayUpdate(ModuleUpdateBase):
         super().__init__(database, DatabaseModel)
         self._display = Display()
 
-    async def update_name(
+    async def _update_name(
         self,
         display_key: str,
         display_name: str,
@@ -173,7 +173,7 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_pixel_clock(
+    async def _update_pixel_clock(
         self,
         display_key: str,
         value: float | None = None,
@@ -189,7 +189,7 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_refresh_rate(
+    async def _update_refresh_rate(
         self,
         display_key: str,
         value: float | None = None,
@@ -205,7 +205,7 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_resolution_horizontal(
+    async def _update_resolution_horizontal(
         self,
         display_key: str,
         value: int | None = None,
@@ -223,7 +223,7 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_resolution_vertical(
+    async def _update_resolution_vertical(
         self,
         display_key: str,
         value: int | None = None,
@@ -254,11 +254,11 @@ class DisplayUpdate(ModuleUpdateBase):
                 display_list.append(display_key)
                 await asyncio.gather(
                     *[
-                        self.update_name(display_key, display_name),
-                        self.update_pixel_clock(display_key),
-                        self.update_refresh_rate(display_key),
-                        self.update_resolution_horizontal(display_key),
-                        self.update_resolution_vertical(display_key),
+                        self._update_name(display_key, display_name),
+                        self._update_pixel_clock(display_key),
+                        self._update_refresh_rate(display_key),
+                        self._update_resolution_horizontal(display_key),
+                        self._update_resolution_vertical(display_key),
                     ]
                 )
 
@@ -271,13 +271,13 @@ class DisplayUpdate(ModuleUpdateBase):
                     display_list.append(display_key)
                     await asyncio.gather(
                         *[
-                            self.update_name(display_key, display.name),
-                            self.update_pixel_clock(display_key, display.pixel_clock),
-                            self.update_refresh_rate(display_key, display.refresh_rate),
-                            self.update_resolution_horizontal(
+                            self._update_name(display_key, display.name),
+                            self._update_pixel_clock(display_key, display.pixel_clock),
+                            self._update_refresh_rate(display_key, display.refresh_rate),
+                            self._update_resolution_horizontal(
                                 display_key, display.resolution_horizontal
                             ),
-                            self.update_resolution_vertical(
+                            self._update_resolution_vertical(
                                 display_key, display.resolution_vertical
                             ),
                         ]

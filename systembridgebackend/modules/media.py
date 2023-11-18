@@ -47,7 +47,7 @@ class Media(ModuleUpdateBase):
         """Session changed handler"""
         self._logger.info("Session changed")
         if self._changed_callback is not None:
-            asyncio.run(self.update_media_info())
+            asyncio.run(self._update_media_info())
 
     def _properties_changed_handler(
         self,
@@ -57,7 +57,7 @@ class Media(ModuleUpdateBase):
         """Properties changed handler"""
         self._logger.info("Media properties changed")
         if self._changed_callback is not None:
-            asyncio.run(self.update_media_info())
+            asyncio.run(self._update_media_info())
 
     def _playback_info_changed_handler(
         self,
@@ -67,7 +67,7 @@ class Media(ModuleUpdateBase):
         """Playback info changed handler"""
         self._logger.info("Media properties changed")
         if self._changed_callback is not None:
-            asyncio.run(self.update_media_info())
+            asyncio.run(self._update_media_info())
 
     async def _update_data(
         self,
@@ -91,7 +91,7 @@ class Media(ModuleUpdateBase):
 
         await self._changed_callback("media")
 
-    async def update_media_info(self) -> None:
+    async def _update_media_info(self) -> None:
         """Update media info from the current session."""
         if platform.system() != "Windows":
             return None
@@ -176,7 +176,7 @@ class Media(ModuleUpdateBase):
             if media_info.status == "PLAYING":
                 self._logger.info("Schedule media update in 5 seconds..")
                 await asyncio.sleep(5)
-                await self.update_media_info()
+                await self._update_media_info()
         else:
             await self._update_data(
                 MediaInfo(updated_at=datetime.datetime.now().timestamp())
