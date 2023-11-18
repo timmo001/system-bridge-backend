@@ -43,7 +43,7 @@ class UpdateEventsThread(Thread):
         if platform.system() != "Windows":
             return
 
-        from .modules.media import (  # pylint: disable=import-error, import-outside-toplevelw
+        from .modules.media import (  # pylint: disable=import-error, import-outside-toplevel
             Media,
         )
 
