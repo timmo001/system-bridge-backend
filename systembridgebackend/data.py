@@ -44,8 +44,8 @@ class UpdateEventsThread(Thread):
             return
 
         from .modules.media import (
-            Media,
-        )  # pylint: disable=import-error, import-outside-toplevel
+            Media,  # pylint: disable=import-error, import-outside-toplevel
+        )
 
         self._media = Media(
             database,
