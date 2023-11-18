@@ -45,13 +45,13 @@ class GUI(Base):
         self._settings = settings
 
         self._name = "GUI"
-        self._process: Optional[subprocess.Popen] = None
+        self._process: subprocess.Popen | None = None
         self._stopping = False
-        self._thread: Optional[StoppableThread] = None
+        self._thread: StoppableThread | None = None
 
     async def _start(  # pylint: disable=keyword-arg-before-vararg
         self,
-        failed_callback: Optional[Callable[[], None]],
+        failed_callback: Callable[[], None] | None,
         attempt: int = 1,
         command: str = "main",
         *args,
@@ -134,7 +134,7 @@ class GUI(Base):
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
         self,
-        failed_callback: Optional[Callable[[], None]],
+        failed_callback: Callable[[], None] | None,
         command: str = "main",
         *args,
     ) -> None:
@@ -150,7 +150,7 @@ class GUI(Base):
 
     async def start(  # pylint: disable=keyword-arg-before-vararg
         self,
-        failed_callback: Optional[Callable[[], None]],
+        failed_callback: Callable[[], None] | None,
         command: str = "main",
         *args,
     ) -> None:

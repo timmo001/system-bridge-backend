@@ -92,7 +92,7 @@ def callback_media_play(
 
 
 def security_api_key_header(
-    api_key_header: Optional[str] = Header(alias=HEADER_API_KEY, default=None),
+    api_key_header: str | None = Header(alias=HEADER_API_KEY, default=None),
 ):
     """Get API key from request."""
     key = str(settings.get_secret(SECRET_API_KEY))
@@ -103,7 +103,7 @@ def security_api_key_header(
 
 
 def security_api_key_query(
-    api_key_query: Optional[str] = Query(alias=QUERY_API_KEY, default=None),
+    api_key_query: str | None = Query(alias=QUERY_API_KEY, default=None),
 ):
     """Get API key from request."""
     key = str(settings.get_secret(SECRET_API_KEY))
@@ -220,9 +220,7 @@ def get_data_by_key(
 
 
 @app.post("/api/keyboard", dependencies=[Depends(security_api_key)])
-def send_keyboard_event(
-    keyboard_event: Union[KeyboardKey, KeyboardText]
-) -> dict[str, str]:
+def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str, str]:
     """Send keyboard event."""
     if isinstance(keyboard_event, KeyboardKey):
         try:
@@ -318,7 +316,7 @@ def get_media_directories() -> dict[str, list[dict[str, str]]]:
 @app.get("/api/media/files", dependencies=[Depends(security_api_key)])
 def get_media_files(
     query_base: str = Query(..., alias="base"),
-    query_path: Optional[str] = Query(None, alias="path"),
+    query_path: str | None = Query(None, alias="path"),
 ) -> MediaFiles:
     """Get media files."""
     root_path = None
@@ -497,12 +495,12 @@ async def send_media_file(
 @app.post("/api/media/play", dependencies=[Depends(security_api_key)])
 async def send_media_play(
     request: Request,
-    query_autoplay: Optional[bool] = Query(False, alias="autoplay"),
-    query_base: Optional[str] = Query(None, alias="base"),
-    query_path: Optional[str] = Query(None, alias="path"),
-    query_type: Optional[str] = Query(None, alias="type"),
-    query_url: Optional[str] = Query(None, alias="url"),
-    query_volume: Optional[float] = Query(40, alias="volume"),
+    query_autoplay: bool | None = Query(False, alias="autoplay"),
+    query_base: str | None = Query(None, alias="base"),
+    query_path: str | None = Query(None, alias="path"),
+    query_type: str | None = Query(None, alias="type"),
+    query_url: str | None = Query(None, alias="url"),
+    query_volume: float | None = Query(40, alias="volume"),
 ) -> dict[str, str]:
     """Play media."""
     return await play_media(
@@ -527,7 +525,7 @@ def send_notification(notification: Notification) -> dict[str, str]:
 
 
 @app.post("/api/open", dependencies=[Depends(security_api_key)])
-def send_open(open_model: Union[OpenPath, OpenUrl]) -> dict[str, str]:
+def send_open(open_model: OpenPath | OpenUrl) -> dict[str, str]:
     """Send notification."""
     if isinstance(open_model, OpenPath) and open_model.path is not None:
         open_path(open_model.path)
@@ -606,10 +604,10 @@ def send_power_logout() -> dict[str, str]:
 
 
 @app.delete("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def delete_remote(key: str) -> dict[str, Union[dict, str]]:
+def delete_remote(key: str) -> dict[str, dict | str]:
     """Delete remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
-    remote_bridge: Optional[RemoteBridge] = None
+    remote_bridge: RemoteBridge | None = None
 
     for bridge in bridges:
         if bridge.key == key:
@@ -632,7 +630,7 @@ def delete_remote(key: str) -> dict[str, Union[dict, str]]:
 
 
 @app.get("/api/remote", dependencies=[Depends(security_api_key)])
-def get_remote() -> dict[str, Union[list[dict], str]]:
+def get_remote() -> dict[str, list[dict] | str]:
     """Get remote bridges."""
     return {
         "message": "Got remote bridges",
@@ -641,7 +639,7 @@ def get_remote() -> dict[str, Union[list[dict], str]]:
 
 
 @app.post("/api/remote", dependencies=[Depends(security_api_key)])
-def send_remote(remote: RemoteBridge) -> dict[str, Union[dict, str]]:
+def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
     """Send remote bridge."""
     database.update_remote_bridge(remote)
     return {
@@ -651,10 +649,10 @@ def send_remote(remote: RemoteBridge) -> dict[str, Union[dict, str]]:
 
 
 @app.put("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def update_remote(key: str, remote: RemoteBridge) -> dict[str, Union[dict, str]]:
+def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
     """Update remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
-    remote_bridge: Optional[RemoteBridge] = None
+    remote_bridge: RemoteBridge | None = None
 
     for bridge in bridges:
         if bridge.key == key:
@@ -679,7 +677,7 @@ def update_remote(key: str, remote: RemoteBridge) -> dict[str, Union[dict, str]]
 @app.post("/api/update", dependencies=[Depends(security_api_key)])
 def send_update(
     query_version: str = Query(..., alias="version")
-) -> dict[str, Union[dict[str, Optional[str]], str]]:
+) -> dict[str, dict[str, str | None] | str]:
     """Send update."""
     if (versions := version_update(query_version)) is None:
         raise HTTPException(

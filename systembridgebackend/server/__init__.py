@@ -60,9 +60,9 @@ class Server(Base):
         self.no_frontend = no_frontend
         self.no_gui = no_gui
 
-        self._gui_notification: Optional[GUI] = None
-        self._gui_player: Optional[GUI] = None
-        self._gui: Optional[GUI] = None
+        self._gui_notification: GUI | None = None
+        self._gui_player: GUI | None = None
+        self._gui: GUI | None = None
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
