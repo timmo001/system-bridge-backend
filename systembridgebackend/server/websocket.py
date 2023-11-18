@@ -1123,7 +1123,7 @@ class WebSocketHandler(Base):
                 request = Request(**data)
             except JSONDecodeError as error:
                 message = f"Invalid JSON: {error}"
-                self._logger.error(message)
+                self._logger.error(message, exc_info=error)
                 await self._send_response(
                     Response(
                         **{
@@ -1136,7 +1136,7 @@ class WebSocketHandler(Base):
                 return
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.error(message)
+                self._logger.error(message, exc_info=error)
                 await self._send_response(
                     Response(
                         **{
@@ -1177,7 +1177,7 @@ class WebSocketHandler(Base):
                     request,
                 )
             except Exception as error:  # pylint: disable=broad-except
-                self._logger.error(error)
+                self._logger.error(error, exc_info=error)
                 await self._send_response(
                     Response(
                         **{

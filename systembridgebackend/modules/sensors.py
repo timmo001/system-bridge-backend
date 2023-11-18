@@ -40,7 +40,7 @@ class Sensors(Base):
             # pylint: disable=import-error, import-outside-toplevel
             from systembridgewindowssensors import get_windowssensors_path
         except (ImportError, ModuleNotFoundError) as error:
-            self._logger.error("Windows sensors not found: %s", error)
+            self._logger.error("Windows sensors not found", exc_info=error)
             return None
 
         path = get_windowssensors_path()
@@ -55,16 +55,16 @@ class Sensors(Base):
             self._logger.debug("Windows sensors result: %s", result)
         except Exception as error:  # pylint: disable=broad-except
             self._logger.error(
-                "Windows sensors error: %s (%s)",
-                error,
+                "Windows sensors error: %s",
                 path,
+                exc_info=error,
             )
             return None
 
         try:
             return json.loads(result)
         except json.decoder.JSONDecodeError as error:
-            self._logger.error(error)
+            self._logger.error("Decoding JSON has failed", exc_info=error)
             return None
 
 

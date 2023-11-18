@@ -717,5 +717,5 @@ if "--no-frontend" not in sys.argv:
             app=StaticFiles(directory=frontend_path),
             name="Frontend",
         )
-    except (ImportError, ModuleNotFoundError) as err:
-        logger.error("Frontend not found: %s", err)
+    except (ImportError, ModuleNotFoundError) as error:
+        logger.error("Frontend not found", exc_info=error)

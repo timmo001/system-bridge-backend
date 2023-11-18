@@ -65,11 +65,7 @@ class ProcessesUpdate(ModuleUpdateBase):
                 model.status = process.status()
                 model.username = process.username()
             except (AccessDenied, NoSuchProcess, OSError) as error:
-                self._logger.debug(
-                    "Failed to get process information for PID %s",
-                    process.pid,
-                    exc_info=error,
-                )
+                pass
             items.append(model)
         # Sort by name
         items = sorted(items, key=lambda item: item.name)
