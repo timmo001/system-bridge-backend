@@ -2,8 +2,8 @@
 import asyncio
 import subprocess
 import sys
+from collections.abc import Callable
 from threading import Event, Thread
-from typing import Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
