@@ -12,8 +12,8 @@ class ModuleUpdateBase(Base):
     def __init__(
         self,
         database: Database,
-        model:Any,
-    ):
+        model: Any,
+    ) -> None:
         super().__init__()
 
         self._database = database

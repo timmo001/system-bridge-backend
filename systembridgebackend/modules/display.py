@@ -156,7 +156,7 @@ class DisplayUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._display = Display()
 
     async def update_name(

@@ -31,7 +31,7 @@ class MemoryUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._memory = Memory()
 
     async def update_swap(self) -> None:

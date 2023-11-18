@@ -166,7 +166,7 @@ class CPUUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._cpu = CPU()
 
     async def update_count(self) -> None:

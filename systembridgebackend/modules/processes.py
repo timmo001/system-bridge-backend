@@ -6,6 +6,7 @@ from json import dumps
 
 from psutil import AccessDenied, NoSuchProcess, Process, process_iter
 from systembridgemodels.processes import Process as ProcessModel
+from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Processes as DatabaseModel
 
 from .._version import __version__
@@ -14,6 +15,13 @@ from .base import ModuleUpdateBase
 
 class ProcessesUpdate(ModuleUpdateBase):
     """Processes Update"""
+
+    def __init__(
+        self,
+        database: Database,
+    ) -> None:
+        """Initialize"""
+        super().__init__(database, DatabaseModel)
 
     async def update_count(
         self,

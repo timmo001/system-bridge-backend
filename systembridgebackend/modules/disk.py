@@ -46,7 +46,7 @@ class DiskUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._disk = Disk()
 
     async def update_io_counters(self) -> None:

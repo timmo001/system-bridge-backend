@@ -8,23 +8,23 @@ from collections.abc import Awaitable, Callable
 
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.media import Media as MediaInfo
-from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Media as DatabaseModel
 from winsdk.windows.foundation import (  # pylint: disable=import-error
     EventRegistrationToken,
 )
 
+from .base import ModuleUpdateBase
 
-class Media(Base):
+
+class Media(ModuleUpdateBase):
     """Media"""
 
     def __init__(
         self, database: Database, changed_callback: Callable[[str], Awaitable[None]]
     ) -> None:
         """Initialize"""
-        super().__init__()
-        self._database = database
+        super().__init__(database, DatabaseModel)
         self._changed_callback = changed_callback
 
         self.sessions: None | (

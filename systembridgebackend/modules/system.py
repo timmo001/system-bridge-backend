@@ -258,7 +258,7 @@ class SystemUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._system = System()
 
     async def update_active_user_id(self) -> None:

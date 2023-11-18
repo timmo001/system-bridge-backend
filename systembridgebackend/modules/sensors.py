@@ -76,7 +76,7 @@ class SensorsUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._sensors = Sensors()
 
     async def update_fans(self) -> None:

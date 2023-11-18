@@ -40,7 +40,7 @@ class NetworkUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._network = Network()
 
     async def update_stats(self) -> None:
