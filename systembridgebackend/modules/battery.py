@@ -38,7 +38,7 @@ class BatteryUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__(database, DatabaseModel)
         self._battery = Battery()
 
     async def update_sensors(self) -> None:
