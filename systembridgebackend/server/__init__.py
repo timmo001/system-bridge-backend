@@ -108,20 +108,21 @@ class Server(Base):
                 # ),
             ]
         )
-        if not self.no_gui:
-            self._gui = GUI(self._settings)
-            self._tasks.extend(
-                [
-                    api_app.loop.create_task(
-                        self._gui.start(self.exit_application),
-                        name="GUI",
-                    ),
-                    api_app.loop.create_task(
-                        self.register_hotkeys(),
-                        name="Register hotkeys",
-                    ),
-                ]
-            )
+        # TODO: Implement GUI
+        # if not self.no_gui:
+        #     self._gui = GUI(self._settings)
+        #     self._tasks.extend(
+        #         [
+        #             api_app.loop.create_task(
+        #                 self._gui.start(self.exit_application),
+        #                 name="GUI",
+        #             ),
+        #             api_app.loop.create_task(
+        #                 self.register_hotkeys(),
+        #                 name="Register hotkeys",
+        #             ),
+        #         ]
+        #     )
 
         await asyncio.wait(self._tasks)
 
