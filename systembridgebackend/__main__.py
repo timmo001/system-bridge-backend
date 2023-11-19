@@ -2,7 +2,6 @@
 import logging
 
 import typer
-from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
