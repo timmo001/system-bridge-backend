@@ -15,6 +15,7 @@ class BatteryUpdate(ModuleUpdateBase):
     @override
     async def update_all_data(self) -> Battery:
         """Update all data"""
+        self._logger.debug("Update all data")
         status = battery.status
         return Battery(
             is_charging=getattr(status, "isCharging", None),

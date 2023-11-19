@@ -23,13 +23,13 @@ from systembridgemodels.media_play import MediaPlay
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
-from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
-from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN, SECRET_TOKEN
+from systembridgeshared.common import asyncio_get_loop
+from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
+from ..data import DataUpdate
 from ..gui import GUI
-from ..modules import MODULES
 from ..modules.listeners import Listeners
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
@@ -151,6 +151,7 @@ class API(FastAPI):
         )
         self.callback_exit: Callable[[], None]
         self.callback_open_gui: Callable[[str, str], None]
+        self.data_update: DataUpdate
         self.listeners: Listeners
         self.loop: asyncio.AbstractEventLoop = asyncio_get_loop()
 
@@ -625,6 +626,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     websocket_handler = WebSocketHandler(
         settings,
+        app.data_update,
         app.listeners,
         websocket,
         app.callback_exit,

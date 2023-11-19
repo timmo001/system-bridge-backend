@@ -97,6 +97,7 @@ class CPUUpdate(ModuleUpdateBase):
     @override
     async def update_all_data(self) -> CPU:
         """Update all data"""
+        self._logger.debug("Update all data")
         data = await asyncio.gather(
             *[
                 self._count(),

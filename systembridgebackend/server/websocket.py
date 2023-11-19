@@ -26,19 +26,24 @@ from systembridgemodels.update import Update as UpdateModel
 from systembridgemodels.update_setting import UpdateSetting
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    EVENT_DATA,
     EVENT_EVENT,
     EVENT_MESSAGE,
+    EVENT_MODULES,
     SUBTYPE_BAD_JSON,
     SUBTYPE_BAD_REQUEST,
     SUBTYPE_BAD_TOKEN,
     SUBTYPE_MISSING_KEY,
+    SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_TEXT,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
+    TYPE_DATA_GET,
     TYPE_DATA_UPDATE,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
+    TYPE_GET_DATA,
     TYPE_KEYBOARD_KEY_PRESSED,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
@@ -47,6 +52,7 @@ from systembridgeshared.const import (
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
+from ..data import DataUpdate
 from ..modules import MODULES
 from ..modules.listeners import Listeners
 from ..utilities.autostart import autostart_disable, autostart_enable
@@ -79,6 +85,7 @@ class WebSocketHandler(Base):
     def __init__(
         self,
         settings: Settings,
+        data_update: DataUpdate,
         listeners: Listeners,
         websocket: WebSocket,
         callback_exit_application: Callable[[], None],
@@ -87,6 +94,7 @@ class WebSocketHandler(Base):
         """Initialise"""
         super().__init__()
         self._settings = settings
+        self._data_update = data_update
         self._listeners = listeners
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
@@ -102,6 +110,9 @@ class WebSocketHandler(Base):
             return
         message = asdict(response)
         self._logger.debug("Sending message: %s", message)
+        if self._websocket is None:
+            self._logger.error("Websocket is None")
+            return
         await self._websocket.send_json(message)
 
     async def _data_changed(
@@ -245,7 +256,7 @@ class WebSocketHandler(Base):
                 Response(
                     id=request.id,
                     type=TYPE_KEYBOARD_TEXT_SENT,
-                    subtype="Key pressed",
+                    message="Key pressed",
                     data={"text": model.text},
                 )
             )
@@ -561,64 +572,65 @@ class WebSocketHandler(Base):
         #             }
         #         )
         #     )
-        # elif request.event == TYPE_GET_DATA:
-        #     try:
-        #         model = GetData(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.modules is None or len(model.modules) == 0:
-        #         self._logger.warning("No modules provided")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
-        #                     EVENT_MESSAGE: "No modules provided",
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     self._logger.info("Getting data: %s", model.modules)
+        elif request.event == TYPE_GET_DATA:
+            try:
+                model = GetData(modules=data[EVENT_DATA][EVENT_MODULES])
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        data={EVENT_MESSAGE: message},
+                    )
+                )
+                return
+            if model.modules is None or len(model.modules) == 0:
+                self._logger.warning("No modules provided")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_MISSING_MODULES,
+                        data={EVENT_MESSAGE: "No modules provided"},
+                    )
+                )
+                return
+            self._logger.info("Getting data: %s", model.modules)
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_DATA_GET,
-        #                 EVENT_MESSAGE: "Getting data",
-        #                 EVENT_MODULES: model.modules,
-        #             }
-        #         )
-        #     )
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_DATA_GET,
+                    message="Getting data",
+                    data={EVENT_MODULES: model.modules},
+                )
+            )
 
-        #     for module in model.modules:
-        #         table = TABLE_MAP.get(module)
-        #         data = self._database.get_data_dict(table)
-        #         if data is not None:
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_DATA_UPDATE,
-        #                         EVENT_MESSAGE: "Data received",
-        #                         EVENT_MODULE: module,
-        #                         EVENT_DATA: data,
-        #                     }
-        #                 )
-        #             )
+            for module in model.modules:
+                if (data := getattr(self._data_update.data, module)) is None:
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            message="Cannot find data for module",
+                            module=module,
+                            data={},
+                        )
+                    )
+                else:
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_DATA_UPDATE,
+                            message="Data received",
+                            module=module,
+                            data=data,
+                        )
+                    )
+
         # elif request.event == TYPE_GET_DIRECTORIES:
         #     await self._send_response(
         #         Response(
@@ -989,6 +1001,9 @@ class WebSocketHandler(Base):
         # Loop until the connection is closed
         while self._active:
             try:
+                if self._websocket is None:
+                    self._logger.error("Websocket is None")
+                    continue
                 data = await self._websocket.receive_json()
                 request = Request(**data)
             except JSONDecodeError as error:
@@ -1018,13 +1033,11 @@ class WebSocketHandler(Base):
 
             self._logger.info("Received: %s", request.event)
 
-            token = self._settings.get_secret(SECRET_TOKEN)
-
-            if request.token != token:
+            if request.token != self._settings.data.api.token:
                 self._logger.warning(
                     "Invalid token: %s != %s",
                     request.token,
-                    token,
+                    self._settings.data.api.token,
                 )
                 await self._send_response(
                     Response(

@@ -114,6 +114,7 @@ class DiskUpdate(ModuleUpdateBase):
 
     async def _update_all_data(self) -> None:
         """Update data"""
+        self._logger.debug("Update all data")
         await asyncio.gather(
             *[
                 self.update_io_counters(),

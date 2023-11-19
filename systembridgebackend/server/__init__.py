@@ -66,6 +66,7 @@ class Server(Base):
         self._logger.info("Setup API app")
         api_app.callback_exit = self.exit_application
         api_app.callback_open_gui = self.callback_open_gui
+        api_app.data_update = DataUpdate(self.data_updated_callback)
         api_app.listeners = listeners
         api_app.loop = asyncio.get_event_loop()
 
@@ -82,7 +83,6 @@ class Server(Base):
             ),
             exit_callback=self.exit_application,
         )
-        self._data_update = DataUpdate(self.data_updated_callback)
         self._logger.info("Server Initialised")
 
     async def start(self) -> None:
@@ -132,7 +132,7 @@ class Server(Base):
     ) -> None:
         """Data updated"""
         await self._listeners.refresh_data_by_module(
-            self._data_update.data,
+            api_app.data_update.data,
             module,
         )
 
@@ -222,7 +222,7 @@ class Server(Base):
     async def update_data(self) -> None:
         """Update data"""
         self._logger.info("Update data")
-        self._data_update.request_update_data()
+        api_app.data_update.request_update_data()
         self._logger.info("Schedule next update in 2 minutes")
         await asyncio.sleep(120)
 
@@ -231,10 +231,3 @@ class Server(Base):
     #     self._logger.info("Update events data")
     #     self._data.request_update_events_data()
     #     asyncio.get_running_loop().run_forever()
-
-    # async def update_frequent_data(self) -> None:
-    #     """Update frequent data"""
-    #     self._logger.info("Update frequent data")
-    #     self._data.request_update_frequent_data()
-    #     self._logger.info("Schedule next frequent update in 30 seconds")
-    #     await asyncio.sleep(30)
