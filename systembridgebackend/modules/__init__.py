@@ -39,7 +39,7 @@ class Update(Base):
         self,
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self.updated_callback = updated_callback
 

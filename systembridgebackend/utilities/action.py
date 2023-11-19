@@ -19,7 +19,7 @@ class ActionHandler(Base):
         self,
         settings: Settings,
     ) -> None:
-        """Initialize the action handler"""
+        """Initialise the action handler"""
         super().__init__()
         self._settings = settings
 

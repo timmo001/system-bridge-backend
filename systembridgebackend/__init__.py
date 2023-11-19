@@ -28,10 +28,10 @@ class Application(Base):
         no_frontend: bool = False,
         no_gui: bool = False,
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         if init:
-            self._logger.info("Initialized application. Exiting now.")
+            self._logger.info("Initialised application. Exiting now.")
             sys.exit(0)
 
         self._logger.info("System Bridge %s: Startup", __version__.public())

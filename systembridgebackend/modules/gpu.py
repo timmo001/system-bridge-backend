@@ -243,7 +243,7 @@ class GPUUpdate(ModuleUpdateBase):
         self,
         database: Database,
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__(database)
         self._gpu = GPU()
 

@@ -142,7 +142,7 @@ class DisplayUpdate(ModuleUpdateBase):
     """Display Update"""
 
     def __init__(self) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._display = Display()
 

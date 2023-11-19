@@ -133,7 +133,7 @@ class API(FastAPI):
         self,
         **kwargs: Any,
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__(**kwargs)
         self.add_middleware(
             CORSMiddleware,

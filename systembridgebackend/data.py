@@ -17,7 +17,7 @@ class UpdateThread(Thread):
         self,
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._updated_callback = updated_callback
         self._update = Update(self._updated_callback)
@@ -34,7 +34,7 @@ class UpdateThread(Thread):
 #         self,
 #         updated_callback: Callable[[str, Any], Awaitable[None]],
 #     ) -> None:
-#         """Initialize"""
+#         """Initialise"""
 #         super().__init__()
 
 #         if platform.system() != "Windows":
@@ -61,7 +61,7 @@ class DataUpdate(Base):
         self,
         updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self.data = Data()
         self._updated_callback = updated_callback

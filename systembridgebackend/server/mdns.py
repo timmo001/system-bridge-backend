@@ -15,7 +15,7 @@ class MDNSAdvertisement(Base):
         self,
         settings: Settings,
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._settings = settings
 

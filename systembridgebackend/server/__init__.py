@@ -55,7 +55,7 @@ class Server(Base):
         no_frontend: bool = False,
         no_gui: bool = False,
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self.no_frontend = no_frontend
         self.no_gui = no_gui
@@ -90,7 +90,7 @@ class Server(Base):
             exit_callback=self.exit_application,
         )
         self._data_update = DataUpdate(self.data_updated_callback)
-        self._logger.info("Server initialized")
+        self._logger.info("Server Initialised")
 
     async def start(self) -> None:
         """Start the server"""

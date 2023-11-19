@@ -148,7 +148,7 @@ class WebSocketHandler(Base):
         callback_exit_application: Callable[[], None],
         callback_open_gui: Callable[[str, str], None],
     ) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._database = database
         self._settings = settings

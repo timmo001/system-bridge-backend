@@ -25,7 +25,7 @@ class SystemUpdate(ModuleUpdateBase):
     """System Update"""
 
     def __init__(self) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._mac_address: str | None = None
         self._version: str = __version__.public()

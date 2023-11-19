@@ -40,7 +40,7 @@ class DiskUpdate(ModuleUpdateBase):
     """Disk Update"""
 
     def __init__(self) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._disk = Disk()
 

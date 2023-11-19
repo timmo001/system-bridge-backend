@@ -20,7 +20,7 @@ class StoppableThread(Thread):
         *args,
         **kwargs,
     ) -> None:
-        """Initialize the thread."""
+        """Initialise the thread."""
         super().__init__(*args, **kwargs)
         self._stop_event = Event()
 
@@ -40,7 +40,7 @@ class GUI(Base):
         self,
         settings: Settings,
     ):
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self._settings = settings
 
