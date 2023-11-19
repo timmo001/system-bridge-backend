@@ -74,6 +74,7 @@ class Update(Base):
         sensor_data = await sensors_update.update_all_data()
         await self._updated_callback("sensors", sensor_data)
 
+        # TODO: Update data in separate threads
         tasks = [self._update(cls) for cls in self._classes]
         await asyncio.gather(*tasks)
 
