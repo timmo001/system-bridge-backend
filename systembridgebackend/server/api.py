@@ -4,6 +4,8 @@ import logging
 import os
 import sys
 from collections.abc import Callable
+from dataclasses import asdict
+from json import dumps
 from typing import Any
 
 from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
@@ -82,7 +84,7 @@ def callback_media_play(
             app.callback_exit,
             "media-player",
             media_type,
-            media_play.json(),
+            dumps(asdict(media_play)),
         ),
         name="GUI media player",
     )
@@ -181,7 +183,7 @@ def get_api_root() -> dict[str, str]:
 
 
 @app.get("/api/data/{module}", dependencies=[Depends(security_api_key)])
-def get_data(module: str) -> DataDict:
+def get_data(module: str) -> Any:
     """Get data from module."""
     table_module = TABLE_MAP.get(module)
     if module not in MODULES or table_module is None:
@@ -189,6 +191,7 @@ def get_data(module: str) -> DataDict:
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
         )
+    # TODO: Replace
     return database.get_data_dict(table_module)
 
 
@@ -228,13 +231,13 @@ def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str,
             ) from error
         return {
             "message": "Keypress sent",
-            **keyboard_event.dict(),
+            **asdict(keyboard_event),
         }
     if isinstance(keyboard_event, KeyboardText):
         keyboard_text(keyboard_event.text)
         return {
             "message": "Text sent",
-            **keyboard_event.dict(),
+            **asdict(keyboard_event),
         }
     raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid keyboard event")
 
@@ -298,7 +301,7 @@ async def send_media_control(
 
     return {
         "message": "Media control sent",
-        **data.dict(),
+        **asdict(data),
     }
 
 
@@ -517,7 +520,10 @@ async def send_media_play(
 @app.post("/api/notification", dependencies=[Depends(security_api_key)])
 def send_notification(notification: Notification) -> dict[str, str]:
     """Send notification."""
-    app.callback_open_gui("notification", notification.json())
+    app.callback_open_gui(
+        "notification",
+        dumps(asdict(notification)),
+    )
     return {"message": "Notification sent"}
 
 

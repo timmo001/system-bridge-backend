@@ -6,7 +6,6 @@ from json import dumps
 
 from psutil import AccessDenied, NoSuchProcess, Process, process_iter
 from systembridgemodels.processes import Process as ProcessModel
-from systembridgeshared.models.database_data import Processes as DatabaseModel
 
 from .._version import __version__
 from .base import ModuleUpdateBase
@@ -74,7 +73,7 @@ class ProcessesUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         processes = list(process_iter())
         await asyncio.gather(

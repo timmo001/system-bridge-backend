@@ -5,8 +5,6 @@ from typing import NamedTuple
 from psutil import swap_memory, virtual_memory
 from psutil._common import sswap
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Memory as DatabaseModel
 
 from .base import ModuleUpdateBase
 
@@ -56,7 +54,7 @@ class MemoryUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[

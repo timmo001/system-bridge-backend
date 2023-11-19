@@ -5,11 +5,11 @@ import asyncio
 import json
 import subprocess
 import sys
+from typing import Any
 
 import psutil
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
-from systembridgeshared.models.database_data_sensors import Sensors as DatabaseModel
 
 from .base import ModuleUpdateBase
 
@@ -70,7 +70,7 @@ class Sensors(Base):
 class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update"""
 
-    async def update_fans(self) -> None:
+    async def _update_fans(self) -> None:
         """Update Fan Sensors"""
         if data := self._sensors.fans():
             for key, value in data.items():
@@ -88,7 +88,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def update_temperatures(self) -> None:
+    async def _update_temperatures(self) -> None:
         """Update Temperature Sensors"""
         if data := self._sensors.temperatures():
             for key, value in data.items():
@@ -106,7 +106,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def update_windows_sensors(self) -> None:
+    async def _update_windows_sensors(self) -> None:
         """Update Windows Sensors"""
         if not (data := self._sensors.windows_sensors()):
             return
@@ -181,15 +181,13 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def update_all_data(self) -> None:
+    async def update_all_data(self) -> list[Any]:
         """Update data"""
-
-        # Clear table in case of hardware changes since last run
-        self._database.clear_table(DatabaseModel)
-        await asyncio.gather(
+        data = await asyncio.gather(
             *[
-                self.update_fans(),
-                self.update_temperatures(),
-                self.update_windows_sensors(),
+                self._update_fans(),
+                self._update_temperatures(),
+                self._update_windows_sensors(),
             ]
         )
+        return data

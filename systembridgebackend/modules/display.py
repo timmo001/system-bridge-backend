@@ -9,10 +9,6 @@ from systembridgemodels.display import Display as DisplayModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Display as DatabaseModel
-from systembridgeshared.models.database_data_sensors import (
-    Sensors as SensorsDatabaseModel,
-)
 
 from .base import ModuleUpdateBase
 
@@ -232,7 +228,7 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         display_list = []
         displays = self._display.sensors_get_displays(self._database)

@@ -15,7 +15,7 @@ from systembridgeshared.const import (
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
-from ..data import Data
+from ..data import DataUpdate
 from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
@@ -89,7 +89,7 @@ class Server(Base):
             ),
             exit_callback=self.exit_application,
         )
-        self._data = Data(database, self.callback_data_updated)
+        self._data_update = DataUpdate(self.data_updated_callback)
         self._logger.info("Server initialized")
 
     async def start(self) -> None:
@@ -105,14 +105,14 @@ class Server(Base):
                     self.indefinite_func_wrapper(self.update_data),
                     name="Update data",
                 ),
-                api_app.loop.create_task(
-                    self.indefinite_func_wrapper(self.update_frequent_data),
-                    name="Update frequent data",
-                ),
-                api_app.loop.create_task(
-                    self.update_events_data(),
-                    name="Update events data",
-                ),
+                # api_app.loop.create_task(
+                #     self.indefinite_func_wrapper(self.update_frequent_data),
+                #     name="Update frequent data",
+                # ),
+                # api_app.loop.create_task(
+                #     self.update_events_data(),
+                #     name="Update events data",
+                # ),
             ]
         )
         if not self.no_gui:
@@ -132,12 +132,15 @@ class Server(Base):
 
         await asyncio.wait(self._tasks)
 
-    async def callback_data_updated(
+    async def data_updated_callback(
         self,
         module: str,
     ) -> None:
         """Data updated"""
-        await self._listeners.refresh_data_by_module(module)
+        await self._listeners.refresh_data_by_module(
+            self._data_update.data,
+            module,
+        )
 
     def callback_open_gui(
         self,
@@ -226,19 +229,19 @@ class Server(Base):
     async def update_data(self) -> None:
         """Update data"""
         self._logger.info("Update data")
-        self._data.request_update_data()
+        self._data_update.request_update_data()
         self._logger.info("Schedule next update in 2 minutes")
         await asyncio.sleep(120)
 
-    async def update_events_data(self) -> None:
-        """Update events data"""
-        self._logger.info("Update events data")
-        self._data.request_update_events_data()
-        asyncio.get_running_loop().run_forever()
+    # async def update_events_data(self) -> None:
+    #     """Update events data"""
+    #     self._logger.info("Update events data")
+    #     self._data.request_update_events_data()
+    #     asyncio.get_running_loop().run_forever()
 
-    async def update_frequent_data(self) -> None:
-        """Update frequent data"""
-        self._logger.info("Update frequent data")
-        self._data.request_update_frequent_data()
-        self._logger.info("Schedule next frequent update in 30 seconds")
-        await asyncio.sleep(30)
+    # async def update_frequent_data(self) -> None:
+    #     """Update frequent data"""
+    #     self._logger.info("Update frequent data")
+    #     self._data.request_update_frequent_data()
+    #     self._logger.info("Schedule next frequent update in 30 seconds")
+    #     await asyncio.sleep(30)

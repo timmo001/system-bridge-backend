@@ -8,8 +8,6 @@ from typing import NamedTuple
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Disk as DatabaseModel
 
 from .base import ModuleUpdateBase
 
@@ -114,7 +112,7 @@ class DiskUpdate(ModuleUpdateBase):
                         ),
                     )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[

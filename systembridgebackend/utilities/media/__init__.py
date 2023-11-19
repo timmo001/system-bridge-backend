@@ -8,6 +8,7 @@ import platform
 import re
 import tempfile
 from collections.abc import Callable
+from dataclasses import asdict
 from datetime import datetime
 from typing import cast
 from urllib.parse import urlencode
@@ -19,7 +20,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 from mutagen._file import File as MutagenFile
 from plyer import storagepath
-from systembridgemodels.media_files import File as MediaFile
+from systembridgemodels.media_files import MediaFile
 from systembridgemodels.media_play import MediaPlay
 from systembridgeshared.const import (
     QUERY_API_KEY,
@@ -511,9 +512,9 @@ async def play_media(
         "player_url": f"""{request_scheme}://{request_host}/app/player/{query_type}.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
-                    **media_play.dict(exclude_none=True),
+                    **asdict(media_play),
                 })}""",
-        **media_play.dict(exclude_none=True),
+        **asdict(media_play),
     }
 
 

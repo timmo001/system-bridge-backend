@@ -5,12 +5,11 @@ import asyncio
 import datetime
 import platform
 from collections.abc import Awaitable, Callable
+from dataclasses import asdict
 
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Media as DatabaseModel
 from winsdk.windows.foundation import (  # pylint: disable=import-error
     EventRegistrationToken,
 )
@@ -20,11 +19,11 @@ class Media(Base):
     """Media"""
 
     def __init__(
-        self, database: Database, changed_callback: Callable[[str], Awaitable[None]]
+        self,
+        changed_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Initialize"""
         super().__init__()
-        self._database = database
         self._changed_callback = changed_callback
 
         self.sessions: None | (
@@ -80,7 +79,7 @@ class Media(Base):
             await self._changed_callback("media")
             return
 
-        for key, value in media_info.dict().items():
+        for key, value in asdict(media_info).items():
             self._database.update_data(
                 DatabaseModel,
                 DatabaseModel(

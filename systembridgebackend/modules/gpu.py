@@ -7,10 +7,6 @@ from json import dumps
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import GPU as DatabaseModel
-from systembridgeshared.models.database_data_sensors import (
-    Sensors as SensorsDatabaseModel,
-)
 
 from .base import ModuleUpdateBase
 
@@ -405,7 +401,7 @@ class GPUUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         gpu_list = []
         gpus = self._gpu.get_gpus(self._database)

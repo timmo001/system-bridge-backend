@@ -15,8 +15,7 @@ from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import System as DatabaseModel
+from systembridgemodels.system import System
 
 from .._version import __version__
 from .base import ModuleUpdateBase
@@ -25,19 +24,26 @@ from .base import ModuleUpdateBase
 class SystemUpdate(ModuleUpdateBase):
     """System Update"""
 
-    def _active_user_id(self) -> int:
+    def __init__(self) -> None:
+        """Initialize"""
+        super().__init__()
+        self._mac_address: str | None = None
+        self._version: str = __version__.public()
+        self._version_latest: str | None = None
+
+    async def _get_active_user_id(self) -> int:
         """Get active user ID"""
         return os.getpid()
 
-    def _active_user_name(self) -> str:
+    async def _get_active_user_name(self) -> str:
         """Get active user"""
         return os.getlogin()
 
-    def _boot_time(self) -> float:
+    async def _get_boot_time(self) -> float:
         """Get boot time"""
         return boot_time()
 
-    def _camera_usage(self) -> list[str]:
+    async def _get_camera_usage(self) -> list[str]:
         """Returns a list of apps that are currently using the webcam."""
         active_apps = []
         if sys.platform == "win32":
@@ -90,15 +96,15 @@ class SystemUpdate(ModuleUpdateBase):
             pass
         return active_apps
 
-    def _fqdn(self) -> str:
+    async def _get_fqdn(self) -> str:
         """Get FQDN"""
         return socket.getfqdn()
 
-    def _hostname(self) -> str:
+    async def _get_hostname(self) -> str:
         """Get hostname"""
         return socket.gethostname()
 
-    def _ip_address_4(self) -> str:
+    async def _get_ip_address_4(self) -> str:
         """Get IPv4 address"""
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -107,7 +113,7 @@ class SystemUpdate(ModuleUpdateBase):
         except OSError:
             return ""
 
-    def _ip_address_6(self) -> str:
+    async def _get_ip_address_6(self) -> str:
         """Get IPv6 address"""
         try:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
@@ -116,12 +122,13 @@ class SystemUpdate(ModuleUpdateBase):
         except OSError:
             return ""
 
-    def _mac_address(self) -> str:
+    async def _get_mac_address(self) -> str:
         """Get MAC address"""
         # pylint: disable=consider-using-f-string
-        return ":".join(re.findall("..", "%012x" % uuid.getnode()))
+        self._mac_address = ":".join(re.findall("..", "%012x" % uuid.getnode()))
+        return self._mac_address
 
-    def _pending_reboot(self) -> bool:
+    async def _get_pending_reboot(self) -> bool:
         """Check if there is a pending reboot"""
         if sys.platform == "win32":
             # Read from registry for pending reboot
@@ -186,31 +193,28 @@ class SystemUpdate(ModuleUpdateBase):
                 return True
         return False
 
-    def _platform(self) -> str:
+    async def _get_platform(self) -> str:
         """Get platform"""
         return platform.system()
 
-    def _platform_version(self) -> str:
+    async def _get_platform_version(self) -> str:
         """Get platform version"""
         return platform.version()
 
-    def _uptime(self) -> float:
+    async def _get_uptime(self) -> float:
         """Get uptime"""
         return os.times().system
 
-    def _users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
+    async def _get_users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
         """Get users"""
         return users()
 
-    def _uuid(self) -> str:
+    @property
+    async def _uuid(self) -> str | None:
         """Get UUID"""
-        return uniqueid.id or self._mac_address()
+        return uniqueid.id or self._mac_address
 
-    def _version(self) -> str:
-        """Get version"""
-        return __version__.public()
-
-    async def _version_latest(self) -> Any | None:
+    async def _get_version_latest(self) -> Any | None:
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
 
@@ -228,47 +232,40 @@ class SystemUpdate(ModuleUpdateBase):
 
         return None
 
-    def _version_newer_available(
-        self,
-        database: Database,
-    ) -> bool | None:
+    async def _get_version_newer_available(self) -> bool | None:
         """Check if newer version is available"""
-        version_record = database.get_data_item_by_key(DatabaseModel, "version")
-        if version_record is None:
-            return None
-        version = version_record.value
-        latest_version_record = database.get_data_item_by_key(
-            DatabaseModel, "version_latest"
-        )
-        if latest_version_record is None:
-            return None
-        latest_version = latest_version_record.value
-        if version is not None and latest_version is not None:
-            return parse_version(latest_version) > parse_version(version)
+        if self._version_latest is not None:
+            return parse_version(self._version_latest) > parse_version(self._version)
         return None
 
-    async def update_all_data(self) -> System:
+    async def _get_update_all_data(self) -> System:
         """Update data"""
         data = await asyncio.gather(
             *[
-                self._active_user_id(),
-                self._active_user_name(),
-                self._boot_time(),
-                self._camera_usage(),
-                self._fqdn(),
-                self._hostname(),
-                self._ip_address_4(),
-                self._ip_address_6(),
-                self._mac_address(),
-                self._pending_reboot(),
-                self._platform(),
-                self._platform_version(),
-                self._uptime(),
-                self._users(),
-                self._uuid(),
-                self._version(),
-                self._version_latest(),
+                self._get_active_user_id(),
+                self._get_active_user_name(),
+                self._get_boot_time(),
+                self._get_camera_usage(),
+                self._get_fqdn(),
+                self._get_hostname(),
+                self._get_ip_address_4(),
+                self._get_ip_address_6(),
+                self._get_mac_address(),
+                self._get_pending_reboot(),
+                self._get_platform(),
+                self._get_platform_version(),
+                self._get_uptime(),
+                self._get_users(),
+                self._get_version_latest(),
             ]
         )
-        # Run after other version updates
-        return await self._version_newer_available()
+
+        return System(
+            *[
+                *data,
+                self._uuid,
+                self._version,
+                # Run after other version updates
+                await self._get_version_newer_available(),
+            ]
+        )

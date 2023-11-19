@@ -4,8 +4,6 @@ import asyncio
 from psutil import net_connections, net_if_addrs, net_if_stats, net_io_counters
 from psutil._common import sconn, snetio, snicaddr, snicstats
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Network as DatabaseModel
 
 from .base import ModuleUpdateBase
 
@@ -66,7 +64,7 @@ class NetworkUpdate(ModuleUpdateBase):
                 ),
             )
 
-    async def update_all_data(self) -> None:
+    async def _update_all_data(self) -> None:
         """Update data"""
         await asyncio.gather(
             *[
