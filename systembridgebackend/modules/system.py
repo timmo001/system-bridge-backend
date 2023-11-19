@@ -287,7 +287,6 @@ class SystemUpdate(ModuleUpdateBase):
             uptime=uptime,
             users=[
                 SystemUser(
-                    id=user.id,
                     name=user.name,
                     terminal=user.terminal,
                     host=user.host,
