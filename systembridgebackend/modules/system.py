@@ -243,7 +243,6 @@ class SystemUpdate(ModuleUpdateBase):
         self._logger.debug("Update all data")
 
         (
-            active_user_id,
             active_user_name,
             boot_time_result,
             camera_usage,
@@ -259,7 +258,6 @@ class SystemUpdate(ModuleUpdateBase):
             version_latest,
         ) = await asyncio.gather(
             *[
-                self._get_active_user_id(),
                 self._get_active_user_name(),
                 self._get_boot_time(),
                 self._get_camera_usage(),
@@ -288,6 +286,7 @@ class SystemUpdate(ModuleUpdateBase):
             users=[
                 SystemUser(
                     name=user.name,
+                    active=user.name == active_user_name,
                     terminal=user.terminal,
                     host=user.host,
                     started=user.started,
@@ -297,8 +296,6 @@ class SystemUpdate(ModuleUpdateBase):
             ],
             uuid=self._uuid,
             version=self._version,
-            active_user_id=active_user_id,
-            active_user_name=active_user_name,
             camera_usage=camera_usage,
             ip_address_6=ip_address_6,
             pending_reboot=pending_reboot,
