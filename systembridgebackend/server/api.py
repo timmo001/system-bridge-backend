@@ -25,7 +25,6 @@ from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
 from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
 from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN, SECRET_TOKEN
-from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
@@ -67,8 +66,7 @@ from ..utilities.power import (
 from ..utilities.update import version_update
 from .websocket import WebSocketHandler
 
-database = Database()
-settings = Settings(database)
+settings = Settings()
 
 logger = logging.getLogger("systembridgebackend.server.api")
 
@@ -94,8 +92,7 @@ def security_token_header(
     token_header: str | None = Header(alias=HEADER_TOKEN, default=None),
 ):
     """Get Token from request."""
-    key = str(settings.get_secret(SECRET_TOKEN))
-    if token_header is not None and token_header == key:
+    if token_header is not None and token_header == settings.data.api.token:
         logger.info("Authorized with Token Header")
         return True
     return False
@@ -105,8 +102,7 @@ def security_token_query(
     token_query: str | None = Query(alias=QUERY_TOKEN, default=None),
 ):
     """Get Token from request."""
-    key = str(settings.get_secret(SECRET_TOKEN))
-    if token_query is not None and token_query == key:
+    if token_query is not None and token_query == settings.data.api.token:
         logger.info("Authorized with Token Query Parameter")
         return True
     return False
@@ -182,41 +178,42 @@ def get_api_root() -> dict[str, str]:
     }
 
 
-@app.get("/api/data/{module}", dependencies=[Depends(security_token)])
-def get_data(module: str) -> Any:
-    """Get data from module."""
-    table_module = TABLE_MAP.get(module)
-    if module not in MODULES or table_module is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            detail={"message": f"Data module {module} not found"},
-        )
-    # TODO: Replace
-    return database.get_data_dict(table_module)
+# TODO: Replace
+# @app.get("/api/data/{module}", dependencies=[Depends(security_token)])
+# def get_data(module: str) -> Any:
+#     """Get data from module."""
+#     # table_module = TABLE_MAP.get(module)
+#     # if module not in MODULES or table_module is None:
+#     #     raise HTTPException(
+#     #         status.HTTP_404_NOT_FOUND,
+#     #         detail={"message": f"Data module {module} not found"},
+#     #     )
+#     # return database.get_data_dict(table_module)
+#     return None
 
-
-@app.get("/api/data/{module}/{key}", dependencies=[Depends(security_token)])
-def get_data_by_key(
-    module: str,
-    key: str,
-) -> dict[str, Any]:
-    """Get data from module by key."""
-    table_module = TABLE_MAP.get(module)
-    if module not in MODULES or table_module is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            detail={"message": f"Data module {module} not found"},
-        )
-    data = database.get_data_item_by_key(table_module, key)
-    if data is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            detail={"message": f"Data item {key} in module {module} not found"},
-        )
-    return {
-        data.key: convert_string_to_correct_type(data.value),
-        "last_updated": data.timestamp,
-    }
+# TODO: Replace
+# @app.get("/api/data/{module}/{key}", dependencies=[Depends(security_token)])
+# def get_data_by_key(
+#     module: str,
+#     key: str,
+# ) -> dict[str, Any]:
+#     """Get data from module by key."""
+#     table_module = TABLE_MAP.get(module)
+#     if module not in MODULES or table_module is None:
+#         raise HTTPException(
+#             status.HTTP_404_NOT_FOUND,
+#             detail={"message": f"Data module {module} not found"},
+#         )
+#     data = database.get_data_item_by_key(table_module, key)
+#     if data is None:
+#         raise HTTPException(
+#             status.HTTP_404_NOT_FOUND,
+#             detail={"message": f"Data item {key} in module {module} not found"},
+#         )
+#     return {
+#         data.key: convert_string_to_correct_type(data.value),
+#         "last_updated": data.timestamp,
+#     }
 
 
 @app.post("/api/keyboard", dependencies=[Depends(security_token)])
@@ -627,7 +624,6 @@ async def websocket_endpoint(websocket: WebSocket):
     """Websocket endpoint."""
     await websocket.accept()
     websocket_handler = WebSocketHandler(
-        database,
         settings,
         app.listeners,
         websocket,

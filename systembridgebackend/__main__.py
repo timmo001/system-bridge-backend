@@ -3,7 +3,6 @@ import logging
 
 import typer
 from systembridgeshared.const import SETTING_LOG_LEVEL
-from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
@@ -11,10 +10,9 @@ from . import Application
 
 app = typer.Typer()
 
-database = Database()
-settings = Settings(database)
+settings = Settings()
 
-LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
+LOG_LEVEL = settings.data.log_level
 logger = setup_logger(LOG_LEVEL, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
@@ -29,7 +27,6 @@ def main(
     """Main Application"""
     try:
         Application(
-            database,
             settings,
             cli=cli,
             init=init,

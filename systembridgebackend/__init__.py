@@ -6,7 +6,6 @@ import sys
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_TOKEN, SETTING_AUTOSTART
-from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
 from ._version import __version__
@@ -21,7 +20,6 @@ class Application(Base):
 
     def __init__(
         self,
-        database: Database,
         settings: Settings,
         cli: bool = False,
         init: bool = False,
@@ -36,13 +34,10 @@ class Application(Base):
 
         self._logger.info("System Bridge %s: Startup", __version__.public())
 
-        self._logger.info(
-            "Your token is: %s",
-            str(settings.get_secret(SECRET_TOKEN)),
-        )
+        self._logger.info("Your token is: %s", settings.data.api.token)
 
         if not cli:
-            autostart = settings.get(SETTING_AUTOSTART)
+            autostart = settings.data.autostart
             self._logger.info("Autostart enabled: %s", autostart)
             if autostart:
                 autostart_enable()

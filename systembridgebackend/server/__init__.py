@@ -6,13 +6,13 @@ from json import loads
 
 import uvicorn
 from systembridgemodels.action import Action
+from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     SETTING_KEYBOARD_HOTKEYS,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
 )
-from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
 from ..data import DataUpdate
@@ -49,7 +49,6 @@ class Server(Base):
 
     def __init__(
         self,
-        database: Database,
         settings: Settings,
         listeners: Listeners,
         no_frontend: bool = False,
@@ -83,8 +82,8 @@ class Server(Base):
                 host="0.0.0.0",
                 loop="asyncio",
                 log_config=None,
-                log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
-                port=int(str(settings.get(SETTING_PORT_API))),
+                log_level=settings.data.log_level.lower(),
+                port=settings.data.api.port,
                 workers=4,
             ),
             exit_callback=self.exit_application,
@@ -200,7 +199,7 @@ class Server(Base):
     async def register_hotkeys(self) -> None:
         """Register hotkeys"""
         self._logger.info("Register hotkeys")
-        hotkeys = self._settings.get(SETTING_KEYBOARD_HOTKEYS)
+        hotkeys = self._settings.data.keyboard_hotkeys
         if hotkeys is not None and isinstance(hotkeys, list):
             self._logger.info("Found %s hotkeys", len(hotkeys))
             for item in hotkeys:
@@ -208,21 +207,20 @@ class Server(Base):
 
     def register_hotkey(
         self,
-        item: dict,
+        hotkey: SettingHotkey,
     ) -> None:
         """Register hotkey"""
-        hotkey = item["name"]
-        self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])
-        action = Action(**loads(item["value"]))
+        self._logger.info("Register hotkey: %s", hotkey)
 
         def hotkey_callback() -> None:
             """Hotkey callback"""
-            self._logger.info("Hotkey '%s' pressed", hotkey)
-            action_handler = ActionHandler(self._settings)
-            api_app.loop.create_task(action_handler.handle(action))
+            self._logger.info("Hotkey pressed: %s", hotkey)
+            # TODO: Implement action handler
+            # action_handler = ActionHandler(self._settings)
+            # api_app.loop.create_task(action_handler.handle(Action(hotkey.key))
 
         keyboard_hotkey_register(
-            hotkey,
+            hotkey.key,
             hotkey_callback,
         )
 

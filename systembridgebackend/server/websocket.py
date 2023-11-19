@@ -106,8 +106,7 @@ from systembridgeshared.const import (
     TYPE_UNREGISTER_DATA_LISTENER,
     TYPE_UPDATE_SETTING,
 )
-from systembridgeshared.database import TABLE_MAP, Database
-from systembridgeshared.settings import SECRET_TOKEN, Settings
+from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
 from ..modules import MODULES
@@ -141,7 +140,6 @@ class WebSocketHandler(Base):
 
     def __init__(
         self,
-        database: Database,
         settings: Settings,
         listeners: Listeners,
         websocket: WebSocket,
@@ -150,7 +148,6 @@ class WebSocketHandler(Base):
     ) -> None:
         """Initialise"""
         super().__init__()
-        self._database = database
         self._settings = settings
         self._listeners = listeners
         self._websocket = websocket
