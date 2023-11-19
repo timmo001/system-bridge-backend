@@ -31,8 +31,6 @@ from systembridgeshared.const import (
     QUERY_URL,
     QUERY_VOLUME,
     SECRET_TOKEN,
-    SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
-    SETTING_PORT_API,
 )
 from systembridgeshared.settings import Settings
 
@@ -212,15 +210,10 @@ def get_directories(settings: Settings) -> list[dict[str, str]]:
         },
     ]
 
-    additional_directories = settings.get(SETTING_ADDITIONAL_MEDIA_DIRECTORIES)
+    additional_directories = settings.data.media.directories
     if additional_directories is not None and isinstance(additional_directories, list):
         for directory in additional_directories:
-            directories.append(
-                {
-                    "key": directory["name"],
-                    "path": directory["value"],
-                }
-            )
+            directories.append(asdict(directory))
 
     return directories
 
@@ -360,8 +353,8 @@ async def play_media(
             )
 
         query_url = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                        QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
-                        QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                        QUERY_TOKEN: settings.data.api.token,
+                        QUERY_API_PORT: settings.data.api.port,
                         QUERY_BASE: query_base,
                         QUERY_PATH: query_path,
                     })}"""
@@ -412,9 +405,6 @@ async def play_media(
         }
     )
 
-    api_port = settings.get(SETTING_PORT_API)
-    token = settings.get_secret(SECRET_TOKEN)
-
     if query_type == "audio":
         if path is None:
             raise HTTPException(
@@ -461,8 +451,8 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
-                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_TOKEN: settings.data.api.token,
+                                                QUERY_API_PORT: settings.data.api.port,
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
@@ -483,8 +473,8 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
-                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_TOKEN: settings.data.api.token,
+                                                QUERY_API_PORT: settings.data.api.port,
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
@@ -510,8 +500,8 @@ async def play_media(
         "mime_type": mime_type,
         "path": path,
         "player_url": f"""{request_scheme}://{request_host}/app/player/{query_type}.html?{urlencode({
-                    QUERY_TOKEN: token,
-                    QUERY_API_PORT: api_port,
+                    QUERY_TOKEN: settings.data.api.token,
+                    QUERY_API_PORT: settings.data.api.port,
                     **asdict(media_play),
                 })}""",
         **asdict(media_play),
