@@ -3,6 +3,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any
 
+from systembridgemodels.sensors import Sensors
 from systembridgeshared.base import Base
 
 from .battery import BatteryUpdate
@@ -57,9 +58,14 @@ class Update(Base):
 
     async def _update(
         self,
+        sensors_data: Sensors,
         class_obj: dict,
     ) -> None:
         """Update"""
+        # If the class has a sensors attribute, set it
+        if class_obj["cls"].__dict__.get("sensors") is not None:
+            class_obj["cls"].sensors = sensors_data
+
         data = await class_obj["cls"].update_all_data()
         await self._updated_callback(
             class_obj["name"],
@@ -71,11 +77,11 @@ class Update(Base):
         self._logger.info("Update data")
 
         sensors_update = SensorsUpdate()
-        sensor_data = await sensors_update.update_all_data()
-        await self._updated_callback("sensors", sensor_data)
+        sensors_data = await sensors_update.update_all_data()
+        await self._updated_callback("sensors", sensors_data)
 
         # TODO: Update data in separate threads
-        tasks = [self._update(cls) for cls in self._classes]
+        tasks = [self._update(sensors_data, cls) for cls in self._classes]
         await asyncio.gather(*tasks)
 
         self._logger.info("Finished updating data")

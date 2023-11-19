@@ -15,12 +15,18 @@ from psutil import (
 )
 from psutil._common import pcputimes, scpufreq, scpustats
 from systembridgemodels.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
+from systembridgemodels.sensors import Sensors
 
 from .base import ModuleUpdateBase
 
 
 class CPUUpdate(ModuleUpdateBase):
     """CPU Update"""
+
+    def __init__(self) -> None:
+        """Initialize"""
+        super().__init__()
+        self.sensors: Sensors | None = None
 
     async def _get_count(self) -> int:
         """CPU count"""
@@ -43,12 +49,58 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_power_package(self) -> float | None:
         """CPU package power"""
-        # TODO: Find in sensor data
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "POWER" and name "PACKAGE"
+                if (
+                    "POWER" in sensor.type.upper()
+                    and "PACKAGE" in sensor.name.upper()
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU package power: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
         return None
 
     async def _get_power_per_cpu(self) -> list[tuple[int, float]] | None:
         """CPU package power"""
-        # TODO: Find in sensor data
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "POWER" and name "CORE"
+                if (
+                    "POWER" in sensor.type.upper()
+                    and "CORE" in sensor.name.upper()
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU core power: %s = %s", sensor.name, sensor.value
+                    )
+                    return [
+                        (int(sensor.name.split()[1]), sensor.value)
+                        for sensor in hardware.sensors
+                        if "POWER" in sensor.type.upper()
+                        and "CORE" in sensor.name.upper()
+                        and sensor.value is not None
+                    ]
         return None
 
     async def _get_stats(self) -> scpustats:
@@ -57,7 +109,28 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_temperature(self) -> float | None:
         """CPU temperature"""
-        # TODO: Find in sensor data
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find type "TEMPERATURE" and name "PACKAGE" or "AVERAGE"
+                if (
+                    "TEMPERATURE" in sensor.type.upper()
+                    and ("PACKAGE" in name or "AVERAGE" in name)
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU temperature: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
         return None
 
     async def _get_times(self) -> pcputimes:
@@ -92,15 +165,23 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_voltage(self) -> float | None:
         """CPU voltage"""
-        # TODO: Find in sensor data
-        # for item in database.get_data(SensorsDatabaseModel):
-        #     if (
-        #         item.hardware_type is not None
-        #         and "cpu" in item.hardware_type.lower()
-        #         and "voltage" in item.type.lower()
-        #     ):
-        #         self._logger.debug("Found CPU voltage: %s = %s", item.key, item.value)
-        #         return item.value
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "VOLTAGE"
+                if "VOLTAGE" in sensor.type.upper() and sensor.value is not None:
+                    self._logger.debug(
+                        "Found CPU voltage: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
         return None
 
     @override

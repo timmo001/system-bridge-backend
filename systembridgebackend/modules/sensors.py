@@ -5,9 +5,14 @@ import asyncio
 import json
 import subprocess
 import sys
-from typing import Any
 
 import psutil
+from systembridgemodels.sensors import (
+    Sensors,
+    SensorsWindows,
+    SensorsWindowsHardware,
+    SensorsWindowsSensor,
+)
 
 from .base import ModuleUpdateBase
 
@@ -64,13 +69,53 @@ class SensorsUpdate(ModuleUpdateBase):
             self._logger.error(error)
             return None
 
-    async def update_all_data(self) -> list[Any]:
+    async def update_all_data(self) -> Sensors:
         """Update data"""
-        data = await asyncio.gather(
+        fans, temperatures, windows_sensors = await asyncio.gather(
             *[
                 self._get_fans(),
                 self._get_temperatures(),
                 self._get_windows_sensors(),
             ]
         )
-        return data
+        return Sensors(
+            fans=fans,
+            temperatures=temperatures,
+            windows_sensors=SensorsWindows(
+                hardware=[
+                    SensorsWindowsHardware(
+                        id=hardware["id"],
+                        name=hardware["name"],
+                        type=hardware["type"],
+                        subhardware=[
+                            SensorsWindowsHardware(
+                                id=subhardware["id"],
+                                name=subhardware["name"],
+                                type=subhardware["type"],
+                                subhardware=[],
+                                sensors=[
+                                    SensorsWindowsSensor(
+                                        id=sensor["id"],
+                                        name=sensor["name"],
+                                        type=sensor["type"],
+                                        value=sensor["value"],
+                                    )
+                                    for sensor in subhardware["sensors"]
+                                ],
+                            )
+                            for subhardware in hardware["subhardware"]
+                        ],
+                        sensors=[
+                            SensorsWindowsSensor(
+                                id=sensor["id"],
+                                name=sensor["name"],
+                                type=sensor["type"],
+                                value=sensor["value"],
+                            )
+                            for sensor in hardware["sensors"]
+                        ],
+                    )
+                    for hardware in windows_sensors["hardware"]
+                ],
+            ),
+        )
