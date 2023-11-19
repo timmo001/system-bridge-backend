@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from json import dumps
+from typing import override
 
 from screeninfo import get_monitors
 from systembridgemodels.display import Display as DisplayModel
@@ -228,7 +229,8 @@ class DisplayUpdate(ModuleUpdateBase):
             ),
         )
 
-    async def _update_all_data(self) -> None:
+    @override
+    async def update_all_data(self) -> None:
         """Update data"""
         display_list = []
         displays = self._display.sensors_get_displays(self._database)

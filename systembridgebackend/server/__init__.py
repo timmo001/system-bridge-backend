@@ -223,8 +223,8 @@ class Server(Base):
         """Update data"""
         self._logger.info("Update data")
         api_app.data_update.request_update_data()
-        self._logger.info("Schedule next update in 2 minutes")
-        await asyncio.sleep(120)
+        self._logger.info("Schedule next update in 60 seconds")
+        await asyncio.sleep(60)
 
     # async def update_events_data(self) -> None:
     #     """Update events data"""

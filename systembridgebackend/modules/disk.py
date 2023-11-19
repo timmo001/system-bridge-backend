@@ -2,32 +2,37 @@
 from __future__ import annotations
 
 import asyncio
-from json import dumps
-from typing import NamedTuple
+from typing import override
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
-from psutil._common import sdiskio, sdiskpart
-from systembridgeshared.base import Base
+from psutil._common import sdiskio, sdiskpart, sdiskusage
+from systembridgemodels.disk import (
+    Disk,
+    DiskDevice,
+    DiskIOCounters,
+    DiskPartition,
+    DiskUsage,
+)
 
 from .base import ModuleUpdateBase
 
 
-class Disk(Base):
-    """Disk"""
+class DiskUpdate(ModuleUpdateBase):
+    """Disk Update"""
 
-    def io_counters(self) -> sdiskio | None:
+    async def _get_io_counters(self) -> sdiskio | None:
         """Disk IO counters"""
         return disk_io_counters()
 
-    def io_counters_per_disk(self) -> dict[str, sdiskio]:
+    async def _get_io_counters_per_disk(self) -> dict[str, sdiskio]:
         """Disk IO counters per disk"""
         return disk_io_counters(perdisk=True)
 
-    def partitions(self) -> list[sdiskpart]:
+    async def _get_partitions(self) -> list[sdiskpart]:
         """Disk partitions"""
         return disk_partitions(all=True)
 
-    def usage(self, path: str) -> NamedTuple | None:
+    async def _get_usage(self, path: str) -> sdiskusage | None:
         """Disk usage"""
         try:
             return disk_usage(path)
@@ -35,91 +40,71 @@ class Disk(Base):
             self._logger.error("PermissionError: %s", error)
             return None
 
-
-class DiskUpdate(ModuleUpdateBase):
-    """Disk Update"""
-
-    def __init__(self) -> None:
-        """Initialise"""
-        super().__init__()
-        self._disk = Disk()
-
-    async def update_io_counters(self) -> None:
-        """Update IO counters"""
-        if io_counters := self._disk.io_counters():
-            for key, value in io_counters._asdict().items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"io_counters_{key}",
-                        value=value,
-                    ),
-                )
-
-    async def update_io_counters_per_disk(self) -> None:
-        """Update IO counters per disk"""
-        for key, value in self._disk.io_counters_per_disk().items():  # type: ignore
-            for subkey, subvalue in value._asdict().items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"io_counters_per_disk_{key}_{subkey}",
-                        value=subvalue,
-                    ),
-                )
-
-    async def update_partitions(self) -> None:
-        """Update partitions"""
-        device_list = []
-        partition_list = []
-        for partition in self._disk.partitions():
-            if partition.device not in device_list:
-                device_list.append(partition.device)
-            partition_list.append(partition.mountpoint)
-            for key, value in partition._asdict().items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"partitions_{partition.mountpoint}_{key}",
-                        value=value,
-                    ),
-                )
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="devices",
-                value=dumps(device_list),
-            ),
-        )
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="partitions",
-                value=dumps(partition_list),
-            ),
-        )
-
-    async def update_usage(self) -> None:
-        """Update usage"""
-        for partition in self._disk.partitions():
-            if data := self._disk.usage(partition.mountpoint):
-                for key, value in data._asdict().items():
-                    self._database.update_data(
-                        DatabaseModel,
-                        DatabaseModel(
-                            key=f"usage_{partition.mountpoint}_{key}",
-                            value=value,
-                        ),
-                    )
-
-    async def _update_all_data(self) -> None:
-        """Update data"""
+    @override
+    async def update_all_data(self) -> Disk:
+        """Update all data"""
         self._logger.debug("Update all data")
-        await asyncio.gather(
-            *[
-                self.update_io_counters(),
-                self.update_io_counters_per_disk(),
-                self.update_partitions(),
-                self.update_usage(),
-            ]
+
+        io_counters, io_counters_per_disk, partitions = await asyncio.gather(
+            self._get_io_counters(),
+            self._get_io_counters_per_disk(),
+            self._get_partitions(),
+        )
+
+        devices: list[DiskDevice] = []
+        for partition in partitions:
+            usage = await self._get_usage(partition.mountpoint)
+            disk_partition = DiskPartition(
+                device=partition.device,
+                mount_point=partition.mountpoint,
+                filesystem_type=partition.fstype,
+                options=partition.opts,
+                max_file_size=partition.maxfile,
+                max_path_length=partition.maxpath,
+                usage=DiskUsage(
+                    free=usage.free,
+                    total=usage.total,
+                    used=usage.used,
+                    percent=usage.percent,
+                )
+                if usage
+                else None,
+            )
+
+            if partition.device not in devices:
+                io_counters_item = io_counters_per_disk.get(partition.device)
+                devices.append(
+                    DiskDevice(
+                        name=partition.device,
+                        partitions=[disk_partition],
+                        io_counters=DiskIOCounters(
+                            read_count=io_counters_item.read_count,
+                            write_count=io_counters_item.write_count,
+                            read_bytes=io_counters_item.read_bytes,
+                            write_bytes=io_counters_item.write_bytes,
+                            read_time=io_counters_item.read_time,
+                            write_time=io_counters_item.write_time,
+                        )
+                        if io_counters_item
+                        else None,
+                    )
+                )
+            else:
+                for device in devices:
+                    if device.name == partition.device:
+                        device.partitions.append(disk_partition)
+                        break
+
+        return Disk(
+            devices=devices,
+            io_counters=DiskIOCounters(
+                read_count=io_counters.read_count,
+                write_count=io_counters.write_count,
+                read_bytes=io_counters.read_bytes,
+                write_bytes=io_counters.write_bytes,
+                read_time=io_counters.read_time,
+                write_time=io_counters.write_time,
+            )
+            if io_counters
+            else None,
         )

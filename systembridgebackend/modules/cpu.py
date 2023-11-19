@@ -14,7 +14,7 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-from systembridgemodels.cpu import CPU
+from systembridgemodels.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
 
 from .base import ModuleUpdateBase
 
@@ -146,30 +146,64 @@ class CPUUpdate(ModuleUpdateBase):
 
         return CPU(
             count=count,
-            frequency_current=frequency.current,
-            frequency_min=frequency.min,
-            frequency_max=frequency.max,
-            # frequency_per_cpu=frequency_per_cpu,
+            frequency=CPUFrequency(
+                current=frequency.current,
+                min=frequency.min,
+                max=frequency.max,
+            ),
+            frequency_per_cpu=[
+                CPUFrequency(
+                    current=item.current,
+                    min=item.min,
+                    max=item.max,
+                )
+                for item in frequency_per_cpu
+            ],
             load_average=load_average,
             power_package=power_package,
-            # power_per_cpu=power_per_cpu,
-            stats_ctx_switches=stats.ctx_switches,
-            stats_interrupts=stats.interrupts,
-            stats_soft_interrupts=stats.soft_interrupts,
-            stats_syscalls=stats.syscalls,
+            power_per_cpu=power_per_cpu,
+            stats=CPUStats(
+                ctx_switches=stats.ctx_switches,
+                interrupts=stats.interrupts,
+                soft_interrupts=stats.soft_interrupts,
+                syscalls=stats.syscalls,
+            ),
             temperature=temperature,
-            times_user=times.user,
-            times_system=times.system,
-            times_idle=times.idle,
-            times_interrupt=times.interrupt,
-            times_dpc=times.dpc,
-            times_percent_user=times_percent.user,
-            times_percent_system=times_percent.system,
-            times_percent_idle=times_percent.idle,
-            times_percent_interrupt=times_percent.interrupt,
-            times_percent_dpc=times_percent.dpc,
-            # times_per_cpu=times_per_cpu,
+            times=CPUTimes(
+                user=times.user,
+                system=times.system,
+                idle=times.idle,
+                interrupt=times.interrupt,
+                dpc=times.dpc,
+            ),
+            times_per_cpu=[
+                CPUTimes(
+                    user=item.user,
+                    system=item.system,
+                    idle=item.idle,
+                    interrupt=item.interrupt,
+                    dpc=item.dpc,
+                )
+                for item in times_per_cpu
+            ],
+            times_percent=CPUTimes(
+                user=times_percent.user,
+                system=times_percent.system,
+                idle=times_percent.idle,
+                interrupt=times_percent.interrupt,
+                dpc=times_percent.dpc,
+            ),
+            times_percent_per_cpu=[
+                CPUTimes(
+                    user=item.user,
+                    system=item.system,
+                    idle=item.idle,
+                    interrupt=item.interrupt,
+                    dpc=item.dpc,
+                )
+                for item in times_per_cpu_percent
+            ],
             usage=usage,
-            # usage_per_cpu=usage_per_cpu,
+            usage_per_cpu=usage_per_cpu,
             voltage=voltage,
         )

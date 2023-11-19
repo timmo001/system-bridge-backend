@@ -7,20 +7,20 @@ from systembridgeshared.base import Base
 
 from .battery import BatteryUpdate
 from .cpu import CPUUpdate
+from .disk import DiskUpdate
+from .sensors import SensorsUpdate
+from .system import SystemUpdate
 
-# from .disk import DiskUpdate
 # from .display import DisplayUpdate
 # from .gpu import GPUUpdate
 # from .memory import MemoryUpdate
 # from .network import NetworkUpdate
 # from .processes import ProcessesUpdate
-from .sensors import SensorsUpdate
-from .system import SystemUpdate
 
 MODULES = [
     "battery",
     "cpu",
-    # "disk",
+    "disk",
     # "display",
     # "gpu",
     # "media",
@@ -46,7 +46,7 @@ class Update(Base):
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate()},
             {"name": "cpu", "cls": CPUUpdate()},
-            # {"name": "disk", "cls": DiskUpdate()},
+            {"name": "disk", "cls": DiskUpdate()},
             # {"name": "display", "cls": DisplayUpdate()},
             # {"name": "gpu", "cls": GPUUpdate()},
             # {"name": "memory", "cls": MemoryUpdate()},
