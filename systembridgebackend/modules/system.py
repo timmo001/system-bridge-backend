@@ -8,14 +8,14 @@ import re
 import socket
 import sys
 import uuid
-from typing import Any
+from typing import Any, override
 
 import aiohttp
 from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgemodels.system import System
+from systembridgemodels.system import System, SystemUser
 
 from .._version import __version__
 from .base import ModuleUpdateBase
@@ -27,7 +27,7 @@ class SystemUpdate(ModuleUpdateBase):
     def __init__(self) -> None:
         """Initialise"""
         super().__init__()
-        self._mac_address: str | None = None
+        self._mac_address: str = self._get_mac_address()
         self._version: str = __version__.public()
         self._version_latest: str | None = None
 
@@ -122,11 +122,10 @@ class SystemUpdate(ModuleUpdateBase):
         except OSError:
             return ""
 
-    async def _get_mac_address(self) -> str:
+    def _get_mac_address(self) -> str:
         """Get MAC address"""
         # pylint: disable=consider-using-f-string
-        self._mac_address = ":".join(re.findall("..", "%012x" % uuid.getnode()))
-        return self._mac_address
+        return ":".join(re.findall("..", "%012x" % uuid.getnode()))
 
     async def _get_pending_reboot(self) -> bool:
         """Check if there is a pending reboot"""
@@ -210,7 +209,7 @@ class SystemUpdate(ModuleUpdateBase):
         return users()
 
     @property
-    async def _uuid(self) -> str | None:
+    def _uuid(self) -> str:
         """Get UUID"""
         return uniqueid.id or self._mac_address
 
@@ -238,9 +237,27 @@ class SystemUpdate(ModuleUpdateBase):
             return parse_version(self._version_latest) > parse_version(self._version)
         return None
 
-    async def _get_update_all_data(self) -> System:
-        """Update data"""
-        data = await asyncio.gather(
+    @override
+    async def update_all_data(self) -> System:
+        """Update all data"""
+        self._logger.debug("Update all data")
+
+        (
+            active_user_id,
+            active_user_name,
+            boot_time_result,
+            camera_usage,
+            fqdn,
+            hostname,
+            ip_address_4,
+            ip_address_6,
+            pending_reboot,
+            platform_result,
+            platform_version,
+            uptime,
+            users_result,
+            version_latest,
+        ) = await asyncio.gather(
             *[
                 self._get_active_user_id(),
                 self._get_active_user_name(),
@@ -250,7 +267,6 @@ class SystemUpdate(ModuleUpdateBase):
                 self._get_hostname(),
                 self._get_ip_address_4(),
                 self._get_ip_address_6(),
-                self._get_mac_address(),
                 self._get_pending_reboot(),
                 self._get_platform(),
                 self._get_platform_version(),
@@ -261,11 +277,32 @@ class SystemUpdate(ModuleUpdateBase):
         )
 
         return System(
-            *[
-                *data,
-                self._uuid,
-                self._version,
-                # Run after other version updates
-                await self._get_version_newer_available(),
-            ]
+            boot_time=boot_time_result,
+            fqdn=fqdn,
+            hostname=hostname,
+            ip_address_4=ip_address_4,
+            mac_address=self._mac_address,
+            platform_version=platform_version,
+            platform=platform_result,
+            uptime=uptime,
+            users=[
+                SystemUser(
+                    id=user.id,
+                    name=user.name,
+                    terminal=user.terminal,
+                    host=user.host,
+                    started=user.started,
+                    pid=user.pid,
+                )
+                for user in users_result
+            ],
+            uuid=self._uuid,
+            version=self._version,
+            active_user_id=active_user_id,
+            active_user_name=active_user_name,
+            camera_usage=camera_usage,
+            ip_address_6=ip_address_6,
+            pending_reboot=pending_reboot,
+            version_latest=version_latest,
+            version_newer_available=await self._get_version_newer_available(),
         )

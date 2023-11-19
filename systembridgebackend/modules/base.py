@@ -12,4 +12,6 @@ class ModuleUpdateBase(Base):
 
     async def update_all_data(self) -> Any:
         """Update data"""
-        raise NotImplementedError()
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not implement update_all_data"
+        )
