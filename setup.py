@@ -29,6 +29,7 @@ setup(
     url="https://github.com/timmo001/system-bridge-backend",
     packages=find_packages(exclude=["tests", "generator"]),
     package_data={"": package_data},
+    python_requires=">=3.11.0",
     install_requires=requirements,
     setup_requires=requirements_setup,
     use_incremental=True,
