@@ -41,7 +41,7 @@ class Update(Base):
     ) -> None:
         """Initialise"""
         super().__init__()
-        self.updated_callback = updated_callback
+        self._updated_callback = updated_callback
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate()},
@@ -60,10 +60,10 @@ class Update(Base):
         class_obj: dict,
     ) -> None:
         """Update"""
-        await class_obj["cls"].update_all_data()
-        await self.updated_callback(
+        data = await class_obj["cls"].update_all_data()
+        await self._updated_callback(
             class_obj["name"],
-            class_obj["cls"].data,
+            data,
         )
 
     async def update_data(self) -> None:

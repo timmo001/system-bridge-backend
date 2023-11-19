@@ -19,8 +19,7 @@ class UpdateThread(Thread):
     ) -> None:
         """Initialise"""
         super().__init__()
-        self._updated_callback = updated_callback
-        self._update = Update(self._updated_callback)
+        self._update = Update(updated_callback)
 
     def run(self) -> None:
         """Run"""
