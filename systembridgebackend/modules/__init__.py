@@ -14,8 +14,8 @@ from .cpu import CPUUpdate
 # from .memory import MemoryUpdate
 # from .network import NetworkUpdate
 # from .processes import ProcessesUpdate
-# from .sensors import SensorsUpdate
-# from .system import SystemUpdate
+from .sensors import SensorsUpdate
+from .system import SystemUpdate
 
 MODULES = [
     "battery",
@@ -27,8 +27,8 @@ MODULES = [
     # "memory",
     # "network",
     # "processes",
-    # "sensors",
-    # "system",
+    "sensors",
+    "system",
 ]
 
 
@@ -52,7 +52,7 @@ class Update(Base):
             # {"name": "memory", "cls": MemoryUpdate()},
             # {"name": "network", "cls": NetworkUpdate()},
             # {"name": "processes", "cls": ProcessesUpdate()},
-            # {"name": "system", "cls": SystemUpdate()},
+            {"name": "system", "cls": SystemUpdate()},
         ]
 
     async def _update(
@@ -70,9 +70,9 @@ class Update(Base):
         """Update Data"""
         self._logger.info("Update data")
 
-        # sensors_update = SensorsUpdate()
-        # sensor_data = await sensors_update.update_all_data()
-        # await self.updated_callback("sensors", sensor_data)
+        sensors_update = SensorsUpdate()
+        sensor_data = await sensors_update.update_all_data()
+        await self._updated_callback("sensors", sensor_data)
 
         tasks = [self._update(cls) for cls in self._classes]
         await asyncio.gather(*tasks)
