@@ -3,7 +3,7 @@ from typing import Any
 
 from systembridgemodels.action import Action
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.const import SECRET_TOKEN, SETTING_PORT_API
 from systembridgeshared.exceptions import (
     AuthenticationException,
     ConnectionErrorException,
@@ -42,15 +42,15 @@ class ActionHandler(Base):
         self._logger.info("API Action: %s", data)
 
         api_port = self._settings.get(SETTING_PORT_API)
-        api_key = self._settings.get_secret(SECRET_API_KEY)
-        if api_port is None or api_key is None:
+        token = self._settings.get_secret(SECRET_TOKEN)
+        if api_port is None or token is None:
             self._logger.warning("API not configured")
             return
 
         http_client = HTTPClient(
             "localhost",
             int(str(api_port)),
-            str(api_key),
+            str(token),
         )
         method = str(data["method"]).upper()
         try:

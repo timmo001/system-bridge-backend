@@ -24,7 +24,7 @@ from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
 from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
-from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
+from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN, SECRET_TOKEN
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.settings import Settings
 
@@ -90,39 +90,39 @@ def callback_media_play(
     )
 
 
-def security_api_key_header(
-    api_key_header: str | None = Header(alias=HEADER_API_KEY, default=None),
+def security_token_header(
+    token_header: str | None = Header(alias=HEADER_TOKEN, default=None),
 ):
-    """Get API key from request."""
-    key = str(settings.get_secret(SECRET_API_KEY))
-    if api_key_header is not None and api_key_header == key:
-        logger.info("Authorized with API Key Header")
+    """Get Token from request."""
+    key = str(settings.get_secret(SECRET_TOKEN))
+    if token_header is not None and token_header == key:
+        logger.info("Authorized with Token Header")
         return True
     return False
 
 
-def security_api_key_query(
-    api_key_query: str | None = Query(alias=QUERY_API_KEY, default=None),
+def security_token_query(
+    token_query: str | None = Query(alias=QUERY_TOKEN, default=None),
 ):
-    """Get API key from request."""
-    key = str(settings.get_secret(SECRET_API_KEY))
-    if api_key_query is not None and api_key_query == key:
-        logger.info("Authorized with API Key Query Parameter")
+    """Get Token from request."""
+    key = str(settings.get_secret(SECRET_TOKEN))
+    if token_query is not None and token_query == key:
+        logger.info("Authorized with Token Query Parameter")
         return True
     return False
 
 
-def security_api_key(
-    api_key_header_result: bool = Depends(security_api_key_header),
-    api_key_query_result: bool = Depends(security_api_key_query),
+def security_token(
+    token_header_result: bool = Depends(security_token_header),
+    token_query_result: bool = Depends(security_token_query),
 ):
-    """Get API key from request."""
-    logger.info("API Key Header Result: %s", api_key_header_result)
-    logger.info("API Key Query Result: %s", api_key_query_result)
-    if not (api_key_header_result or api_key_query_result):
+    """Get Token from request."""
+    logger.info("Token Header Result: %s", token_header_result)
+    logger.info("Token Query Result: %s", token_query_result)
+    if not (token_header_result or token_query_result):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API Key",
+            detail="Invalid Token",
         )
 
 
@@ -173,7 +173,7 @@ def get_root() -> dict[str, str]:
     }
 
 
-@app.get("/api", dependencies=[Depends(security_api_key)])
+@app.get("/api", dependencies=[Depends(security_token)])
 def get_api_root() -> dict[str, str]:
     """Get API root."""
     return {
@@ -182,7 +182,7 @@ def get_api_root() -> dict[str, str]:
     }
 
 
-@app.get("/api/data/{module}", dependencies=[Depends(security_api_key)])
+@app.get("/api/data/{module}", dependencies=[Depends(security_token)])
 def get_data(module: str) -> Any:
     """Get data from module."""
     table_module = TABLE_MAP.get(module)
@@ -195,7 +195,7 @@ def get_data(module: str) -> Any:
     return database.get_data_dict(table_module)
 
 
-@app.get("/api/data/{module}/{key}", dependencies=[Depends(security_api_key)])
+@app.get("/api/data/{module}/{key}", dependencies=[Depends(security_token)])
 def get_data_by_key(
     module: str,
     key: str,
@@ -219,7 +219,7 @@ def get_data_by_key(
     }
 
 
-@app.post("/api/keyboard", dependencies=[Depends(security_api_key)])
+@app.post("/api/keyboard", dependencies=[Depends(security_token)])
 def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str, str]:
     """Send keyboard event."""
     if isinstance(keyboard_event, KeyboardKey):
@@ -242,7 +242,7 @@ def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str,
     raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid keyboard event")
 
 
-@app.post("/api/media/control", dependencies=[Depends(security_api_key)])
+@app.post("/api/media/control", dependencies=[Depends(security_token)])
 async def send_media_control(
     data: MediaControl,
 ) -> dict[str, str]:
@@ -305,7 +305,7 @@ async def send_media_control(
     }
 
 
-@app.get("/api/media", dependencies=[Depends(security_api_key)])
+@app.get("/api/media", dependencies=[Depends(security_token)])
 def get_media_directories() -> dict[str, list[dict[str, str]]]:
     """Get media directories."""
     return {
@@ -313,7 +313,7 @@ def get_media_directories() -> dict[str, list[dict[str, str]]]:
     }
 
 
-@app.get("/api/media/files", dependencies=[Depends(security_api_key)])
+@app.get("/api/media/files", dependencies=[Depends(security_token)])
 def get_media_files(
     query_base: str = Query(..., alias="base"),
     query_path: str | None = Query(None, alias="path"),
@@ -358,7 +358,7 @@ def get_media_files(
     )
 
 
-@app.get("/api/media/file", dependencies=[Depends(security_api_key)])
+@app.get("/api/media/file", dependencies=[Depends(security_token)])
 def get_media_file(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
@@ -405,7 +405,7 @@ def get_media_file(
     return file
 
 
-@app.get("/api/media/file/data", dependencies=[Depends(security_api_key)])
+@app.get("/api/media/file/data", dependencies=[Depends(security_token)])
 def get_media_file_data(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
@@ -447,7 +447,7 @@ def get_media_file_data(
     return get_file_data(path)
 
 
-@app.post("/api/media/file/write", dependencies=[Depends(security_api_key)])
+@app.post("/api/media/file/write", dependencies=[Depends(security_token)])
 async def send_media_file(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
@@ -492,7 +492,7 @@ async def send_media_file(
     }
 
 
-@app.post("/api/media/play", dependencies=[Depends(security_api_key)])
+@app.post("/api/media/play", dependencies=[Depends(security_token)])
 async def send_media_play(
     request: Request,
     query_autoplay: bool | None = Query(False, alias="autoplay"),
@@ -517,7 +517,7 @@ async def send_media_play(
     )
 
 
-@app.post("/api/notification", dependencies=[Depends(security_api_key)])
+@app.post("/api/notification", dependencies=[Depends(security_token)])
 def send_notification(notification: Notification) -> dict[str, str]:
     """Send notification."""
     app.callback_open_gui(
@@ -527,7 +527,7 @@ def send_notification(notification: Notification) -> dict[str, str]:
     return {"message": "Notification sent"}
 
 
-@app.post("/api/open", dependencies=[Depends(security_api_key)])
+@app.post("/api/open", dependencies=[Depends(security_token)])
 def send_open(open_model: OpenPath | OpenUrl) -> dict[str, str]:
     """Send notification."""
     if isinstance(open_model, OpenPath) and open_model.path is not None:
@@ -546,7 +546,7 @@ def send_open(open_model: OpenPath | OpenUrl) -> dict[str, str]:
     )
 
 
-@app.post("/api/power/sleep", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/sleep", dependencies=[Depends(security_token)])
 def send_power_sleep() -> dict[str, str]:
     """Send power sleep."""
     app.loop.create_task(
@@ -556,7 +556,7 @@ def send_power_sleep() -> dict[str, str]:
     return {"message": "Sleeping"}
 
 
-@app.post("/api/power/hibernate", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/hibernate", dependencies=[Depends(security_token)])
 def send_power_hibernate() -> dict[str, str]:
     """Send power hibernate."""
     app.loop.create_task(
@@ -566,7 +566,7 @@ def send_power_hibernate() -> dict[str, str]:
     return {"message": "Hibernating"}
 
 
-@app.post("/api/power/restart", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/restart", dependencies=[Depends(security_token)])
 def send_power_restart() -> dict[str, str]:
     """Send power restart."""
     app.loop.create_task(
@@ -576,7 +576,7 @@ def send_power_restart() -> dict[str, str]:
     return {"message": "Restarting"}
 
 
-@app.post("/api/power/shutdown", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/shutdown", dependencies=[Depends(security_token)])
 def send_power_shutdown() -> dict[str, str]:
     """Send power shutdown."""
     app.loop.create_task(
@@ -586,7 +586,7 @@ def send_power_shutdown() -> dict[str, str]:
     return {"message": "Shutting down"}
 
 
-@app.post("/api/power/lock", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/lock", dependencies=[Depends(security_token)])
 def send_power_lock() -> dict[str, str]:
     """Send power lock."""
     app.loop.create_task(
@@ -596,7 +596,7 @@ def send_power_lock() -> dict[str, str]:
     return {"message": "Locking"}
 
 
-@app.post("/api/power/logout", dependencies=[Depends(security_api_key)])
+@app.post("/api/power/logout", dependencies=[Depends(security_token)])
 def send_power_logout() -> dict[str, str]:
     """Send power logout."""
     app.loop.create_task(
@@ -606,7 +606,7 @@ def send_power_logout() -> dict[str, str]:
     return {"message": "Logging out"}
 
 
-@app.post("/api/update", dependencies=[Depends(security_api_key)])
+@app.post("/api/update", dependencies=[Depends(security_token)])
 def send_update(
     query_version: str = Query(..., alias="version")
 ) -> dict[str, dict[str, str | None] | str]:

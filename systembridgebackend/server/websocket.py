@@ -44,12 +44,12 @@ from systembridgeshared.const import (
     EVENT_VALUE,
     EVENT_VERSIONS,
     SETTING_AUTOSTART,
-    SUBTYPE_BAD_API_KEY,
     SUBTYPE_BAD_DIRECTORY,
     SUBTYPE_BAD_FILE,
     SUBTYPE_BAD_JSON,
     SUBTYPE_BAD_PATH,
     SUBTYPE_BAD_REQUEST,
+    SUBTYPE_BAD_TOKEN,
     SUBTYPE_INVALID_ACTION,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
@@ -107,7 +107,7 @@ from systembridgeshared.const import (
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import TABLE_MAP, Database
-from systembridgeshared.settings import SECRET_API_KEY, Settings
+from systembridgeshared.settings import SECRET_TOKEN, Settings
 from systembridgeshared.update import Update
 
 from ..modules import MODULES
@@ -1083,19 +1083,19 @@ class WebSocketHandler(Base):
 
             self._logger.info("Received: %s", request.event)
 
-            api_key = self._settings.get_secret(SECRET_API_KEY)
+            token = self._settings.get_secret(SECRET_TOKEN)
 
-            if request.api_key != api_key:
+            if request.token != token:
                 self._logger.warning(
                     "Invalid api-key: %s != %s",
-                    request.api_key,
-                    api_key,
+                    request.token,
+                    token,
                 )
                 await self._send_response(
                     Response(
                         id=request.id,
                         type=TYPE_ERROR,
-                        subtype=SUBTYPE_BAD_API_KEY,
+                        subtype=SUBTYPE_BAD_TOKEN,
                         data={EVENT_MESSAGE: "Invalid api-key"},
                     )
                 )

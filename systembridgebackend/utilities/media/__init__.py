@@ -23,14 +23,14 @@ from plyer import storagepath
 from systembridgemodels.media_files import MediaFile
 from systembridgemodels.media_play import MediaPlay
 from systembridgeshared.const import (
-    QUERY_API_KEY,
     QUERY_API_PORT,
     QUERY_AUTOPLAY,
     QUERY_BASE,
     QUERY_PATH,
+    QUERY_TOKEN,
     QUERY_URL,
     QUERY_VOLUME,
-    SECRET_API_KEY,
+    SECRET_TOKEN,
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_PORT_API,
 )
@@ -360,7 +360,7 @@ async def play_media(
             )
 
         query_url = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                        QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                        QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
                         QUERY_API_PORT: settings.get(SETTING_PORT_API),
                         QUERY_BASE: query_base,
                         QUERY_PATH: query_path,
@@ -413,7 +413,7 @@ async def play_media(
     )
 
     api_port = settings.get(SETTING_PORT_API)
-    api_key = settings.get_secret(SECRET_API_KEY)
+    token = settings.get_secret(SECRET_TOKEN)
 
     if query_type == "audio":
         if path is None:
@@ -461,7 +461,7 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                                                QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
                                                 QUERY_API_PORT: settings.get(SETTING_PORT_API),
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
@@ -483,7 +483,7 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                                                QUERY_TOKEN: settings.get_secret(SECRET_TOKEN),
                                                 QUERY_API_PORT: settings.get(SETTING_PORT_API),
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
@@ -510,7 +510,7 @@ async def play_media(
         "mime_type": mime_type,
         "path": path,
         "player_url": f"""{request_scheme}://{request_host}/app/player/{query_type}.html?{urlencode({
-                    QUERY_API_KEY: api_key,
+                    QUERY_TOKEN: token,
                     QUERY_API_PORT: api_port,
                     **asdict(media_play),
                 })}""",
