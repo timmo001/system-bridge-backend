@@ -200,7 +200,7 @@ class GPU(Base):
                 return item.value
         return None
 
-    def power(
+    def power_usage(
         self,
         database: Database,
         gpu_key: str,
@@ -382,7 +382,7 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update power"""
-        value = self._gpu.power(self._database, gpu_key)
+        value = self._gpu.power_usage(self._database, gpu_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(

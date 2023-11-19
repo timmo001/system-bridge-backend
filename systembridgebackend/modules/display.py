@@ -4,8 +4,8 @@ from __future__ import annotations
 import asyncio
 from json import dumps
 
-from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 from screeninfo import get_monitors
+from systembridgemodels.display import Display as DisplayModel
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
@@ -17,16 +17,6 @@ from systembridgeshared.models.database_data_sensors import (
 from .base import ModuleUpdateBase
 
 
-class DisplayModel(BaseModel):
-    """Display Model"""
-
-    name: str = Field(..., description="Display name")
-    pixel_clock: float | None = Field(None, description="Pixel clock")
-    refresh_rate: float | None = Field(None, description="Refresh rate")
-    resolution_horizontal: int = Field(..., description="Resolution horizontal")
-    resolution_vertical: int = Field(..., description="Resolution vertical")
-
-
 class Display(Base):
     """Display"""
 
@@ -35,14 +25,18 @@ class Display(Base):
         return [
             DisplayModel(
                 name=monitor.name if monitor.name is not None else str(key),
-                pixel_clock=None,
-                refresh_rate=None,
                 resolution_horizontal=monitor.width,
                 resolution_vertical=monitor.height,
+                x=monitor.x,
+                y=monitor.y,
+                width=monitor.width_mm,
+                height=monitor.height_mm,
+                is_primary=monitor.is_primary,
+                pixel_clock=None,
+                refresh_rate=None,
             )
             for key, monitor in enumerate(get_monitors())
         ]
-
     def sensors_get_displays(
         self,
         database: Database,
@@ -151,12 +145,9 @@ class Display(Base):
 class DisplayUpdate(ModuleUpdateBase):
     """Display Update"""
 
-    def __init__(
-        self,
-        database: Database,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__()
         self._display = Display()
 
     async def update_name(

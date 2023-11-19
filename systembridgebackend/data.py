@@ -72,7 +72,7 @@ class UpdateFrequentThread(Thread):
         super().__init__()
         self._database = database
         self._updated_callback = updated_callback
-        self._update = Update(self._database, self._updated_callback)
+        self._update = Update(self._updated_callback)
 
     def run(self) -> None:
         """Run"""

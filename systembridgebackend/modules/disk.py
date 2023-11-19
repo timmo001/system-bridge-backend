@@ -41,12 +41,9 @@ class Disk(Base):
 class DiskUpdate(ModuleUpdateBase):
     """Disk Update"""
 
-    def __init__(
-        self,
-        database: Database,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__()
         self._disk = Disk()
 
     async def update_io_counters(self) -> None:

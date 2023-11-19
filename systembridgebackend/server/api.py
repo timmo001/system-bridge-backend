@@ -11,13 +11,12 @@ from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from systembridgemodels.data import DataDict
+from systembridgemodels.data import Data
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import Action as MediaAction
 from systembridgemodels.media_control import MediaControl
-from systembridgemodels.media_files import File as MediaFile
-from systembridgemodels.media_files import MediaFiles
+from systembridgemodels.media_files import MediaFile, MediaFiles
 from systembridgemodels.media_play import MediaPlay
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
@@ -25,7 +24,6 @@ from systembridgemodels.open_url import OpenUrl
 from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
 from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
 from systembridgeshared.database import TABLE_MAP, Database
-from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
@@ -64,7 +62,6 @@ from ..utilities.power import (
     shutdown,
     sleep,
 )
-from ..utilities.remote_bridge import get_remote_bridges
 from ..utilities.update import version_update
 from .websocket import WebSocketHandler
 
@@ -601,77 +598,6 @@ def send_power_logout() -> dict[str, str]:
         name="Power Logout",
     )
     return {"message": "Logging out"}
-
-
-@app.delete("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def delete_remote(key: str) -> dict[str, dict | str]:
-    """Delete remote bridge."""
-    bridges: list[RemoteBridge] = get_remote_bridges(database)
-    remote_bridge: RemoteBridge | None = None
-
-    for bridge in bridges:
-        if bridge.key == key:
-            remote_bridge = bridge
-
-    if remote_bridge is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            {
-                "message": "Remote bridge not found",
-            },
-        )
-
-    database.delete_remote_bridge(remote_bridge.key)
-
-    return {
-        "message": "Deleted remote bridge",
-        "data": remote_bridge.dict(),
-    }
-
-
-@app.get("/api/remote", dependencies=[Depends(security_api_key)])
-def get_remote() -> dict[str, list[dict] | str]:
-    """Get remote bridges."""
-    return {
-        "message": "Got remote bridges",
-        "data": [bridge.dict() for bridge in get_remote_bridges(database)],
-    }
-
-
-@app.post("/api/remote", dependencies=[Depends(security_api_key)])
-def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
-    """Send remote bridge."""
-    database.update_remote_bridge(remote)
-    return {
-        "message": "Added remote bridge",
-        "data": remote.dict(),
-    }
-
-
-@app.put("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
-    """Update remote bridge."""
-    bridges: list[RemoteBridge] = get_remote_bridges(database)
-    remote_bridge: RemoteBridge | None = None
-
-    for bridge in bridges:
-        if bridge.key == key:
-            remote_bridge = bridge
-
-    if remote_bridge is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            {
-                "message": "Remote bridge not found",
-            },
-        )
-
-    database.update_remote_bridge(remote)
-
-    return {
-        "message": "Updated remote bridge",
-        "data": remote.dict(),
-    }
 
 
 @app.post("/api/update", dependencies=[Depends(security_api_key)])

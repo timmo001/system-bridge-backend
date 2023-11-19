@@ -9,7 +9,6 @@ import sys
 import psutil
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
-from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_sensors import Sensors as DatabaseModel
 
 from .base import ModuleUpdateBase
@@ -70,14 +69,6 @@ class Sensors(Base):
 
 class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update"""
-
-    def __init__(
-        self,
-        database: Database,
-    ) -> None:
-        """Initialize"""
-        super().__init__(database)
-        self._sensors = Sensors()
 
     async def update_fans(self) -> None:
         """Update Fan Sensors"""

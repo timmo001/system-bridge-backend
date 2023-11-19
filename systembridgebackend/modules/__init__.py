@@ -2,8 +2,8 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 
+from systembridgemodels.data import Data
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
 
 from .battery import BatteryUpdate
 from .cpu import CPUUpdate
@@ -36,26 +36,24 @@ class Update(Base):
 
     def __init__(
         self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
+        updated_callback: Callable[[str], Awaitable[Data]],
     ) -> None:
         """Initialize"""
         super().__init__()
-        self._database = database  # pylint: disable=duplicate-code
         self.updated_callback = updated_callback
 
         self._classes = [
-            {"name": "battery", "cls": BatteryUpdate(self._database)},
-            {"name": "disk", "cls": DiskUpdate(self._database)},
-            {"name": "system", "cls": SystemUpdate(self._database)},
+            {"name": "battery", "cls": BatteryUpdate()},
+            {"name": "disk", "cls": DiskUpdate()},
+            {"name": "system", "cls": SystemUpdate()},
         ]
         self._classes_frequent = [
-            {"name": "cpu", "cls": CPUUpdate(self._database)},
-            {"name": "display", "cls": DisplayUpdate(self._database)},
-            {"name": "gpu", "cls": GPUUpdate(self._database)},
-            {"name": "memory", "cls": MemoryUpdate(self._database)},
-            {"name": "network", "cls": NetworkUpdate(self._database)},
-            {"name": "processes", "cls": ProcessesUpdate(self._database)},
+            {"name": "cpu", "cls": CPUUpdate()},
+            {"name": "display", "cls": DisplayUpdate()},
+            {"name": "gpu", "cls": GPUUpdate()},
+            {"name": "memory", "cls": MemoryUpdate()},
+            {"name": "network", "cls": NetworkUpdate()},
+            {"name": "processes", "cls": ProcessesUpdate()},
         ]
 
     async def _update(
@@ -79,7 +77,7 @@ class Update(Base):
         """Update Data"""
         self._logger.info("Update frequent data")
 
-        sensors_update = SensorsUpdate(self._database)
+        sensors_update = SensorsUpdate()
         await sensors_update.update_all_data()
         await self.updated_callback("sensors")
 
@@ -87,3 +85,4 @@ class Update(Base):
         await asyncio.gather(*tasks)
 
         self._logger.info("Finished updating frequent data")
+        return data

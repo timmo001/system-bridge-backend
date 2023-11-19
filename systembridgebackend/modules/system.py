@@ -8,7 +8,6 @@ import re
 import socket
 import sys
 import uuid
-from json import dumps
 from typing import Any
 
 import aiohttp
@@ -16,7 +15,6 @@ from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import System as DatabaseModel
 
@@ -24,22 +22,22 @@ from .._version import __version__
 from .base import ModuleUpdateBase
 
 
-class System(Base):
-    """System"""
+class SystemUpdate(ModuleUpdateBase):
+    """System Update"""
 
-    def active_user_id(self) -> int:
+    def _active_user_id(self) -> int:
         """Get active user ID"""
         return os.getpid()
 
-    def active_user_name(self) -> str:
+    def _active_user_name(self) -> str:
         """Get active user"""
         return os.getlogin()
 
-    def boot_time(self) -> float:
+    def _boot_time(self) -> float:
         """Get boot time"""
         return boot_time()
 
-    def camera_usage(self) -> list[str]:
+    def _camera_usage(self) -> list[str]:
         """Returns a list of apps that are currently using the webcam."""
         active_apps = []
         if sys.platform == "win32":
@@ -92,15 +90,15 @@ class System(Base):
             pass
         return active_apps
 
-    def fqdn(self) -> str:
+    def _fqdn(self) -> str:
         """Get FQDN"""
         return socket.getfqdn()
 
-    def hostname(self) -> str:
+    def _hostname(self) -> str:
         """Get hostname"""
         return socket.gethostname()
 
-    def ip_address_4(self) -> str:
+    def _ip_address_4(self) -> str:
         """Get IPv4 address"""
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -109,7 +107,7 @@ class System(Base):
         except OSError:
             return ""
 
-    def ip_address_6(self) -> str:
+    def _ip_address_6(self) -> str:
         """Get IPv6 address"""
         try:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
@@ -118,12 +116,12 @@ class System(Base):
         except OSError:
             return ""
 
-    def mac_address(self) -> str:
+    def _mac_address(self) -> str:
         """Get MAC address"""
         # pylint: disable=consider-using-f-string
         return ":".join(re.findall("..", "%012x" % uuid.getnode()))
 
-    def pending_reboot(self) -> bool:
+    def _pending_reboot(self) -> bool:
         """Check if there is a pending reboot"""
         if sys.platform == "win32":
             # Read from registry for pending reboot
@@ -188,31 +186,31 @@ class System(Base):
                 return True
         return False
 
-    def platform(self) -> str:
+    def _platform(self) -> str:
         """Get platform"""
         return platform.system()
 
-    def platform_version(self) -> str:
+    def _platform_version(self) -> str:
         """Get platform version"""
         return platform.version()
 
-    def uptime(self) -> float:
+    def _uptime(self) -> float:
         """Get uptime"""
         return os.times().system
 
-    def users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
+    def _users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
         """Get users"""
         return users()
 
-    def uuid(self) -> str:
+    def _uuid(self) -> str:
         """Get UUID"""
-        return uniqueid.id or self.mac_address()
+        return uniqueid.id or self._mac_address()
 
-    def version(self) -> str:
+    def _version(self) -> str:
         """Get version"""
         return __version__.public()
 
-    async def version_latest(self) -> Any | None:
+    async def _version_latest(self) -> Any | None:
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
 
@@ -230,7 +228,7 @@ class System(Base):
 
         return None
 
-    def version_newer_available(
+    def _version_newer_available(
         self,
         database: Database,
     ) -> bool | None:
@@ -249,223 +247,28 @@ class System(Base):
             return parse_version(latest_version) > parse_version(version)
         return None
 
-
-class SystemUpdate(ModuleUpdateBase):
-    """System Update"""
-
-    def __init__(
-        self,
-        database: Database,
-    ) -> None:
-        """Initialize"""
-        super().__init__(database)
-        self._system = System()
-
-    async def update_active_user_id(self) -> None:
-        """Update active user ID"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="active_user_id",
-                value=str(self._system.active_user_id()),
-            ),
-        )
-
-    async def update_active_user_name(self) -> None:
-        """Update active user name"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="active_user_name",
-                value=self._system.active_user_name(),
-            ),
-        )
-
-    async def update_boot_time(self) -> None:
-        """Update boot time"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="boot_time",
-                value=str(self._system.boot_time()),
-            ),
-        )
-
-    async def update_camera_usage(self) -> None:
-        """Update camera usage"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="camera_usage",
-                value=dumps(self._system.camera_usage()),
-            ),
-        )
-
-    async def update_fqdn(self) -> None:
-        """Update FQDN"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="fqdn",
-                value=self._system.fqdn(),
-            ),
-        )
-
-    async def update_hostname(self) -> None:
-        """Update hostname"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="hostname",
-                value=self._system.hostname(),
-            ),
-        )
-
-    async def update_ip_address_4(self) -> None:
-        """Update IP address 4"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="ip_address_4",
-                value=self._system.ip_address_4(),
-            ),
-        )
-
-    async def update_ip_address_6(self) -> None:
-        """Update IP address 6"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="ip_address_6",
-                value=self._system.ip_address_6(),
-            ),
-        )
-
-    async def update_mac_address(self) -> None:
-        """Update MAC address"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="mac_address",
-                value=self._system.mac_address(),
-            ),
-        )
-
-    async def update_pending_reboot(self) -> None:
-        """Update pending reboot"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="pending_reboot",
-                value=str(self._system.pending_reboot()),
-            ),
-        )
-
-    async def update_platform(self) -> None:
-        """Update platform"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="platform",
-                value=self._system.platform(),
-            ),
-        )
-
-    async def update_platform_version(self) -> None:
-        """Update platform version"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="platform_version",
-                value=self._system.platform_version(),
-            ),
-        )
-
-    async def update_uptime(self) -> None:
-        """Update uptime"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="uptime",
-                value=str(self._system.uptime()),
-            ),
-        )
-
-    async def update_users(self) -> None:
-        """Update users"""
-        for user in self._system.users():
-            for key, value in user._asdict().items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"user_{user.name.replace(' ','_').lower()}_{key}",
-                        value=value,
-                    ),
-                )
-
-    async def update_uuid(self) -> None:
-        """Update UUID"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="uuid",
-                value=self._system.uuid(),
-            ),
-        )
-
-    async def update_version(self) -> None:
-        """Update version"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="version",
-                value=self._system.version(),
-            ),
-        )
-
-    async def update_version_latest(self) -> None:
-        """Update latest version"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="version_latest",
-                value=await self._system.version_latest(),
-            ),
-        )
-
-    async def update_version_newer_available(self) -> None:
-        """Update newer version available"""
-        value = self._system.version_newer_available(self._database)
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="version_newer_available",
-                value=str(value) if value else str(False),
-            ),
-        )
-
-    async def update_all_data(self) -> None:
+    async def update_all_data(self) -> System:
         """Update data"""
-        await asyncio.gather(
+        data = await asyncio.gather(
             *[
-                self.update_active_user_id(),
-                self.update_active_user_name(),
-                self.update_boot_time(),
-                self.update_camera_usage(),
-                self.update_fqdn(),
-                self.update_hostname(),
-                self.update_ip_address_4(),
-                self.update_ip_address_6(),
-                self.update_mac_address(),
-                self.update_pending_reboot(),
-                self.update_platform(),
-                self.update_platform_version(),
-                self.update_uptime(),
-                self.update_users(),
-                self.update_uuid(),
-                self.update_version(),
-                self.update_version_latest(),
+                self._active_user_id(),
+                self._active_user_name(),
+                self._boot_time(),
+                self._camera_usage(),
+                self._fqdn(),
+                self._hostname(),
+                self._ip_address_4(),
+                self._ip_address_6(),
+                self._mac_address(),
+                self._pending_reboot(),
+                self._platform(),
+                self._platform_version(),
+                self._uptime(),
+                self._users(),
+                self._uuid(),
+                self._version(),
+                self._version_latest(),
             ]
         )
         # Run after other version updates
-        await self.update_version_newer_available()
+        return await self._version_newer_available()

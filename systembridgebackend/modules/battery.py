@@ -7,7 +7,6 @@ import psutil
 from plyer import battery
 from systembridgeshared.base import Base
 from systembridgeshared.common import camel_to_snake
-from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Battery as DatabaseModel
 
 from .base import ModuleUpdateBase
@@ -33,15 +32,12 @@ class Battery(Base):
 class BatteryUpdate(ModuleUpdateBase):
     """Battery Update"""
 
-    def __init__(
-        self,
-        database: Database,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__()
         self._battery = Battery()
 
-    async def update_sensors(self) -> None:
+    async def _update_sensors(self) -> None:
         """Update Battery Sensors"""
         if data := self._battery.sensors():
             for key, value in data._asdict().items():
@@ -58,7 +54,7 @@ class BatteryUpdate(ModuleUpdateBase):
                     ),
                 )
 
-    async def update_status(self) -> None:
+    async def _update_status(self) -> None:
         """Update Battery Status"""
         if data := self._battery.status():
             for key, value in data.items():
@@ -74,7 +70,7 @@ class BatteryUpdate(ModuleUpdateBase):
         """Update data"""
         await asyncio.gather(
             *[
-                self.update_sensors(),
-                self.update_status(),
+                self._update_sensors(),
+                self._update_status(),
             ]
         )
