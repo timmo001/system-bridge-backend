@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import sys
 
 from systembridgeshared.base import Base
@@ -10,6 +9,7 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_AUTOSTART
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
+from ._version import __version__
 from .modules.listeners import Listeners
 from .modules.system import System
 from .server import Server
@@ -34,7 +34,7 @@ class Application(Base):
             self._logger.info("Initialized application. Exiting now.")
             sys.exit(0)
 
-        self._logger.info("System Bridge %s: Startup", System().version())
+        self._logger.info("System Bridge %s: Startup", __version__.public())
 
         self._logger.info(
             "Your api-key is: %s",
@@ -49,7 +49,7 @@ class Application(Base):
             else:
                 autostart_disable()
 
-        listeners = Listeners(database)
+        listeners = Listeners()
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
