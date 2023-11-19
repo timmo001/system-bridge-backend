@@ -1,6 +1,6 @@
 """System Bridge: MDNS/Zeroconf Advertisement"""
 from systembridgeshared.base import Base
-from systembridgeshared.settings import SETTING_PORT_API, Settings
+from systembridgeshared.settings import Settings
 from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
 from ..modules.system import System

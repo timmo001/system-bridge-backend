@@ -5,7 +5,6 @@ import asyncio
 import sys
 
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_TOKEN, SETTING_AUTOSTART
 from systembridgeshared.settings import Settings
 
 from ._version import __version__
@@ -50,7 +49,6 @@ class Application(Base):
         asyncio.set_event_loop(loop)
 
         self._server = Server(
-            database,
             settings,
             listeners,
             no_frontend=no_frontend,

@@ -2,17 +2,11 @@
 import asyncio
 import sys
 from collections.abc import Callable
-from json import loads
 
 import uvicorn
 from systembridgemodels.action import Action
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
-    SETTING_KEYBOARD_HOTKEYS,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
 from systembridgeshared.settings import Settings
 
 from ..data import DataUpdate
