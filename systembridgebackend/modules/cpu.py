@@ -36,11 +36,10 @@ class CPUUpdate(ModuleUpdateBase):
         """CPU frequency per CPU"""
         return cpu_freq(percpu=True)  # type: ignore
 
-    async def _get_load_average(
-        self,
-    ) -> tuple[float, float, float]:  # pylint: disable=unsubscriptable-object
+    async def _get_load_average(self) -> float:
         """Get load average"""
-        return getloadavg()
+        avg_tuple = getloadavg()
+        return sum([avg_tuple[0], avg_tuple[1], avg_tuple[2]]) / 3
 
     async def _get_power_package(self) -> float | None:
         """CPU package power"""
