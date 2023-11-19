@@ -63,7 +63,7 @@ class Update(Base):
     ) -> None:
         """Update"""
         # If the class has a sensors attribute, set it
-        if class_obj["cls"].__dict__.get("sensors") is not None:
+        if class_obj["cls"].__dict__.get("sensors", {}) != {}:
             class_obj["cls"].sensors = sensors_data
 
         data = await class_obj["cls"].update_all_data()
