@@ -1087,7 +1087,7 @@ class WebSocketHandler(Base):
 
             if request.token != token:
                 self._logger.warning(
-                    "Invalid api-key: %s != %s",
+                    "Invalid token: %s != %s",
                     request.token,
                     token,
                 )
@@ -1096,7 +1096,7 @@ class WebSocketHandler(Base):
                         id=request.id,
                         type=TYPE_ERROR,
                         subtype=SUBTYPE_BAD_TOKEN,
-                        data={EVENT_MESSAGE: "Invalid api-key"},
+                        data={EVENT_MESSAGE: "Invalid token"},
                     )
                 )
                 return

@@ -141,7 +141,7 @@ class API(FastAPI):
             allow_origins="*",
             allow_headers=[
                 "accept",
-                "api-key",
+                "token",
                 "content-type",
                 "origin",
             ],

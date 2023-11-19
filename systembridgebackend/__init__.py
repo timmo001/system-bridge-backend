@@ -37,7 +37,7 @@ class Application(Base):
         self._logger.info("System Bridge %s: Startup", __version__.public())
 
         self._logger.info(
-            "Your api-key is: %s",
+            "Your token is: %s",
             str(settings.get_secret(SECRET_TOKEN)),
         )
 
