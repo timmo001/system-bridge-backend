@@ -1,7 +1,7 @@
 """WebSocket Handler"""
 import os
 from collections.abc import Callable
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
 from json import JSONDecodeError
 from uuid import uuid4
 
@@ -130,13 +130,15 @@ class WebSocketHandler(Base):
         if module not in MODULES:
             self._logger.info("Data module %s not in registered modules", module)
             return
+        data_module = getattr(data, module)
+
         await self._send_response(
             Response(
                 id=str(uuid4()),
                 type=TYPE_DATA_UPDATE,
                 message="Data changed",
                 module=module,
-                data=asdict(getattr(data, module)),
+                data=asdict(data_module) if is_dataclass(data_module) else data_module,
             )
         )
 
