@@ -22,6 +22,7 @@ from .api import app as api_app
 # TODO: Launch backend and gui from package
 # TODO: Rework models and modules
 
+
 class APIServer(uvicorn.Server):
     """Customized uvicorn.Server
 
@@ -102,10 +103,10 @@ class Server(Base):
                     self.indefinite_func_wrapper(self.update_data),
                     name="Update data",
                 ),
-                # api_app.loop.create_task(
-                #     self.update_events_data(),
-                #     name="Update events data",
-                # ),
+                api_app.loop.create_task(
+                    self.update_media_data(),
+                    name="Update media data",
+                ),
             ]
         )
         # TODO: Implement GUI
@@ -226,10 +227,8 @@ class Server(Base):
         self._logger.info("Schedule next update in 60 seconds")
         await asyncio.sleep(60)
 
-    # TODO: Implement events
-    # TODO: Find other items that can be updated via events
-    # async def update_events_data(self) -> None:
-    #     """Update events data"""
-    #     self._logger.info("Update events data")
-    #     self._data.request_update_events_data()
-    #     asyncio.get_running_loop().run_forever()
+    async def update_media_data(self) -> None:
+        """Update media data"""
+        self._logger.info("Update media data")
+        api_app.data_update.request_update_media_data()
+        asyncio.get_running_loop().run_forever()

@@ -5,7 +5,6 @@ import asyncio
 import datetime
 import platform
 from collections.abc import Awaitable, Callable
-from dataclasses import asdict
 
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.media import Media as MediaInfo
@@ -20,7 +19,7 @@ class Media(Base):
 
     def __init__(
         self,
-        changed_callback: Callable[[str], Awaitable[None]],
+        changed_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
         """Initialise"""
         super().__init__()
@@ -74,21 +73,7 @@ class Media(Base):
     ) -> None:
         """Update data"""
         self._logger.info("Updating media data")
-        if media_info is None:
-            self._database.clear_table(DatabaseModel)
-            await self._changed_callback("media")
-            return
-
-        for key, value in asdict(media_info).items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=key,
-                    value=value,
-                ),
-            )
-
-        await self._changed_callback("media")
+        await self._changed_callback("media", media_info)
 
     async def update_media_info(self) -> None:
         """Update media info from the current session."""

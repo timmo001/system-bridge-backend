@@ -1,10 +1,12 @@
 """Data"""
 import asyncio
+import platform
 from collections.abc import Awaitable, Callable
 from threading import Thread
 from typing import Any
 
 from systembridgemodels.data import Data
+from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
 
 from .modules import Update
@@ -26,31 +28,31 @@ class UpdateThread(Thread):
         asyncio.run(self._update.update_data())
 
 
-# class UpdateEventsThread(Thread):
-#     """Update events thread"""
+class UpdateMediaThread(Thread):
+    """Update media thread"""
 
-#     def __init__(
-#         self,
-#         updated_callback: Callable[[str, Any], Awaitable[None]],
-#     ) -> None:
-#         """Initialise"""
-#         super().__init__()
+    def __init__(
+        self,
+        updated_callback: Callable[[str, MediaInfo], Awaitable[None]],
+    ) -> None:
+        """Initialise"""
+        super().__init__()
 
-#         if platform.system() != "Windows":
-#             return
+        if platform.system() != "Windows":
+            return
 
-#         from .modules.media import (  # pylint: disable=import-error, import-outside-toplevel
-#             Media,
-#         )
+        from .modules.media import (  # pylint: disable=import-error, import-outside-toplevel
+            Media,
+        )
 
-#         self._media = Media(updated_callback)
+        self._media = Media(updated_callback)
 
-#     def run(self) -> None:
-#         """Run"""
-#         if platform.system() != "Windows":
-#             return
+    def run(self) -> None:
+        """Run"""
+        if platform.system() != "Windows":
+            return
 
-#         asyncio.run(self._media.update_media_info())
+        asyncio.run(self._media.update_media_info())
 
 
 class DataUpdate(Base):
@@ -79,7 +81,7 @@ class DataUpdate(Base):
         thread = UpdateThread(self._data_updated_callback)
         thread.start()
 
-    # def request_update_events_data(self) -> None:
-    #     """Request update events data"""
-    #     thread = UpdateEventsThread(self._updated_callback)
-    #     thread.start()
+    def request_update_media_data(self) -> None:
+        """Request update media data"""
+        thread = UpdateMediaThread(self._data_updated_callback)
+        thread.start()
