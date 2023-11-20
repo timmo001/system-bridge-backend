@@ -41,6 +41,6 @@ class ProcessesUpdate(ModuleUpdateBase):
                 )
             items.append(model)
         # Sort by name
-        items = sorted(items, key=lambda item: item.name)
+        items = sorted(items, key=lambda item: item.name or "")
 
         return items
