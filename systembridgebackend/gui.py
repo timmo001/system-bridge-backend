@@ -71,9 +71,9 @@ class GUI(Base):
                 async with asyncio.timeout(20):
                     await websocket_client.connect()
                     await websocket_client.close()
-            except ConnectionErrorException:
+            except ConnectionErrorException as error:
                 self._logger.warning(
-                    "Could not connect to WebSocket. Retrying in 5 seconds"
+                    "Could not connect to WebSocket. Retrying in 5 seconds", exc_info=error
                 )
                 await asyncio.sleep(5)
                 await self._start(
@@ -83,9 +83,9 @@ class GUI(Base):
                     *args,
                 )
                 return
-            except asyncio.TimeoutError:
+            except asyncio.TimeoutError as error:
                 self._logger.warning(
-                    "Connection timeout to WebSocket. Retrying in 5 seconds"
+                    "Connection timeout to WebSocket. Retrying in 5 seconds", exc_info=error
                 )
                 await asyncio.sleep(5)
                 await self._start(

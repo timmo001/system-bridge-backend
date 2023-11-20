@@ -33,6 +33,8 @@ from systembridgeshared.const import (
     SUBTYPE_BAD_JSON,
     SUBTYPE_BAD_REQUEST,
     SUBTYPE_BAD_TOKEN,
+    SUBTYPE_LISTENER_ALREADY_REGISTERED,
+    SUBTYPE_LISTENER_NOT_REGISTERED,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_TEXT,
@@ -40,6 +42,8 @@ from systembridgeshared.const import (
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
     TYPE_DATA_GET,
+    TYPE_DATA_LISTENER_REGISTERED,
+    TYPE_DATA_LISTENER_UNREGISTERED,
     TYPE_DATA_UPDATE,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
@@ -48,6 +52,8 @@ from systembridgeshared.const import (
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_KEYBOARD_TEXT_SENT,
+    TYPE_REGISTER_DATA_LISTENER,
+    TYPE_UNREGISTER_DATA_LISTENER,
 )
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
@@ -146,7 +152,7 @@ class WebSocketHandler(Base):
                 model = UpdateModel(**data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.warning(message)
+                self._logger.warning(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id=request.id,
@@ -177,7 +183,7 @@ class WebSocketHandler(Base):
                 model = KeyboardKey(**data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.warning(message)
+                self._logger.warning(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id=request.id,
@@ -202,7 +208,7 @@ class WebSocketHandler(Base):
             try:
                 keyboard_keypress(model.key)
             except ValueError as err:
-                self._logger.warning(err.args[0])
+                self._logger.warning("ValueError", exc_info=err)
                 await self._send_response(
                     Response(
                         id=request.id,
@@ -228,7 +234,7 @@ class WebSocketHandler(Base):
                 model = KeyboardText(**data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.warning(message)
+                self._logger.warning(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id=request.id,
@@ -265,7 +271,7 @@ class WebSocketHandler(Base):
         #         model = MediaControl(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -374,7 +380,7 @@ class WebSocketHandler(Base):
         #         model = Notification(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -417,7 +423,7 @@ class WebSocketHandler(Base):
         #             model = OpenPath(**data)
         #         except ValueError as error:
         #             message = f"Invalid request: {error}"
-        #             self._logger.warning(message)
+        #             self._logger.warning(message, exc_info=error)
         #             await self._send_response(
         #                 Response(
         #                     **{
@@ -446,7 +452,7 @@ class WebSocketHandler(Base):
         #             model = OpenUrl(**data)
         #         except ValueError as error:
         #             message = f"Invalid request: {error}"
-        #             self._logger.warning(message)
+        #             self._logger.warning(message, exc_info=error)
         #             await self._send_response(
         #                 Response(
         #                     **{
@@ -482,102 +488,98 @@ class WebSocketHandler(Base):
         #             }
         #         )
         #     )
-        # elif request.event == TYPE_REGISTER_DATA_LISTENER:
-        #     try:
-        #         model = RegisterDataListener(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.modules is None or len(model.modules) == 0:
-        #         self._logger.warning("No modules provided")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
-        #                     EVENT_MESSAGE: "No modules provided",
-        #                 }
-        #             )
-        #         )
-        #         return
+        elif request.event == TYPE_REGISTER_DATA_LISTENER:
+            try:
+                model = RegisterDataListener(**data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        data={EVENT_MESSAGE: message},
+                    )
+                )
+                return
+            if model.modules is None or len(model.modules) == 0:
+                self._logger.warning("No modules provided")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_MISSING_MODULES,
+                        data={EVENT_MESSAGE: "No modules provided"},
+                    )
+                )
+                return
 
-        #     self._logger.info(
-        #         "Registering data listener: %s - %s",
-        #         listener_id,
-        #         model.modules,
-        #     )
+            self._logger.info(
+                "Registering data listener: %s - %s",
+                listener_id,
+                model.modules,
+            )
 
-        #     if await self._listeners.add_listener(
-        #         listener_id,
-        #         self._data_changed,
-        #         model.modules,
-        #     ):
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
-        #                     EVENT_MESSAGE: "Listener already registered with this connection",
-        #                     EVENT_MODULES: model.modules,
-        #                 }
-        #             )
-        #         )
-        #         return
+            if await self._listeners.add_listener(
+                listener_id,
+                self._data_changed,
+                model.modules,
+            ):
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_LISTENER_ALREADY_REGISTERED,
+                        data={
+                            EVENT_MESSAGE: "Listener already registered with this connection",
+                            EVENT_MODULES: model.modules,
+                        },
+                    )
+                )
+                return
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_DATA_LISTENER_REGISTERED,
-        #                 EVENT_MESSAGE: "Data listener registered",
-        #                 EVENT_MODULES: model.modules,
-        #             }
-        #         )
-        #     )
-        # elif request.event == TYPE_UNREGISTER_DATA_LISTENER:
-        #     self._logger.info("Unregistering data listener %s", listener_id)
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_DATA_LISTENER_REGISTERED,
+                    data={
+                        EVENT_MESSAGE: "Data listener registered",
+                        EVENT_MODULES: model.modules,
+                    },
+                )
+            )
+        elif request.event == TYPE_UNREGISTER_DATA_LISTENER:
+            self._logger.info("Unregistering data listener %s", listener_id)
 
-        #     if not self._listeners.remove_listener(listener_id):
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
-        #                     EVENT_MESSAGE: "Listener not registered with this connection",
-        #                 }
-        #             )
-        #         )
-        #         return
+            if not self._listeners.remove_listener(listener_id):
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_LISTENER_NOT_REGISTERED,
+                        data={
+                            EVENT_MESSAGE: "Listener not registered with this connection",
+                        },
+                    )
+                )
+                return
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_DATA_LISTENER_UNREGISTERED,
-        #                 EVENT_MESSAGE: "Data listener unregistered",
-        #             }
-        #         )
-        #     )
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_DATA_LISTENER_UNREGISTERED,
+                    data={
+                        EVENT_MESSAGE: "Data listener unregistered",
+                    },
+                )
+            )
         elif request.event == TYPE_GET_DATA:
             try:
                 model = GetData(modules=data[EVENT_DATA][EVENT_MODULES])
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.warning(message)
+                self._logger.warning(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id=request.id,
@@ -646,7 +648,7 @@ class WebSocketHandler(Base):
         #         model = MediaGetFiles(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -737,7 +739,7 @@ class WebSocketHandler(Base):
         #         model = MediaGetFile(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -836,7 +838,7 @@ class WebSocketHandler(Base):
         #         model = GetSetting(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -867,7 +869,7 @@ class WebSocketHandler(Base):
         #         model = UpdateSetting(**data)
         #     except ValueError as error:
         #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message)
+        #         self._logger.warning(message, exc_info=error)
         #         await self._send_response(
         #             Response(
         #                 **{
@@ -1008,7 +1010,7 @@ class WebSocketHandler(Base):
                 request = Request(**data)
             except JSONDecodeError as error:
                 message = f"Invalid JSON: {error}"
-                self._logger.error(message)
+                self._logger.error(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id="UNKNOWN",
@@ -1020,7 +1022,7 @@ class WebSocketHandler(Base):
                 return
             except ValueError as error:
                 message = f"Invalid request: {error}"
-                self._logger.error(message)
+                self._logger.error(message, exc_info=error)
                 await self._send_response(
                     Response(
                         id="UNKNOWN",
@@ -1056,7 +1058,7 @@ class WebSocketHandler(Base):
                     request,
                 )
             except Exception as error:  # pylint: disable=broad-except
-                self._logger.error(error)
+                self._logger.error(error, exc_info=error)
                 await self._send_response(
                     Response(
                         id=request.id,

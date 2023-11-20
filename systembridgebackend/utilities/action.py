@@ -72,7 +72,7 @@ class ActionHandler(Base):
                 )
             self._logger.warning("Unknown API method: %s", method)
             return None
-        except AuthenticationException as exception:
-            self._logger.warning("API authentication error: %s", exception)
-        except ConnectionErrorException as exception:
-            self._logger.warning("API connection error: %s", exception)
+        except AuthenticationException as error:
+            self._logger.warning("API authentication error", exc_info=error)
+        except ConnectionErrorException as error:
+            self._logger.warning("API connection error", exc_info=error)

@@ -37,7 +37,7 @@ class DisksUpdate(ModuleUpdateBase):
         try:
             return disk_usage(path)
         except PermissionError as error:
-            self._logger.error("PermissionError: %s", error)
+            self._logger.error("PermissionError", exc_info=error)
             return None
 
     @override
