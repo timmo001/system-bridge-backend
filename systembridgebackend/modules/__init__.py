@@ -9,10 +9,10 @@ from systembridgeshared.base import Base
 from .battery import BatteryUpdate
 from .cpu import CPUUpdate
 from .disk import DiskUpdate
+from .display import DisplayUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
 
-# from .display import DisplayUpdate
 # from .gpu import GPUUpdate
 # from .memory import MemoryUpdate
 # from .network import NetworkUpdate
@@ -22,7 +22,7 @@ MODULES = [
     "battery",
     "cpu",
     "disk",
-    # "display",
+    "display",
     # "gpu",
     # "media",
     # "memory",
@@ -48,7 +48,7 @@ class Update(Base):
             {"name": "battery", "cls": BatteryUpdate()},
             {"name": "cpu", "cls": CPUUpdate()},
             {"name": "disk", "cls": DiskUpdate()},
-            # {"name": "display", "cls": DisplayUpdate()},
+            {"name": "display", "cls": DisplayUpdate()},
             # {"name": "gpu", "cls": GPUUpdate()},
             # {"name": "memory", "cls": MemoryUpdate()},
             # {"name": "network", "cls": NetworkUpdate()},

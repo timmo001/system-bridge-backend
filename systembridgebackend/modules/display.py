@@ -1,142 +1,14 @@
 """Display"""
 from __future__ import annotations
 
-import asyncio
-from json import dumps
 from typing import override
 
 from screeninfo import get_monitors
-from systembridgemodels.display import Display as DisplayModel
-from systembridgeshared.base import Base
-from systembridgeshared.common import make_key
+from systembridgemodels.display import Display
+from systembridgemodels.sensors import Sensors
 from systembridgeshared.database import Database
 
 from .base import ModuleUpdateBase
-
-
-class Display(Base):
-    """Display"""
-
-    def get_displays(self) -> list[DisplayModel]:
-        """Get Displays"""
-        return [
-            DisplayModel(
-                name=monitor.name if monitor.name is not None else str(key),
-                resolution_horizontal=monitor.width,
-                resolution_vertical=monitor.height,
-                x=monitor.x,
-                y=monitor.y,
-                width=monitor.width_mm,
-                height=monitor.height_mm,
-                is_primary=monitor.is_primary,
-                pixel_clock=None,
-                refresh_rate=None,
-            )
-            for key, monitor in enumerate(get_monitors())
-        ]
-    def sensors_get_displays(
-        self,
-        database: Database,
-    ) -> list[str]:
-        """Get Displays"""
-        displays = []
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "display" in item.hardware_type.lower()
-                and item.hardware_name is not None
-                and item.hardware_name not in displays
-            ):
-                displays.append(item.hardware_name)
-        return displays
-
-    def sensors_pixel_clock(
-        self,
-        database: Database,
-        display_key: str,
-    ) -> float | None:
-        """Display pixel clock"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "display" in item.hardware_type.lower()
-                and "pixel" in item.name.lower()
-                and "clock" in item.name.lower()
-                and make_key(item.hardware_name) == display_key
-            ):
-                self._logger.debug(
-                    "Found display pixel clock: %s = %s",
-                    item.key,
-                    item.value,
-                )
-                return item.value
-        return None
-
-    def sensors_refresh_rate(
-        self,
-        database: Database,
-        display_key: str,
-    ) -> float | None:
-        """Display refresh rate"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "display" in item.hardware_type.lower()
-                and "refresh" in item.name.lower()
-                and "rate" in item.name.lower()
-                and make_key(item.hardware_name) == display_key
-            ):
-                self._logger.debug(
-                    "Found display refresh rate: %s = %s",
-                    item.key,
-                    item.value,
-                )
-                return item.value
-        return None
-
-    def sensors_resolution_horizontal(
-        self,
-        database: Database,
-        display_key: str,
-    ) -> int | None:
-        """Display resolution horizontal"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "display" in item.hardware_type.lower()
-                and "resolution" in item.name.lower()
-                and "horizontal" in item.name.lower()
-                and make_key(item.hardware_name) == display_key
-            ):
-                self._logger.debug(
-                    "Found display resolution horizontal: %s = %s",
-                    item.key,
-                    item.value,
-                )
-                return item.value
-        return None
-
-    def sensors_resolution_vertical(
-        self,
-        database: Database,
-        display_key: str,
-    ) -> int | None:
-        """Display resolution vertical"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "display" in item.hardware_type.lower()
-                and "resolution" in item.name.lower()
-                and "vertical" in item.name.lower()
-                and make_key(item.hardware_name) == display_key
-            ):
-                self._logger.debug(
-                    "Found display resolution vertical: %s = %s",
-                    item.key,
-                    item.value,
-                )
-                return item.value
-        return None
 
 
 class DisplayUpdate(ModuleUpdateBase):
@@ -145,137 +17,149 @@ class DisplayUpdate(ModuleUpdateBase):
     def __init__(self) -> None:
         """Initialise"""
         super().__init__()
-        self._display = Display()
+        self.sensors: Sensors | None = None
 
-    async def update_name(
+    def _get_pixel_clock(
         self,
         display_key: str,
-        display_name: str,
-    ) -> None:
-        """Update name"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key=f"{display_key}_name",
-                value=display_name,
-            ),
-        )
+    ) -> float | None:
+        """Display pixel clock"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "DISPLAY" and name display_key
+            if (
+                "DISPLAY" not in hardware.type.upper()
+                and display_key not in hardware.name.upper()
+            ):
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find name "PIXEL" and "CLOCK"
+                if "PIXEL" not in name or "CLOCK" not in name:
+                    continue
+                self._logger.debug(
+                    "Found display pixel clock: %s = %s",
+                    sensor.name,
+                    sensor.value,
+                )
+                return int(sensor.value) if sensor.value is not None else None
+        return None
 
-    async def update_pixel_clock(
+    def sensors_refresh_rate(
         self,
         display_key: str,
-        value: float | None = None,
-    ) -> None:
-        """Update pixel clock"""
-        if value is None:
-            value = self._display.sensors_pixel_clock(self._database, display_key)
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key=f"{display_key}_pixel_clock",
-                value=str(value) if value is not None else None,
-            ),
-        )
+    ) -> float | None:
+        """Display refresh rate"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "DISPLAY" and name display_key
+            if (
+                "DISPLAY" not in hardware.type.upper()
+                and display_key not in hardware.name.upper()
+            ):
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find name "REFRESH" and "RATE"
+                if "REFRESH" not in name or "RATE" not in name:
+                    continue
+                self._logger.debug(
+                    "Found display refresh rate: %s = %s",
+                    sensor.name,
+                    sensor.value,
+                )
+                return int(sensor.value) if sensor.value is not None else None
+        return None
 
-    async def update_refresh_rate(
+    def sensors_resolution_horizontal(
         self,
         display_key: str,
-        value: float | None = None,
-    ) -> None:
-        """Update refresh rate"""
-        if value is None:
-            value = self._display.sensors_refresh_rate(self._database, display_key)
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key=f"{display_key}_refresh_rate",
-                value=str(value) if value is not None else None,
-            ),
-        )
+    ) -> int | None:
+        """Display resolution horizontal"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "DISPLAY" and name display_key
+            if (
+                "DISPLAY" not in hardware.type.upper()
+                and display_key not in hardware.name.upper()
+            ):
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find name "RESOLUTION" and "HORIZONTAL"
+                if "RESOLUTION" not in name or "HORIZONTAL" not in name:
+                    continue
+                self._logger.debug(
+                    "Found display resolution horizontal: %s = %s",
+                    sensor.name,
+                    sensor.value,
+                )
+                return int(sensor.value) if sensor.value is not None else None
+        return None
 
-    async def update_resolution_horizontal(
+    def sensors_resolution_vertical(
         self,
         display_key: str,
-        value: int | None = None,
-    ) -> None:
-        """Update resolution horizontal"""
-        if value is None:
-            value = self._display.sensors_resolution_horizontal(
-                self._database, display_key
-            )
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key=f"{display_key}_resolution_horizontal",
-                value=str(value) if value is not None else None,
-            ),
-        )
-
-    async def update_resolution_vertical(
-        self,
-        display_key: str,
-        value: int | None = None,
-    ) -> None:
-        """Update resolution vertical"""
-        if value is None:
-            value = self._display.sensors_resolution_vertical(
-                self._database, display_key
-            )
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key=f"{display_key}_resolution_vertical",
-                value=str(value) if value is not None else None,
-            ),
-        )
+    ) -> int | None:
+        """Display resolution vertical"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "DISPLAY" and name display_key
+            if (
+                "DISPLAY" not in hardware.type.upper()
+                and display_key not in hardware.name.upper()
+            ):
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find name "RESOLUTION" and "VERTICAL"
+                if "RESOLUTION" not in name or "VERTICAL" not in name:
+                    continue
+                self._logger.debug(
+                    "Found display resolution vertical: %s = %s",
+                    sensor.name,
+                    sensor.value,
+                )
+                return int(sensor.value) if sensor.value is not None else None
+        return None
 
     @override
-    async def update_all_data(self) -> None:
-        """Update data"""
-        display_list = []
-        displays = self._display.sensors_get_displays(self._database)
+    async def update_all_data(self) -> list[Display]:
+        """Update all data"""
+        self._logger.debug("Update all data")
 
-        if displays is not None and len(displays) > 0:
-            # Clear table in case of hardware changes since last run
-            self._database.clear_table(DatabaseModel)
-            for display_name in displays:
-                display_key = make_key(display_name)
-                display_list.append(display_key)
-                await asyncio.gather(
-                    *[
-                        self.update_name(display_key, display_name),
-                        self.update_pixel_clock(display_key),
-                        self.update_refresh_rate(display_key),
-                        self.update_resolution_horizontal(display_key),
-                        self.update_resolution_vertical(display_key),
-                    ]
-                )
-
-            if len(display_list) == 0:
-                self._logger.debug("No displays found. Using alternative")
-                for key, display in enumerate(self._display.get_displays()):
-                    display_key = (
-                        str(key) if display.name is None else make_key(display.name)
-                    )
-                    display_list.append(display_key)
-                    await asyncio.gather(
-                        *[
-                            self.update_name(display_key, display.name),
-                            self.update_pixel_clock(display_key, display.pixel_clock),
-                            self.update_refresh_rate(display_key, display.refresh_rate),
-                            self.update_resolution_horizontal(
-                                display_key, display.resolution_horizontal
-                            ),
-                            self.update_resolution_vertical(
-                                display_key, display.resolution_vertical
-                            ),
-                        ]
-                    )
-
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key="displays",
-                    value=dumps(display_list),
-                ),
+        return [
+            Display(
+                name=monitor.name if monitor.name is not None else str(key),
+                resolution_horizontal=monitor.width,
+                resolution_vertical=monitor.height,
+                x=monitor.x,
+                y=monitor.y,
+                width=monitor.width_mm,
+                height=monitor.height_mm,
+                is_primary=monitor.is_primary,
+                pixel_clock=self._get_pixel_clock(str(key)),
+                refresh_rate=self.sensors_refresh_rate(str(key)),
             )
+            for key, monitor in enumerate(get_monitors())
+        ]

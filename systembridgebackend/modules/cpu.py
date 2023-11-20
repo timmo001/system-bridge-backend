@@ -24,7 +24,7 @@ class CPUUpdate(ModuleUpdateBase):
     """CPU Update"""
 
     def __init__(self) -> None:
-        """Initialize"""
+        """Initialise"""
         super().__init__()
         self.sensors: Sensors | None = None
 

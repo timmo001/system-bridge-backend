@@ -1,4 +1,4 @@
-"""Server"""
+"""System Bridge: Server"""
 import asyncio
 import sys
 from collections.abc import Callable
@@ -17,6 +17,10 @@ from ..utilities.action import ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
+# TODO: Split into more threads where possible
+# TODO: Reduce complexity throughout application
+# TODO: Launch backend and gui from package
+# TODO: Rework models and modules
 
 class APIServer(uvicorn.Server):
     """Customized uvicorn.Server
