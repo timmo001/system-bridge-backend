@@ -8,26 +8,25 @@ from systembridgeshared.base import Base
 
 from .battery import BatteryUpdate
 from .cpu import CPUUpdate
-from .disk import DiskUpdate
-from .display import DisplayUpdate
-from .gpu import GPUUpdate
+from .disks import DisksUpdate
+from .displays import DisplaysUpdate
+from .gpus import GPUsUpdate
 from .memory import MemoryUpdate
-from .network import NetworkUpdate
+from .networks import NetworksUpdate
+from .processes import ProcessesUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
-
-# from .processes import ProcessesUpdate
 
 MODULES = [
     "battery",
     "cpu",
-    "disk",
-    "display",
-    "gpu",
-    # "media",
+    "disks",
+    "displays",
+    "gpus",
+    "media",
     "memory",
-    "network",
-    # "processes",
+    "networks",
+    "processes",
     "sensors",
     "system",
 ]
@@ -47,12 +46,12 @@ class Update(Base):
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate()},
             {"name": "cpu", "cls": CPUUpdate()},
-            {"name": "disk", "cls": DiskUpdate()},
-            {"name": "display", "cls": DisplayUpdate()},
-            {"name": "gpu", "cls": GPUUpdate()},
+            {"name": "disks", "cls": DisksUpdate()},
+            {"name": "displays", "cls": DisplaysUpdate()},
+            {"name": "gpus", "cls": GPUsUpdate()},
             {"name": "memory", "cls": MemoryUpdate()},
-            {"name": "network", "cls": NetworkUpdate()},
-            # {"name": "processes", "cls": ProcessesUpdate()},
+            {"name": "networks", "cls": NetworksUpdate()},
+            {"name": "processes", "cls": ProcessesUpdate()},
             {"name": "system", "cls": SystemUpdate()},
         ]
 

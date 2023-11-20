@@ -1,16 +1,16 @@
-"""GPU"""
+"""GPUs"""
 from __future__ import annotations
 
 from typing import override
 
-from systembridgemodels.gpu import GPU
+from systembridgemodels.gpus import GPU, GPUs
 from systembridgemodels.sensors import Sensors
 
 from .base import ModuleUpdateBase
 
 
-class GPUUpdate(ModuleUpdateBase):
-    """GPU Update"""
+class GPUsUpdate(ModuleUpdateBase):
+    """GPUs Update"""
 
     def __init__(self) -> None:
         """Initialise"""
@@ -18,7 +18,7 @@ class GPUUpdate(ModuleUpdateBase):
         self.sensors: Sensors | None = None
 
     @override
-    async def update_all_data(self) -> list[GPU]:
+    async def update_all_data(self) -> GPUs:
         """Update all data"""
         self._logger.debug("Update all data")
 
@@ -29,7 +29,7 @@ class GPUUpdate(ModuleUpdateBase):
         ):
             return []
 
-        gpus = []
+        gpus: GPUs = []
 
         for hardware in self.sensors.windows_sensors.hardware:
             # Find type "GPU" and name gpu_key

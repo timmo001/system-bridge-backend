@@ -1,17 +1,17 @@
-"""Display"""
+"""Displays"""
 from __future__ import annotations
 
 from typing import override
 
 from screeninfo import get_monitors
-from systembridgemodels.display import Display
+from systembridgemodels.displays import Display, Displays
 from systembridgemodels.sensors import Sensors
 
 from .base import ModuleUpdateBase
 
 
-class DisplayUpdate(ModuleUpdateBase):
-    """Display Update"""
+class DisplaysUpdate(ModuleUpdateBase):
+    """Displays Update"""
 
     def __init__(self) -> None:
         """Initialise"""
@@ -143,7 +143,7 @@ class DisplayUpdate(ModuleUpdateBase):
         return None
 
     @override
-    async def update_all_data(self) -> list[Display]:
+    async def update_all_data(self) -> Displays:
         """Update all data"""
         self._logger.debug("Update all data")
 

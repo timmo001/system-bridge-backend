@@ -1,4 +1,4 @@
-"""Disk"""
+"""Disks"""
 from __future__ import annotations
 
 import asyncio
@@ -6,19 +6,19 @@ from typing import override
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart, sdiskusage
-from systembridgemodels.disk import (
+from systembridgemodels.disks import (
     Disk,
-    DiskDevice,
     DiskIOCounters,
     DiskPartition,
+    Disks,
     DiskUsage,
 )
 
 from .base import ModuleUpdateBase
 
 
-class DiskUpdate(ModuleUpdateBase):
-    """Disk Update"""
+class DisksUpdate(ModuleUpdateBase):
+    """Disks Update"""
 
     async def _get_io_counters(self) -> sdiskio | None:
         """Disk IO counters"""
@@ -41,7 +41,7 @@ class DiskUpdate(ModuleUpdateBase):
             return None
 
     @override
-    async def update_all_data(self) -> Disk:
+    async def update_all_data(self) -> Disks:
         """Update all data"""
         self._logger.debug("Update all data")
 
@@ -51,7 +51,7 @@ class DiskUpdate(ModuleUpdateBase):
             self._get_partitions(),
         )
 
-        devices: list[DiskDevice] = []
+        devices: list[Disk] = []
         for partition in partitions:
             usage = await self._get_usage(partition.mountpoint)
             disk_partition = DiskPartition(
@@ -74,7 +74,7 @@ class DiskUpdate(ModuleUpdateBase):
             if partition.device not in devices:
                 io_counters_item = io_counters_per_disk.get(partition.device)
                 devices.append(
-                    DiskDevice(
+                    Disk(
                         name=partition.device,
                         partitions=[disk_partition],
                         io_counters=DiskIOCounters(
@@ -95,7 +95,7 @@ class DiskUpdate(ModuleUpdateBase):
                         device.partitions.append(disk_partition)
                         break
 
-        return Disk(
+        return Disks(
             devices=devices,
             io_counters=DiskIOCounters(
                 read_count=io_counters.read_count,

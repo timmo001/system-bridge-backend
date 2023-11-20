@@ -4,19 +4,20 @@ from typing import override
 
 from psutil import net_connections, net_if_addrs, net_if_stats, net_io_counters
 from psutil._common import sconn, snetio, snicaddr, snicstats
-from systembridgemodels.network import (
+from systembridgemodels.networks import (
     Network,
     NetworkAddress,
     NetworkConnection,
     NetworkIO,
+    Networks,
     NetworkStats,
 )
 
 from .base import ModuleUpdateBase
 
 
-class NetworkUpdate(ModuleUpdateBase):
-    """Network Update"""
+class NetworksUpdate(ModuleUpdateBase):
+    """Networks Update"""
 
     async def _get_addresses(
         self,
@@ -37,7 +38,7 @@ class NetworkUpdate(ModuleUpdateBase):
         return net_if_stats()
 
     @override
-    async def update_all_data(self) -> Network:
+    async def update_all_data(self) -> Networks:
         """Update all data"""
         self._logger.debug("Update all data")
 
@@ -50,29 +51,34 @@ class NetworkUpdate(ModuleUpdateBase):
             ]
         )
 
-        networks: dict[str, NetworkStats] = {}
+        networks: list[Network] = []
 
         for name, stat in stats.items():
             addrs = addresses.get(name, None)
-            networks[name] = NetworkStats(
-                addresses=[
-                    NetworkAddress(
-                        address=address.address,
-                        family=address.family,
-                        netmask=address.netmask,
-                        broadcast=address.broadcast,
-                        ptp=address.ptp,
-                    )
-                    for address in addrs
-                ],
-                isup=stat.isup,
-                duplex=stat.duplex,
-                speed=stat.speed,
-                mtu=stat.mtu,
-                flags=stat.flags,
+            networks.append(
+                Network(
+                    name=name,
+                    addresses=[
+                        NetworkAddress(
+                            address=address.address,
+                            family=address.family,
+                            netmask=address.netmask,
+                            broadcast=address.broadcast,
+                            ptp=address.ptp,
+                        )
+                        for address in addrs
+                    ],
+                    stats=NetworkStats(
+                        isup=stat.isup,
+                        duplex=stat.duplex,
+                        speed=stat.speed,
+                        mtu=stat.mtu,
+                        flags=stat.flags,
+                    ),
+                )
             )
 
-        return Network(
+        return Networks(
             connections=[
                 NetworkConnection(
                     fd=connection.fd,
