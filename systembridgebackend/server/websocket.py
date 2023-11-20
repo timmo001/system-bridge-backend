@@ -490,7 +490,7 @@ class WebSocketHandler(Base):
         #     )
         elif request.event == TYPE_REGISTER_DATA_LISTENER:
             try:
-                model = RegisterDataListener(**data)
+                model = RegisterDataListener(modules=data[EVENT_DATA][EVENT_MODULES])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
