@@ -1,6 +1,5 @@
 """Modules Listeners"""
 from collections.abc import Awaitable, Callable
-from typing import Any
 
 from systembridgemodels.data import Data
 from systembridgeshared.base import Base
@@ -14,7 +13,7 @@ class Listener:
     def __init__(
         self,
         listener_id: str,
-        data_changed_callback: Callable[[str, Any], Awaitable[None]],
+        data_changed_callback: Callable[[str, Data], Awaitable[None]],
         modules: list[str],
     ) -> None:
         """Initialise"""
@@ -67,7 +66,7 @@ class Listeners(Base):
                 self._logger.info(
                     "Sending '%s' data to listener: %s", module, listener.id
                 )
-                await listener.data_changed_callback(module, getattr(data, module))
+                await listener.data_changed_callback(module, data)
 
     def remove_all_listeners(self) -> None:
         """Remove all listeners"""

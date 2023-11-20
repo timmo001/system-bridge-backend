@@ -136,7 +136,7 @@ class WebSocketHandler(Base):
                 type=TYPE_DATA_UPDATE,
                 message="Data changed",
                 module=module,
-                data=asdict(data),
+                data=asdict(getattr(data, module)),
             )
         )
 
