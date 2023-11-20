@@ -1,4 +1,4 @@
-"""System Bridge: GUI"""
+"""GUI"""
 import asyncio
 import subprocess
 import sys

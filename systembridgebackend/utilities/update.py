@@ -1,4 +1,4 @@
-"""System Bridge: Update Utilities"""
+"""Update Utilities"""
 from systembridgeshared.update import Update
 
 

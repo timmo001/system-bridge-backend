@@ -1,4 +1,4 @@
-"""System Bridge: Windows Media Utilities"""
+"""Windows Media Utilities"""
 from winsdk.windows.media import (  # pylint: disable=import-error
     MediaPlaybackAutoRepeatMode,
 )

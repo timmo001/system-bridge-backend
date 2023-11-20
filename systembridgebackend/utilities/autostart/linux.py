@@ -1,4 +1,4 @@
-"""System Bridge: Linux Autostart"""
+"""Linux Autostart"""
 import os
 import sys
 

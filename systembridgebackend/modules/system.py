@@ -1,4 +1,4 @@
-"""System Bridge: System"""
+"""System"""
 from __future__ import annotations
 
 import asyncio

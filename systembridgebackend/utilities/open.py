@@ -1,4 +1,4 @@
-"""System Bridge: Open Utilities"""
+"""Open Utilities"""
 import os
 import subprocess
 import sys

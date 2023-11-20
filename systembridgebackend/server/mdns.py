@@ -1,4 +1,4 @@
-"""System Bridge: MDNS/Zeroconf Advertisement"""
+"""MDNS/Zeroconf Advertisement"""
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf

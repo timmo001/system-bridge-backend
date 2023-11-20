@@ -1,4 +1,4 @@
-"""System Bridge: Modules Listeners"""
+"""Modules Listeners"""
 from collections.abc import Awaitable, Callable
 from typing import Any
 

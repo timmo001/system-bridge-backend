@@ -1,4 +1,4 @@
-"""System Bridge: Power Utilities"""
+"""Power Utilities"""
 import asyncio
 import os
 import sys

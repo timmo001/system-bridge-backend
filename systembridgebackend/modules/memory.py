@@ -1,4 +1,4 @@
-"""System Bridge: Memory"""
+"""Memory"""
 import asyncio
 from typing import NamedTuple
 

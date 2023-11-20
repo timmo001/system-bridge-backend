@@ -1,4 +1,4 @@
-"""System Bridge: Media Utilities"""
+"""Media Utilities"""
 from __future__ import annotations
 
 import asyncio

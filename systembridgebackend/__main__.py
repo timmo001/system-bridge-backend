@@ -1,4 +1,4 @@
-"""System Bridge: Main"""
+"""Main"""
 import logging
 
 import typer

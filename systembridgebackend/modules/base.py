@@ -1,4 +1,4 @@
-"""System Bridge: Modules Base"""
+"""Modules Base"""
 
 from typing import Any
 

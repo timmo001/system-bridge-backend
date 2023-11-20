@@ -1,4 +1,4 @@
-"""System Bridge: Autostart"""
+"""Autostart"""
 import platform
 
 

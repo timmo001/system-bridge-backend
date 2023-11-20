@@ -1,4 +1,4 @@
-"""System Bridge: Modules"""
+"""Modules"""
 import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any

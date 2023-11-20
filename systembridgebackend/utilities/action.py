@@ -1,4 +1,4 @@
-"""System Bridge: Action Utilities"""
+"""Action Utilities"""
 from typing import Any
 
 from systembridgemodels.action import Action

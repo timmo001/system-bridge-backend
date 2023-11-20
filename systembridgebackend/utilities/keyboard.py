@@ -1,4 +1,4 @@
-"""System Bridge: Keyboard Utilities"""
+"""Keyboard Utilities"""
 from collections.abc import Callable
 
 from keyboard import (

@@ -1,4 +1,4 @@
-"""System Bridge: Data"""
+"""Data"""
 import asyncio
 from collections.abc import Awaitable, Callable
 from threading import Thread

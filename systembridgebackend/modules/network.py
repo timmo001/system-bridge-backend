@@ -1,4 +1,4 @@
-"""System Bridge: Network"""
+"""Network"""
 import asyncio
 
 from psutil import net_connections, net_if_addrs, net_if_stats, net_io_counters

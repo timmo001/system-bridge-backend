@@ -1,4 +1,4 @@
-"""System Bridge: Sensors"""
+"""Sensors"""
 from __future__ import annotations
 
 import asyncio

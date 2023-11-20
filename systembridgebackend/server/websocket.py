@@ -1,4 +1,4 @@
-"""System Bridge: WebSocket Handler"""
+"""WebSocket Handler"""
 import os
 from collections.abc import Callable
 from dataclasses import asdict

@@ -1,4 +1,4 @@
-"""System Bridge: API"""
+"""API"""
 import asyncio
 import logging
 import os

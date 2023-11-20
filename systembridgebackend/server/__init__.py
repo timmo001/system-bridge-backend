@@ -1,4 +1,4 @@
-"""System Bridge: Server"""
+"""Server"""
 import asyncio
 import sys
 from collections.abc import Callable
@@ -98,10 +98,6 @@ class Server(Base):
                     self.indefinite_func_wrapper(self.update_data),
                     name="Update data",
                 ),
-                # api_app.loop.create_task(
-                #     self.indefinite_func_wrapper(self.update_frequent_data),
-                #     name="Update frequent data",
-                # ),
                 # api_app.loop.create_task(
                 #     self.update_events_data(),
                 #     name="Update events data",
@@ -226,6 +222,8 @@ class Server(Base):
         self._logger.info("Schedule next update in 60 seconds")
         await asyncio.sleep(60)
 
+    # TODO: Implement events
+    # TODO: Find other items that can be updated via events
     # async def update_events_data(self) -> None:
     #     """Update events data"""
     #     self._logger.info("Update events data")
