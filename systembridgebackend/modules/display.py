@@ -6,7 +6,6 @@ from typing import override
 from screeninfo import get_monitors
 from systembridgemodels.display import Display
 from systembridgemodels.sensors import Sensors
-from systembridgeshared.database import Database
 
 from .base import ModuleUpdateBase
 

@@ -10,10 +10,10 @@ from .battery import BatteryUpdate
 from .cpu import CPUUpdate
 from .disk import DiskUpdate
 from .display import DisplayUpdate
+from .gpu import GPUUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
 
-# from .gpu import GPUUpdate
 # from .memory import MemoryUpdate
 # from .network import NetworkUpdate
 # from .processes import ProcessesUpdate
@@ -23,7 +23,7 @@ MODULES = [
     "cpu",
     "disk",
     "display",
-    # "gpu",
+    "gpu",
     # "media",
     # "memory",
     # "network",
@@ -49,7 +49,7 @@ class Update(Base):
             {"name": "cpu", "cls": CPUUpdate()},
             {"name": "disk", "cls": DiskUpdate()},
             {"name": "display", "cls": DisplayUpdate()},
-            # {"name": "gpu", "cls": GPUUpdate()},
+            {"name": "gpu", "cls": GPUUpdate()},
             # {"name": "memory", "cls": MemoryUpdate()},
             # {"name": "network", "cls": NetworkUpdate()},
             # {"name": "processes", "cls": ProcessesUpdate()},
