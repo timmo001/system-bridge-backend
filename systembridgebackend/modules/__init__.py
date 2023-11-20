@@ -33,8 +33,8 @@ MODULES = [
 ]
 
 
-class UpdateThread(Thread):
-    """Update thread"""
+class UpdateDataThread(Thread):
+    """Update data thread"""
 
     def __init__(
         self,
@@ -96,7 +96,7 @@ class Update(Base):
             if class_obj["cls"].__dict__.get("sensors", {}) != {}:
                 class_obj["cls"].sensors = sensors_data
 
-            thread = UpdateThread(
+            thread = UpdateDataThread(
                 class_obj,
                 self._updated_callback,
             )
