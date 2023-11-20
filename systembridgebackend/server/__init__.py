@@ -20,7 +20,6 @@ from .api import app as api_app
 # TODO: Split into more threads where possible
 # TODO: Reduce complexity throughout application
 # TODO: Launch backend and gui from package
-# TODO: Rework models and modules
 
 
 class APIServer(uvicorn.Server):
