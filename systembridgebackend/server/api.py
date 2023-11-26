@@ -28,7 +28,6 @@ from systembridgeshared.settings import Settings
 
 from .._version import __version__
 from ..data import DataUpdate
-from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
@@ -70,21 +69,22 @@ settings = Settings()
 logger = logging.getLogger("systembridgebackend.server.api")
 
 
-def callback_media_play(
-    media_type: str,
-    media_play: MediaPlay,
-) -> None:
-    """Callback to open media player"""
-    gui_player = GUI(settings)
-    app.loop.create_task(
-        gui_player.start(
-            app.callback_exit,
-            "media-player",
-            media_type,
-            dumps(asdict(media_play)),
-        ),
-        name="GUI media player",
-    )
+# TODO: Implement GUI
+# def callback_media_play(
+#     media_type: str,
+#     media_play: MediaPlay,
+# ) -> None:
+#     """Callback to open media player"""
+#     gui_player = GUI(settings)
+#     app.loop.create_task(
+#         gui_player.start(
+#             app.callback_exit,
+#             "media-player",
+#             media_type,
+#             dumps(asdict(media_play)),
+#         ),
+#         name="GUI media player",
+#     )
 
 
 def security_token_header(
@@ -489,29 +489,30 @@ async def send_media_file(
     }
 
 
-@app.post("/api/media/play", dependencies=[Depends(security_token)])
-async def send_media_play(
-    request: Request,
-    query_autoplay: bool | None = Query(False, alias="autoplay"),
-    query_base: str | None = Query(None, alias="base"),
-    query_path: str | None = Query(None, alias="path"),
-    query_type: str | None = Query(None, alias="type"),
-    query_url: str | None = Query(None, alias="url"),
-    query_volume: float | None = Query(40, alias="volume"),
-) -> dict[str, str]:
-    """Play media."""
-    return await play_media(
-        settings,
-        callback_media_play,
-        query_autoplay=query_autoplay,
-        query_base=query_base,
-        query_path=query_path,
-        query_type=query_type,
-        query_url=query_url,
-        query_volume=query_volume,
-        request_host=request.url.hostname,
-        request_scheme=request.url.scheme,
-    )
+# TODO: Implement GUI
+# @app.post("/api/media/play", dependencies=[Depends(security_token)])
+# async def send_media_play(
+#     request: Request,
+#     query_autoplay: bool | None = Query(False, alias="autoplay"),
+#     query_base: str | None = Query(None, alias="base"),
+#     query_path: str | None = Query(None, alias="path"),
+#     query_type: str | None = Query(None, alias="type"),
+#     query_url: str | None = Query(None, alias="url"),
+#     query_volume: float | None = Query(40, alias="volume"),
+# ) -> dict[str, str]:
+#     """Play media."""
+#     return await play_media(
+#         settings,
+#         callback_media_play,
+#         query_autoplay=query_autoplay,
+#         query_base=query_base,
+#         query_path=query_path,
+#         query_type=query_type,
+#         query_url=query_url,
+#         query_volume=query_volume,
+#         request_host=request.url.hostname,
+#         request_scheme=request.url.scheme,
+#     )
 
 
 @app.post("/api/notification", dependencies=[Depends(security_token)])
