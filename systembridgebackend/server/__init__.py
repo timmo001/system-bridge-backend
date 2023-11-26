@@ -17,7 +17,8 @@ from ..utilities.action import ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
-# TODO: Split into more threads where possible
+# TODO: Frontend
+# TODO: GUI
 # TODO: Reduce complexity throughout application
 # TODO: Launch backend and gui from package
 
@@ -108,21 +109,20 @@ class Server(Base):
                 ),
             ]
         )
-        # TODO: Implement GUI
-        # if not self.no_gui:
-        #     self._gui = GUI(self._settings)
-        #     self._tasks.extend(
-        #         [
-        #             api_app.loop.create_task(
-        #                 self._gui.start(self.exit_application),
-        #                 name="GUI",
-        #             ),
-        #             api_app.loop.create_task(
-        #                 self.register_hotkeys(),
-        #                 name="Register hotkeys",
-        #             ),
-        #         ]
-        #     )
+        if not self.no_gui:
+            self._gui = GUI(self._settings)
+            self._tasks.extend(
+                [
+                    api_app.loop.create_task(
+                        self._gui.start(self.exit_application),
+                        name="GUI",
+                    ),
+                    api_app.loop.create_task(
+                        self.register_hotkeys(),
+                        name="Register hotkeys",
+                    ),
+                ]
+            )
 
         await asyncio.wait(self._tasks)
 
