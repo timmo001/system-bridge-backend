@@ -10,7 +10,6 @@ from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
 from ..data import DataUpdate
-from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from ..utilities.action import ActionHandler
@@ -51,12 +50,10 @@ class Server(Base):
         settings: Settings,
         listeners: Listeners,
         no_frontend: bool = False,
-        no_gui: bool = False,
     ) -> None:
         """Initialise"""
         super().__init__()
         self.no_frontend = no_frontend
-        self.no_gui = no_gui
 
         self._gui_notification: GUI | None = None
         self._gui_player: GUI | None = None
@@ -109,20 +106,6 @@ class Server(Base):
                 ),
             ]
         )
-        if not self.no_gui:
-            self._gui = GUI(self._settings)
-            self._tasks.extend(
-                [
-                    api_app.loop.create_task(
-                        self._gui.start(self.exit_application),
-                        name="GUI",
-                    ),
-                    api_app.loop.create_task(
-                        self.register_hotkeys(),
-                        name="Register hotkeys",
-                    ),
-                ]
-            )
 
         await asyncio.wait(self._tasks)
 
@@ -143,33 +126,39 @@ class Server(Base):
     ) -> None:
         """Open GUI"""
         if command == "notification":
-            if self._gui_notification:
-                self._gui_notification.stop()
-            self._gui_notification = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui_notification.start(
-                        self.exit_application,
-                        command,
-                        data,
-                    ),
-                    name="GUI Notification",
-                )
-            )
+            # TODO: Launch GUI as a detached process
+            self._logger.info("Launch Notification GUI as a detached process")
+            # if self._gui_notification:
+            #     self._gui_notification.stop()
+            # self._gui_notification = GUI(self._settings)
+            # self._tasks.append(
+            #     api_app.loop.create_task(
+            #         self._gui_notification.start(
+            #             self.exit_application,
+            #             command,
+            #             data,
+            #         ),
+            #         name="GUI Notification",
+            #     )
+            # )
         elif command == "player":
-            if self._gui_player:
-                self._gui_player.stop()
-            self._gui_player = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui_player.start(
-                        self.exit_application,
-                        command,
-                        data,
-                    ),
-                    name="GUI Media Player",
-                )
-            )
+            # TODO: Launch GUI as a detached process
+            self._logger.info("Launch Player GUI as a detached process")
+            # if self._gui_player:
+            #     self._gui_player.stop()
+            # self._gui_player = GUI(self._settings)
+            # self._tasks.append(
+            #     api_app.loop.create_task(
+            #         self._gui_player.start(
+            #             self.exit_application,
+            #             command,
+            #             data,
+            #         ),
+            #         name="GUI Media Player",
+            #     )
+            # )
+        else:
+            raise NotImplementedError(f"Command not implemented: {command}")
 
     async def indefinite_func_wrapper(self, func) -> None:
         """Indefinite function wrapper"""
