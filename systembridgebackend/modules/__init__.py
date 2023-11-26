@@ -4,7 +4,6 @@ from collections.abc import Awaitable, Callable
 from threading import Thread
 from typing import Any
 
-from systembridgemodels.sensors import Sensors
 from systembridgeshared.base import Base
 
 from .battery import BatteryUpdate
