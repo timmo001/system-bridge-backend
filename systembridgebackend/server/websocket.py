@@ -84,6 +84,7 @@ from ..utilities.media import (
 from ..utilities.open import open_path, open_url
 from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
 
+# TODO: Implement websocket types
 
 class WebSocketHandler(Base):
     """WebSocket handler"""

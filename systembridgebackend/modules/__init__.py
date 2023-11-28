@@ -70,7 +70,6 @@ class Update(Base):
         self._updated_callback = updated_callback
 
         self._classes: list[dict[str, Any]] = [
-            # System first
             {"name": "system", "cls": SystemUpdate()},
             {"name": "battery", "cls": BatteryUpdate()},
             {"name": "cpu", "cls": CPUUpdate()},
