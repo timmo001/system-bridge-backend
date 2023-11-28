@@ -47,11 +47,13 @@ from systembridgeshared.const import (
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
+    TYPE_GET_SETTINGS,
     TYPE_KEYBOARD_KEY_PRESSED,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_KEYBOARD_TEXT_SENT,
     TYPE_REGISTER_DATA_LISTENER,
+    TYPE_SETTINGS_RESULT,
     TYPE_UNREGISTER_DATA_LISTENER,
 )
 from systembridgeshared.settings import Settings
@@ -84,6 +86,7 @@ from ..utilities.open import open_path, open_url
 from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
 
 # TODO: Implement websocket types
+
 
 class WebSocketHandler(Base):
     """WebSocket handler"""
@@ -823,18 +826,16 @@ class WebSocketHandler(Base):
         #             }
         #         )
         #     )
-        # elif request.event == TYPE_GET_SETTINGS:
-        #     self._logger.info("Getting settings")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_SETTINGS_RESULT,
-        #                 EVENT_MESSAGE: "Got settings",
-        #                 EVENT_DATA: self._settings.get_all(),
-        #             }
-        #         )
-        #     )
+        elif request.event == TYPE_GET_SETTINGS:
+            self._logger.info("Getting settings")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_SETTINGS_RESULT,
+                    message="Got settings",
+                    data=asdict(self._settings.data),
+                )
+            )
         # elif request.event == TYPE_GET_SETTING:
         #     try:
         #         model = GetSetting(**data)
