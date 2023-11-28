@@ -9,7 +9,6 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
 from systembridgemodels.data import Data
 from systembridgemodels.get_data import GetData
-from systembridgemodels.get_setting import GetSetting
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import Action as MediaAction
