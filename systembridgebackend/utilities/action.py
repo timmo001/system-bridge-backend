@@ -1,13 +1,13 @@
 """Action Utilities."""
 from typing import Any
 
+from systembridgeconnector.http_client import HTTPClient
 from systembridgemodels.action import Action
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import (
     AuthenticationException,
     ConnectionErrorException,
 )
-from systembridgeshared.http_client import HTTPClient
 from systembridgeshared.settings import Settings
 
 
