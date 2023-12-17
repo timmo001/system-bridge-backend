@@ -21,7 +21,7 @@ class Media(Base):
         self,
         changed_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._changed_callback = changed_callback
 

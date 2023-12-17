@@ -1,12 +1,12 @@
-"""System Bridge: Server"""
+"""System Bridge: Server."""
 import asyncio
-import sys
 from collections.abc import Callable
+import sys
 
-import uvicorn
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
+import uvicorn
 
 from ..data import DataUpdate
 from ..gui import GUI
@@ -16,17 +16,20 @@ from ..utilities.action import Action, ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
+
 class APIServer(uvicorn.Server):
-    """Customized uvicorn.Server
+    """Customized uvicorn.Server.
 
     Uvicorn server overrides signals and we need to include
-    Tasks to the signals."""
+    Tasks to the signals.
+    """
 
     def __init__(
         self,
         config: uvicorn.Config,
         exit_callback: Callable[[], None],
     ) -> None:
+        """Initialise."""
         super().__init__(config)
         self._exit_callback = exit_callback
 
@@ -37,7 +40,7 @@ class APIServer(uvicorn.Server):
 
 
 class Server(Base):
-    """Server"""
+    """Server."""
 
     def __init__(
         self,
@@ -45,13 +48,16 @@ class Server(Base):
         listeners: Listeners,
         no_frontend: bool = False,
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self.no_frontend = no_frontend
 
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
+
+        self._gui_notification: GUI | None = None
+        self._gui_player: GUI | None = None
 
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
@@ -79,7 +85,7 @@ class Server(Base):
         self._logger.info("Server Initialised")
 
     async def start(self) -> None:
-        """Start the server"""
+        """Start the server."""
         self._logger.info("Start server")
         self._tasks.extend(
             [
@@ -104,7 +110,7 @@ class Server(Base):
         self,
         module: str,
     ) -> None:
-        """Data updated"""
+        """Update data."""
         await self._listeners.refresh_data_by_module(
             api_app.data_update.data,
             module,
@@ -115,10 +121,10 @@ class Server(Base):
         command: str,
         data: str,
     ) -> None:
-        """Open GUI"""
+        """Open GUI."""
         if command == "notification":
             self._logger.info("Launch Notification GUI as a detached process")
-            if self._gui_notification:
+            if self._gui_notification is not None:
                 self._gui_notification.stop()
             self._gui_notification = GUI(self._settings)
             self._tasks.append(
@@ -150,12 +156,12 @@ class Server(Base):
             raise NotImplementedError(f"Command not implemented: {command}")
 
     async def indefinite_func_wrapper(self, func) -> None:
-        """Indefinite function wrapper"""
+        """Indefinite function wrapper."""
         while True:
             await func()
 
     def exit_application(self) -> None:
-        """Exit application"""
+        """Exit application."""
         self._logger.info("Exiting application")
 
         # Stop the API server
@@ -185,7 +191,7 @@ class Server(Base):
         sys.exit(0)
 
     async def register_hotkeys(self) -> None:
-        """Register hotkeys"""
+        """Register hotkeys."""
         self._logger.info("Register hotkeys")
         hotkeys = self._settings.data.keyboard_hotkeys
         if hotkeys is not None and isinstance(hotkeys, list):
@@ -197,11 +203,11 @@ class Server(Base):
         self,
         hotkey: SettingHotkey,
     ) -> None:
-        """Register hotkey"""
+        """Register hotkey."""
         self._logger.info("Register hotkey: %s", hotkey)
 
         def hotkey_callback() -> None:
-            """Hotkey callback"""
+            """Hotkey callback."""
             self._logger.info("Hotkey pressed: %s", hotkey)
             action_handler = ActionHandler(self._settings)
             api_app.loop.create_task(action_handler.handle(Action(hotkey.key)))
@@ -212,14 +218,14 @@ class Server(Base):
         )
 
     async def update_data(self) -> None:
-        """Update data"""
+        """Update data."""
         self._logger.info("Update data")
         api_app.data_update.request_update_data()
         self._logger.info("Schedule next update in 60 seconds")
         await asyncio.sleep(60)
 
     async def update_media_data(self) -> None:
-        """Update media data"""
+        """Update media data."""
         self._logger.info("Update media data")
         api_app.data_update.request_update_media_data()
         asyncio.get_running_loop().run_forever()

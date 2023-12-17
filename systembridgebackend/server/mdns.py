@@ -9,18 +9,18 @@ ZEROCONF_TYPE = "_system-bridge._tcp.local."
 
 
 class MDNSAdvertisement(Base):
-    """MDNS/Zeroconf Advertisement"""
+    """MDNS/Zeroconf Advertisement."""
 
     def __init__(
         self,
         settings: Settings,
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._settings = settings
 
     def advertise_server(self) -> None:
-        """Advertise server"""
+        """Advertise server."""
         # TODO: Restore mdns functionality
 
         # system = System()

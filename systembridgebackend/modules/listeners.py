@@ -16,7 +16,7 @@ class Listener:
         data_changed_callback: Callable[[str, Data], Awaitable[None]],
         modules: list[str],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         self.id = listener_id
         self.data_changed_callback = data_changed_callback
         self.modules = modules
@@ -26,7 +26,7 @@ class Listeners(Base):
     """Module Listeners"""
 
     def __init__(self) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._registered_listeners: list[Listener] = []
 

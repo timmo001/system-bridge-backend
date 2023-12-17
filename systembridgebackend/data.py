@@ -19,7 +19,7 @@ class UpdateThread(Thread):
         self,
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._update = Update(updated_callback)
 
@@ -42,7 +42,7 @@ class UpdateMediaThread(Thread):
         self,
         updated_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
 
         if platform.system() != "Windows":
@@ -76,7 +76,7 @@ class DataUpdate(Base):
         self,
         updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self.data = Data()
         self._updated_callback = updated_callback

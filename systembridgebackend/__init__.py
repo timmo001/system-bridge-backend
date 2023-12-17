@@ -21,7 +21,7 @@ class Application(Base):
         init: bool = False,
         no_frontend: bool = False,
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         if init:
             self._logger.info("Initialised application. Exiting now.")

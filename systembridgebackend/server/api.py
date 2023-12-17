@@ -1,11 +1,11 @@
 """API"""
 import asyncio
-import logging
-import os
-import sys
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 from json import dumps
+import logging
+import os
+import sys
 from typing import Any
 
 from fastapi import Depends, FastAPI, File, Header, Query, WebSocket, status
@@ -15,8 +15,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
-from systembridgemodels.media_control import Action as MediaAction
-from systembridgemodels.media_control import MediaControl
+from systembridgemodels.media_control import Action as MediaAction, MediaControl
 from systembridgemodels.media_files import MediaFile, MediaFiles
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
@@ -103,13 +102,13 @@ def security_token(
 
 
 class API(FastAPI):
-    """Extended FastAPI"""
+    """Extended FastAPI."""
 
     def __init__(
         self,
         **kwargs: Any,
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__(**kwargs)
         self.add_middleware(
             CORSMiddleware,

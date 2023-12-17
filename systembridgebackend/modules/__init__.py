@@ -40,7 +40,7 @@ class UpdateDataThread(Thread):
         class_obj: dict[str, Any],
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._class_obj = class_obj
         self._updated_callback = updated_callback
@@ -65,7 +65,7 @@ class Update(Base):
         self,
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._updated_callback = updated_callback
 

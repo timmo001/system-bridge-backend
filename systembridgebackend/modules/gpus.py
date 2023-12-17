@@ -13,7 +13,7 @@ class GPUsUpdate(ModuleUpdateBase):
     """GPUs Update"""
 
     def __init__(self) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self.sensors: Sensors | None = None
 

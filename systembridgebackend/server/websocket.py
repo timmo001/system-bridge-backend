@@ -159,7 +159,7 @@ class WebSocketHandler(Base):
         module: str,
         data: Data,
     ) -> None:
-        """Data changed."""
+        """Change data."""
         if module not in MODULES:
             self._logger.info("Data module %s not in registered modules", module)
             return
