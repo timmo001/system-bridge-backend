@@ -1,4 +1,4 @@
-"""Sensors"""
+"""Sensors."""
 from __future__ import annotations
 
 import asyncio
@@ -19,22 +19,22 @@ from .base import ModuleUpdateBase
 # TODO: Fix sensors
 
 class SensorsUpdate(ModuleUpdateBase):
-    """Sensors Update"""
+    """Sensors Update."""
 
     async def _get_fans(self) -> dict | None:
-        """Get fans"""
+        """Get fans."""
         if not hasattr(psutil, "sensors_fans"):
             return None
         return psutil.sensors_fans()  # type: ignore
 
     async def _get_temperatures(self) -> dict | None:
-        """Get temperatures"""
+        """Get temperatures."""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
         return psutil.sensors_temperatures()  # type: ignore
 
     async def _get_windows_sensors(self) -> dict | None:
-        """Get windows sensors"""
+        """Get windows sensors."""
         if sys.platform != "win32":
             return None
 
@@ -69,7 +69,7 @@ class SensorsUpdate(ModuleUpdateBase):
             return None
 
     async def update_all_data(self) -> Sensors:
-        """Update data"""
+        """Update data."""
         fans, temperatures, windows_sensors = await asyncio.gather(
             *[
                 self._get_fans(),

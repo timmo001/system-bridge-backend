@@ -81,7 +81,7 @@ class Update(Base):
             {"name": "processes", "cls": ProcessesUpdate()},
         ]
 
-        self.threads: dict[str,Thread] = {}
+        self.threads: dict[str, Thread] = {}
 
     async def update_data(self) -> None:
         """Update Data."""

@@ -1,7 +1,7 @@
 """Data."""
 import asyncio
-from collections.abc import Awaitable, Callable
 import platform
+from collections.abc import Awaitable, Callable
 from threading import Thread
 from typing import Any
 
@@ -27,13 +27,13 @@ class UpdateThread(Thread):
         """Run."""
         asyncio.run(self._update.update_data())
 
-
     def join(self, timeout: float | None = None) -> None:
         """Join."""
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()
         super().join(timeout)
+
 
 class UpdateMediaThread(Thread):
     """Update media thread."""
@@ -61,13 +61,13 @@ class UpdateMediaThread(Thread):
 
         asyncio.run(self._media.update_media_info())
 
-
     def join(self, timeout: float | None = None) -> None:
         """Join."""
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()
         super().join(timeout)
+
 
 class DataUpdate(Base):
     """Data Update."""
