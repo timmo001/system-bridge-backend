@@ -1,4 +1,4 @@
-"""Modules"""
+"""Modules."""
 import asyncio
 from collections.abc import Awaitable, Callable
 from threading import Thread
@@ -33,7 +33,7 @@ MODULES = [
 
 
 class UpdateDataThread(Thread):
-    """Update data thread"""
+    """Update data thread."""
 
     def __init__(
         self,
@@ -46,7 +46,7 @@ class UpdateDataThread(Thread):
         self._updated_callback = updated_callback
 
     async def _update(self) -> None:
-        """Update"""
+        """Update."""
         data = await self._class_obj["cls"].update_all_data()
         await self._updated_callback(
             self._class_obj["name"],
@@ -54,12 +54,12 @@ class UpdateDataThread(Thread):
         )
 
     def run(self) -> None:
-        """Run"""
+        """Run."""
         asyncio.run(self._update())
 
 
 class Update(Base):
-    """Modules Update"""
+    """Modules Update."""
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class Update(Base):
         self.threads: dict[str,Thread] = {}
 
     async def update_data(self) -> None:
-        """Update Data"""
+        """Update Data."""
         self._logger.info("Request update data")
 
         sensors_update = SensorsUpdate()
