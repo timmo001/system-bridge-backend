@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import override
 
 from plyer import battery
-from systembridgemodels.battery import Battery
+from systembridgemodels.modules.battery import Battery
 
 from .base import ModuleUpdateBase
 

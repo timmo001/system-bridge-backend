@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import override
 
 from screeninfo import get_monitors
-from systembridgemodels.displays import Display, Displays
-from systembridgemodels.sensors import Sensors
+from systembridgemodels.modules.displays import Display, Displays
+from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
 

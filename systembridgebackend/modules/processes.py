@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import override
 
 from psutil import AccessDenied, NoSuchProcess, process_iter
-from systembridgemodels.processes import Process, Processes
+from systembridgemodels.modules.processes import Process, Processes
 
 from .._version import __version__
 from .base import ModuleUpdateBase

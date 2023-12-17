@@ -14,8 +14,8 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-from systembridgemodels.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
-from systembridgemodels.sensors import Sensors
+from systembridgemodels.modules.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
+from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
 

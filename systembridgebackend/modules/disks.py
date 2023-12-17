@@ -6,7 +6,7 @@ from typing import override
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart, sdiskusage
-from systembridgemodels.disks import (
+from systembridgemodels.modules.disks import (
     Disk,
     DiskIOCounters,
     DiskPartition,

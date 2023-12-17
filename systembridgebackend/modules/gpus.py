@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import override
 
-from systembridgemodels.gpus import GPU, GPUs
-from systembridgemodels.sensors import Sensors
+from systembridgemodels.modules.gpus import GPU, GPUs
+from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
 

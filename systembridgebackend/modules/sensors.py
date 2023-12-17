@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 import psutil
-from systembridgemodels.sensors import (
+from systembridgemodels.modules.sensors import (
     Sensors,
     SensorsWindows,
     SensorsWindowsHardware,

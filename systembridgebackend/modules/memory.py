@@ -4,7 +4,7 @@ from typing import NamedTuple, override
 
 from psutil import swap_memory, virtual_memory
 from psutil._common import sswap
-from systembridgemodels.memory import Memory, MemorySwap, MemoryVirtual
+from systembridgemodels.modules.memory import Memory, MemorySwap, MemoryVirtual
 
 from .base import ModuleUpdateBase
 

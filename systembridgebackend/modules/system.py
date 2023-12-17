@@ -7,15 +7,15 @@ import platform
 import re
 import socket
 import sys
-import uuid
 from typing import Any, override
+import uuid
 
 import aiohttp
 from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgemodels.system import System, SystemUser
+from systembridgemodels.modules.system import System, SystemUser
 
 from .._version import __version__
 from .base import ModuleUpdateBase

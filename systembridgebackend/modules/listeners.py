@@ -1,7 +1,7 @@
 """Modules Listeners"""
 from collections.abc import Awaitable, Callable
 
-from systembridgemodels.data import Data
+from systembridgemodels.modules.modules.data import Data
 from systembridgeshared.base import Base
 
 from . import MODULES
