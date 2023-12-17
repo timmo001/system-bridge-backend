@@ -69,7 +69,7 @@ settings = Settings()
 logger = logging.getLogger("systembridgebackend.server.api")
 
 
-# TODO: Implement GUI
+# TODO: GUI
 # def callback_media_play(
 #     media_type: str,
 #     media_play: MediaPlay,
@@ -489,7 +489,7 @@ async def send_media_file(
     }
 
 
-# TODO: Implement GUI
+# TODO: GUI
 # @app.post("/api/media/play", dependencies=[Depends(security_token)])
 # async def send_media_play(
 #     request: Request,

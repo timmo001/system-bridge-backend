@@ -4,7 +4,6 @@ import sys
 from collections.abc import Callable
 
 import uvicorn
-from systembridgemodels.action import Action
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
@@ -12,12 +11,13 @@ from systembridgeshared.settings import Settings
 from ..data import DataUpdate
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
-from ..utilities.action import ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
+# TODO: Decouple packages from each other (run independently)
 # TODO: Frontend
 # TODO: GUI
+# TODO: GUI Notification
 # TODO: Reduce complexity throughout application
 # TODO: Launch backend and gui from package
 
@@ -55,9 +55,6 @@ class Server(Base):
         super().__init__()
         self.no_frontend = no_frontend
 
-        self._gui_notification: GUI | None = None
-        self._gui_player: GUI | None = None
-        self._gui: GUI | None = None
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
@@ -171,12 +168,12 @@ class Server(Base):
         for task in self._tasks:
             task.cancel()
         self._logger.info("Tasks cancelled")
-        if self._gui:
-            self._gui.stop()
-        if self._gui_notification:
-            self._gui_notification.stop()
-        if self._gui_player:
-            self._gui_player.stop()
+        # if self._gui:
+        #     self._gui.stop()
+        # if self._gui_notification:
+        #     self._gui_notification.stop()
+        # if self._gui_player:
+        #     self._gui_player.stop()
         self._logger.info("GUI stopped. Exiting Application")
         sys.exit(0)
 
