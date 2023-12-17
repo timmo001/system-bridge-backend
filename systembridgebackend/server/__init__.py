@@ -11,6 +11,7 @@ from systembridgeshared.settings import Settings
 from ..data import DataUpdate
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
+from ..utilities.action import Action, ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
@@ -181,14 +182,6 @@ class Server(Base):
         api_app.data_update.update_media_thread.join(timeout=2)
         self._logger.info("Threads joined")
 
-        # if self._gui:
-        #     self._gui.stop()
-        # if self._gui_notification:
-        #     self._gui_notification.stop()
-        # if self._gui_player:
-        #     self._gui_player.stop()
-        # self._logger.info("GUI stopped. Exiting Application")
-
         self._logger.info("Exit Application")
         sys.exit(0)
 
@@ -211,9 +204,8 @@ class Server(Base):
         def hotkey_callback() -> None:
             """Hotkey callback"""
             self._logger.info("Hotkey pressed: %s", hotkey)
-            # TODO: Implement action handler
-            # action_handler = ActionHandler(self._settings)
-            # api_app.loop.create_task(action_handler.handle(Action(hotkey.key))
+            action_handler = ActionHandler(self._settings)
+            api_app.loop.create_task(action_handler.handle(Action(hotkey.key)))
 
         keyboard_hotkey_register(
             hotkey.key,
