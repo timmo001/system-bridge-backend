@@ -62,7 +62,6 @@ from systembridgeshared.update import Update
 from ..data import DataUpdate
 from ..modules import MODULES
 from ..modules.listeners import Listeners
-from ..utilities.autostart import autostart_disable, autostart_enable
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
     control_fastforward,
