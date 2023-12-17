@@ -1,4 +1,4 @@
-"""Action Utilities"""
+"""Action Utilities."""
 from typing import Any
 
 from systembridgemodels.action import Action
@@ -12,13 +12,13 @@ from systembridgeshared.settings import Settings
 
 
 class ActionHandler(Base):
-    """Handle actions"""
+    """Handle actions."""
 
     def __init__(
         self,
         settings: Settings,
     ) -> None:
-        """Initialise the action handler"""
+        """Initialise the action handler."""
         super().__init__()
         self._settings = settings
 
@@ -26,7 +26,7 @@ class ActionHandler(Base):
         self,
         action: Action,
     ) -> None:
-        """Handle an action"""
+        """Handle an action."""
         self._logger.info("Action: %s", action)
         if action.command == "api" and action.data is not None:
             await self.api_action(action.data)
@@ -37,7 +37,7 @@ class ActionHandler(Base):
         self,
         data: dict[str, Any],
     ) -> Any:
-        """Handle an API action"""
+        """Handle an API action."""
         self._logger.info("API Action: %s", data)
 
         api_port = self._settings.data.api.port

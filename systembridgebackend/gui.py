@@ -1,8 +1,8 @@
-"""System Bridge: GUI"""
+"""System Bridge: GUI."""
 import asyncio
+from collections.abc import Callable
 import subprocess
 import sys
-from collections.abc import Callable
 from threading import Event, Thread
 
 from systembridgeshared.base import Base
@@ -12,8 +12,10 @@ from systembridgeshared.websocket_client import WebSocketClient
 
 
 class StoppableThread(Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
+    """Thread class with a stop() method.
+
+    The thread itself has to check regularly for the stopped() condition.
+    """
 
     def __init__(
         self,
@@ -34,13 +36,13 @@ class StoppableThread(Thread):
 
 
 class GUI(Base):
-    """GUI"""
+    """GUI."""
 
     def __init__(
         self,
         settings: Settings,
     ):
-        """Initialize"""
+        """Initialise."""
         super().__init__()
         self._settings = settings
 
@@ -56,7 +58,7 @@ class GUI(Base):
         command: str | None = None,
         *args,
     ) -> None:
-        """Start the GUI"""
+        """Start the GUI."""
         if attempt > 2:
             self._logger.error("Failed to start GUI after 2 attempts")
             if failed_callback is not None:
@@ -138,7 +140,7 @@ class GUI(Base):
         command: str = "main",
         *args,
     ) -> None:
-        """Start the GUI in a synchronous thread"""
+        """Start the GUI in a synchronous thread."""
         asyncio.run(
             self._start(
                 failed_callback,
@@ -154,7 +156,7 @@ class GUI(Base):
         command: str = "main",
         *args,
     ) -> None:
-        """Start the GUI"""
+        """Start the GUI."""
         self._thread = StoppableThread(
             target=self._start_gui_sync,
             args=(
@@ -167,7 +169,7 @@ class GUI(Base):
         self._stopping = False
 
     def stop(self) -> None:
-        """Stop the GUI"""
+        """Stop the GUI."""
         self._logger.info("Stopping GUI: %s", self._name)
         self._stopping = True
         if self._process is not None:

@@ -1,8 +1,8 @@
-"""Power Utilities"""
+"""Power Utilities."""
 import asyncio
+from collections.abc import Callable
 import os
 import sys
-from collections.abc import Callable
 
 
 async def schedule_power_event(

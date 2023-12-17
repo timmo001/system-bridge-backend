@@ -1,7 +1,7 @@
-"""Data"""
+"""Data."""
 import asyncio
-import platform
 from collections.abc import Awaitable, Callable
+import platform
 from threading import Thread
 from typing import Any
 
@@ -13,7 +13,7 @@ from .modules import Update
 
 
 class UpdateThread(Thread):
-    """Update thread"""
+    """Update thread."""
 
     def __init__(
         self,
@@ -24,19 +24,19 @@ class UpdateThread(Thread):
         self._update = Update(updated_callback)
 
     def run(self) -> None:
-        """Run"""
+        """Run."""
         asyncio.run(self._update.update_data())
 
 
     def join(self, timeout: float | None = None) -> None:
-        """Join"""
+        """Join."""
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()
         super().join(timeout)
 
 class UpdateMediaThread(Thread):
-    """Update media thread"""
+    """Update media thread."""
 
     def __init__(
         self,
@@ -55,7 +55,7 @@ class UpdateMediaThread(Thread):
         self._media = Media(updated_callback)
 
     def run(self) -> None:
-        """Run"""
+        """Run."""
         if platform.system() != "Windows":
             return
 
@@ -63,14 +63,14 @@ class UpdateMediaThread(Thread):
 
 
     def join(self, timeout: float | None = None) -> None:
-        """Join"""
+        """Join."""
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()
         super().join(timeout)
 
 class DataUpdate(Base):
-    """Data Update"""
+    """Data Update."""
 
     def __init__(
         self,
@@ -88,19 +88,19 @@ class DataUpdate(Base):
         name: str,
         data: Any,
     ) -> None:
-        """Data updated callback"""
+        """Data updated callback."""
         setattr(self.data, name, data)
         await self._updated_callback(name)
 
     def request_update_data(self) -> None:
-        """Request update data"""
+        """Request update data."""
         if self.update_thread.is_alive():
             self._logger.warning("Update thread is already alive")
             return
         self.update_thread.start()
 
     def request_update_media_data(self) -> None:
-        """Request update media data"""
+        """Request update media data."""
         if self.update_media_thread.is_alive():
             self._logger.warning("Update media thread is already alive")
             return

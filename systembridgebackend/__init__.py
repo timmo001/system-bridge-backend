@@ -1,4 +1,4 @@
-"""System Bridge"""
+"""System Bridge."""
 from __future__ import annotations
 
 import asyncio
@@ -13,7 +13,7 @@ from .server import Server
 
 
 class Application(Base):
-    """Application"""
+    """Application."""
 
     def __init__(
         self,
