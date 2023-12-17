@@ -21,7 +21,7 @@ def main(
     init: bool = typer.Option(False, "--init", help="Initialise"),
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
 ) -> None:
-    """Main Application."""
+    """Run the main application."""
     try:
         Application(
             settings,
