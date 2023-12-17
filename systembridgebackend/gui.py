@@ -6,9 +6,7 @@ import sys
 from threading import Event, Thread
 
 from systembridgeshared.base import Base
-from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
-from systembridgeshared.websocket_client import WebSocketClient
 
 
 class StoppableThread(Thread):
@@ -64,41 +62,6 @@ class GUI(Base):
             if failed_callback is not None:
                 failed_callback()
             return
-        if command is None:
-            self._logger.info(
-                "Test WebSocket connection before starting GUI. Attempt #%s", attempt
-            )
-            websocket_client = WebSocketClient(self._settings)
-            try:
-                async with asyncio.timeout(20):
-                    await websocket_client.connect()
-                    await websocket_client.close()
-            except ConnectionErrorException:
-                self._logger.warning(
-                    "Could not connect to WebSocket. Retrying in 5 seconds"
-                )
-                await asyncio.sleep(5)
-                await self._start(
-                    failed_callback,
-                    attempt + 1,
-                    command,
-                    *args,
-                )
-                return
-            except asyncio.TimeoutError:
-                self._logger.warning(
-                    "Connection timeout to WebSocket. Retrying in 5 seconds"
-                )
-                await asyncio.sleep(5)
-                await self._start(
-                    failed_callback,
-                    attempt + 1,
-                    command,
-                    *args,
-                )
-                return
-
-        self._logger.info("Connection test passed")
 
         pgm_args = (
             [
