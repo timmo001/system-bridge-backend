@@ -8,7 +8,7 @@ from dataclasses import asdict, is_dataclass
 from json import dumps
 from typing import Any
 
-from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
+from fastapi import Depends, FastAPI, File, Header, Query, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -18,7 +18,6 @@ from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import Action as MediaAction
 from systembridgemodels.media_control import MediaControl
 from systembridgemodels.media_files import MediaFile, MediaFiles
-from systembridgemodels.media_play import MediaPlay
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
@@ -206,10 +205,11 @@ def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str,
     if isinstance(keyboard_event, KeyboardKey):
         try:
             keyboard_keypress(keyboard_event.key)
-        except ValueError as error:
+        except ValueError as value_error:
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, detail={"error": str(error)}
-            ) from error
+                status.HTTP_400_BAD_REQUEST,
+                detail={"error": str(value_error)},
+            ) from value_error
         return {
             "message": "Keypress sent",
             **asdict(keyboard_event),
@@ -471,32 +471,6 @@ async def send_media_file(
         "path": path,
         "filename": query_filename,
     }
-
-
-# TODO: GUI
-# @app.post("/api/media/play", dependencies=[Depends(security_token)])
-# async def send_media_play(
-#     request: Request,
-#     query_autoplay: bool | None = Query(False, alias="autoplay"),
-#     query_base: str | None = Query(None, alias="base"),
-#     query_path: str | None = Query(None, alias="path"),
-#     query_type: str | None = Query(None, alias="type"),
-#     query_url: str | None = Query(None, alias="url"),
-#     query_volume: float | None = Query(40, alias="volume"),
-# ) -> dict[str, str]:
-#     """Play media."""
-#     return await play_media(
-#         settings,
-#         callback_media_play,
-#         query_autoplay=query_autoplay,
-#         query_base=query_base,
-#         query_path=query_path,
-#         query_type=query_type,
-#         query_url=query_url,
-#         query_volume=query_volume,
-#         request_host=request.url.hostname,
-#         request_scheme=request.url.scheme,
-#     )
 
 
 @app.post("/api/notification", dependencies=[Depends(security_token)])
