@@ -28,6 +28,13 @@ class UpdateThread(Thread):
         asyncio.run(self._update.update_data())
 
 
+    def join(self, timeout: float | None = None) -> None:
+        """Join"""
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        loop.stop()
+        super().join(timeout)
+
 class UpdateMediaThread(Thread):
     """Update media thread"""
 
@@ -55,6 +62,13 @@ class UpdateMediaThread(Thread):
         asyncio.run(self._media.update_media_info())
 
 
+    def join(self, timeout: float | None = None) -> None:
+        """Join"""
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        loop.stop()
+        super().join(timeout)
+
 class DataUpdate(Base):
     """Data Update"""
 
@@ -66,6 +80,8 @@ class DataUpdate(Base):
         super().__init__()
         self.data = Data()
         self._updated_callback = updated_callback
+        self.update_thread = UpdateThread(self._data_updated_callback)
+        self.update_media_thread = UpdateMediaThread(self._data_updated_callback)
 
     async def _data_updated_callback(
         self,
@@ -78,10 +94,14 @@ class DataUpdate(Base):
 
     def request_update_data(self) -> None:
         """Request update data"""
-        thread = UpdateThread(self._data_updated_callback)
-        thread.start()
+        if self.update_thread.is_alive():
+            self._logger.warning("Update thread is already alive")
+            return
+        self.update_thread.start()
 
     def request_update_media_data(self) -> None:
         """Request update media data"""
-        thread = UpdateMediaThread(self._data_updated_callback)
-        thread.start()
+        if self.update_media_thread.is_alive():
+            self._logger.warning("Update media thread is already alive")
+            return
+        self.update_media_thread.start()

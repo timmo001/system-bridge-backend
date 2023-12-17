@@ -81,9 +81,11 @@ class Update(Base):
             {"name": "processes", "cls": ProcessesUpdate()},
         ]
 
+        self.threads: dict[str,Thread] = {}
+
     async def update_data(self) -> None:
         """Update Data"""
-        self._logger.info("Update data")
+        self._logger.info("Request update data")
 
         sensors_update = SensorsUpdate()
         sensors_data = await sensors_update.update_all_data()
@@ -94,11 +96,11 @@ class Update(Base):
             if class_obj["cls"].__dict__.get("sensors", {}) != {}:
                 class_obj["cls"].sensors = sensors_data
 
-            thread = UpdateDataThread(
+            self.threads[class_obj["name"]] = UpdateDataThread(
                 class_obj,
                 self._updated_callback,
             )
-            thread.start()
+            self.threads[class_obj["name"]].start()
 
             # Stagger the updates to avoid overloading the system
             await asyncio.sleep(1)
