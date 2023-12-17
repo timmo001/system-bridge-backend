@@ -21,7 +21,7 @@ class MDNSAdvertisement(Base):
 
     def advertise_server(self) -> None:
         """Advertise server"""
-        # TODO: Restore functionality
+        # TODO: Restore mdns functionality
 
         # system = System()
 
