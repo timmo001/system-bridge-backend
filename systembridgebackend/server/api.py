@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from collections.abc import Callable
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
 from json import dumps
 from typing import Any
 
@@ -28,6 +28,7 @@ from systembridgeshared.settings import Settings
 
 from .._version import __version__
 from ..data import DataUpdate
+from ..modules import MODULES
 from ..modules.listeners import Listeners
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
@@ -48,7 +49,6 @@ from ..utilities.media import (
     get_file,
     get_file_data,
     get_files,
-    play_media,
     write_file,
 )
 from ..utilities.open import open_path, open_url
@@ -67,24 +67,6 @@ from .websocket import WebSocketHandler
 settings = Settings()
 
 logger = logging.getLogger("systembridgebackend.server.api")
-
-
-# TODO: GUI
-# def callback_media_play(
-#     media_type: str,
-#     media_play: MediaPlay,
-# ) -> None:
-#     """Callback to open media player"""
-#     gui_player = GUI(settings)
-#     app.loop.create_task(
-#         gui_player.start(
-#             app.callback_exit,
-#             "media-player",
-#             media_type,
-#             dumps(asdict(media_play)),
-#         ),
-#         name="GUI media player",
-#     )
 
 
 def security_token_header(
@@ -178,42 +160,44 @@ def get_api_root() -> dict[str, str]:
     }
 
 
-# TODO: Replace
-# @app.get("/api/data/{module}", dependencies=[Depends(security_token)])
-# def get_data(module: str) -> Any:
-#     """Get data from module."""
-#     # table_module = TABLE_MAP.get(module)
-#     # if module not in MODULES or table_module is None:
-#     #     raise HTTPException(
-#     #         status.HTTP_404_NOT_FOUND,
-#     #         detail={"message": f"Data module {module} not found"},
-#     #     )
-#     # return database.get_data_dict(table_module)
-#     return None
+@app.get("/api/data/{module}", dependencies=[Depends(security_token)])
+def get_data(module: str) -> Any:
+    """Get data from module."""
+    if module not in MODULES:
+        logger.info("Data module %s not in registered modules", module)
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data module {module} not found"},
+        )
 
-# TODO: Replace
-# @app.get("/api/data/{module}/{key}", dependencies=[Depends(security_token)])
-# def get_data_by_key(
-#     module: str,
-#     key: str,
-# ) -> dict[str, Any]:
-#     """Get data from module by key."""
-#     table_module = TABLE_MAP.get(module)
-#     if module not in MODULES or table_module is None:
-#         raise HTTPException(
-#             status.HTTP_404_NOT_FOUND,
-#             detail={"message": f"Data module {module} not found"},
-#         )
-#     data = database.get_data_item_by_key(table_module, key)
-#     if data is None:
-#         raise HTTPException(
-#             status.HTTP_404_NOT_FOUND,
-#             detail={"message": f"Data item {key} in module {module} not found"},
-#         )
-#     return {
-#         data.key: convert_string_to_correct_type(data.value),
-#         "last_updated": data.timestamp,
-#     }
+    if (data_module := getattr(app.data_update.data, module)) is None:
+        logger.info("Data module %s not found", module)
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data module {module} not found"},
+        )
+
+    return asdict(data_module) if is_dataclass(data_module) else data_module
+
+
+@app.get("/api/data/{module}/{key}", dependencies=[Depends(security_token)])
+def get_data_by_key(
+    module: str,
+    key: str,
+) -> dict[str, Any]:
+    """Get data from module by key."""
+    data = get_data(module)
+
+    if key not in data:
+        logger.info("Data item %s in module %s not found", key, module)
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data item {key} in module {module} not found"},
+        )
+
+    return {
+        key: data[key],
+    }
 
 
 @app.post("/api/keyboard", dependencies=[Depends(security_token)])
