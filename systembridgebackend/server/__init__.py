@@ -9,6 +9,7 @@ from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
 from ..data import DataUpdate
+from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from ..utilities.action import Action, ActionHandler
@@ -116,37 +117,35 @@ class Server(Base):
     ) -> None:
         """Open GUI"""
         if command == "notification":
-            # TODO: Launch GUI as a detached process
             self._logger.info("Launch Notification GUI as a detached process")
-            # if self._gui_notification:
-            #     self._gui_notification.stop()
-            # self._gui_notification = GUI(self._settings)
-            # self._tasks.append(
-            #     api_app.loop.create_task(
-            #         self._gui_notification.start(
-            #             self.exit_application,
-            #             command,
-            #             data,
-            #         ),
-            #         name="GUI Notification",
-            #     )
-            # )
+            if self._gui_notification:
+                self._gui_notification.stop()
+            self._gui_notification = GUI(self._settings)
+            self._tasks.append(
+                api_app.loop.create_task(
+                    self._gui_notification.start(
+                        self.exit_application,
+                        command,
+                        data,
+                    ),
+                    name="GUI Notification",
+                )
+            )
         elif command == "player":
-            # TODO: Launch GUI as a detached process
             self._logger.info("Launch Player GUI as a detached process")
-            # if self._gui_player:
-            #     self._gui_player.stop()
-            # self._gui_player = GUI(self._settings)
-            # self._tasks.append(
-            #     api_app.loop.create_task(
-            #         self._gui_player.start(
-            #             self.exit_application,
-            #             command,
-            #             data,
-            #         ),
-            #         name="GUI Media Player",
-            #     )
-            # )
+            if self._gui_player:
+                self._gui_player.stop()
+            self._gui_player = GUI(self._settings)
+            self._tasks.append(
+                api_app.loop.create_task(
+                    self._gui_player.start(
+                        self.exit_application,
+                        command,
+                        data,
+                    ),
+                    name="GUI Media Player",
+                )
+            )
         else:
             raise NotImplementedError(f"Command not implemented: {command}")
 
