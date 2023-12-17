@@ -1,4 +1,4 @@
-"""WebSocket Handler"""
+"""WebSocket Handler."""
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 from json import JSONDecodeError, dumps
@@ -119,7 +119,7 @@ from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
 
 
 class WebSocketHandler(Base):
-    """WebSocket handler"""
+    """WebSocket handler."""
 
     def __init__(
         self,
@@ -130,7 +130,7 @@ class WebSocketHandler(Base):
         callback_exit_application: Callable[[], None],
         callback_open_gui: Callable[[str, str], None],
     ) -> None:
-        """Initialise"""
+        """Initialise."""
         super().__init__()
         self._settings = settings
         self._data_update = data_update
@@ -144,7 +144,7 @@ class WebSocketHandler(Base):
         self,
         response: Response,
     ) -> None:
-        """Send response"""
+        """Send response."""
         if not self._active:
             return
         message = asdict(response)
@@ -159,7 +159,7 @@ class WebSocketHandler(Base):
         module: str,
         data: Data,
     ) -> None:
-        """Data changed"""
+        """Data changed."""
         if module not in MODULES:
             self._logger.info("Data module %s not in registered modules", module)
             return
@@ -181,7 +181,7 @@ class WebSocketHandler(Base):
         response_data: dict,
         request: Request,
     ) -> None:
-        """Handle event"""
+        """Handle event."""
         if request.event == TYPE_APPLICATION_UPDATE:
             try:
                 model = UpdateModel(**response_data)
