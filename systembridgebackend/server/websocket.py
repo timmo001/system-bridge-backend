@@ -1,8 +1,8 @@
 """WebSocket Handler"""
-import os
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 from json import JSONDecodeError, dumps
+import os
 from uuid import uuid4
 
 from fastapi import WebSocket
@@ -11,8 +11,7 @@ from systembridgemodels.data import Data
 from systembridgemodels.get_data import GetData
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
-from systembridgemodels.media_control import Action as MediaAction
-from systembridgemodels.media_control import MediaControl
+from systembridgemodels.media_control import Action as MediaAction, MediaControl
 from systembridgemodels.media_get_file import MediaGetFile
 from systembridgemodels.media_get_files import MediaGetFiles
 from systembridgemodels.notification import Notification
@@ -22,7 +21,6 @@ from systembridgemodels.register_data_listener import RegisterDataListener
 from systembridgemodels.request import Request
 from systembridgemodels.response import Response
 from systembridgemodels.update import Update as UpdateModel
-from systembridgemodels.update_setting import UpdateSetting
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -31,9 +29,7 @@ from systembridgeshared.const import (
     EVENT_MESSAGE,
     EVENT_MODULES,
     EVENT_PATH,
-    EVENT_SETTING,
     EVENT_URL,
-    EVENT_VALUE,
     SUBTYPE_BAD_DIRECTORY,
     SUBTYPE_BAD_FILE,
     SUBTYPE_BAD_JSON,
@@ -89,10 +85,9 @@ from systembridgeshared.const import (
     TYPE_POWER_SLEEP,
     TYPE_POWER_SLEEPING,
     TYPE_REGISTER_DATA_LISTENER,
-    TYPE_SETTING_UPDATED,
     TYPE_SETTINGS_RESULT,
     TYPE_UNREGISTER_DATA_LISTENER,
-    TYPE_UPDATE_SETTING,
+    TYPE_UPDATE_SETTINGS,
 )
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
@@ -847,50 +842,17 @@ class WebSocketHandler(Base):
                     data=asdict(self._settings.data),
                 )
             )
-        elif request.event == TYPE_UPDATE_SETTING:
-            try:
-                model = UpdateSetting(**response_data)
-            except ValueError as error:
-                message = f"Invalid request: {error}"
-                self._logger.warning(message, exc_info=error)
-                await self._send_response(
-                    Response(
-                        id=request.id,
-                        type=TYPE_ERROR,
-                        subtype=SUBTYPE_BAD_REQUEST,
-                        message=message,
-                        data={},
-                    )
-                )
-                return
-
-            self._logger.info(
-                "Setting setting %s to: %s",
-                model.setting,
-                model.value,
-            )
-
-            self._settings.update(model.setting, model.value)
-
+        elif request.event == TYPE_UPDATE_SETTINGS:
+            self._logger.info("Updating settings")
+            self._settings.update(response_data[EVENT_DATA])
             await self._send_response(
                 Response(
                     id=request.id,
-                    type=TYPE_SETTING_UPDATED,
-                    message="Setting updated",
-                    data={
-                        EVENT_SETTING: model.setting,
-                        EVENT_VALUE: model.value,
-                    },
+                    type=TYPE_SETTINGS_RESULT,
+                    message="Updated settings",
+                    data=asdict(self._settings.data),
                 )
             )
-
-            # TODO: Implement autostart
-            # if model.setting == "autostart":
-            #     self._logger.info("Setting autostart to %s", model.value)
-            #     if model.value is True:
-            #         autostart_enable()
-            #     else:
-            #         autostart_disable()
         elif request.event == TYPE_POWER_SLEEP:
             self._logger.info("Sleeping")
             await self._send_response(
@@ -975,7 +937,7 @@ class WebSocketHandler(Base):
         self,
         listener_id: str,
     ) -> None:
-        """Handler"""
+        """Handle the websocket connection."""
         # Loop until the connection is closed
         while self._active:
             try:
@@ -1045,7 +1007,7 @@ class WebSocketHandler(Base):
                 )
 
     async def handler(self) -> None:
-        """Handler"""
+        """Handle the websocket connection."""
         listener_id = str(uuid4())
         try:
             await self._handler(listener_id)
@@ -1059,5 +1021,5 @@ class WebSocketHandler(Base):
         self,
         active: bool,
     ) -> None:
-        """Set active"""
+        """Set active."""
         self._active = active
