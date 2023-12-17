@@ -9,9 +9,7 @@ from systembridgeshared.settings import Settings
 
 from ._version import __version__
 from .modules.listeners import Listeners
-from .modules.system import System
 from .server import Server
-from .utilities.autostart import autostart_disable, autostart_enable
 
 
 class Application(Base):
@@ -20,7 +18,6 @@ class Application(Base):
     def __init__(
         self,
         settings: Settings,
-        cli: bool = False,
         init: bool = False,
         no_frontend: bool = False,
     ) -> None:
@@ -33,14 +30,6 @@ class Application(Base):
         self._logger.info("System Bridge %s: Startup", __version__.public())
 
         self._logger.info("Your token is: %s", settings.data.api.token)
-
-        if not cli:
-            autostart = settings.data.autostart
-            self._logger.info("Autostart enabled: %s", autostart)
-            if autostart:
-                autostart_enable()
-            else:
-                autostart_disable()
 
         listeners = Listeners()
 

@@ -18,7 +18,6 @@ logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
 @app.command(name=None, short_help="Main Application")
 def main(
-    cli: bool = typer.Option(False, "--cli", help="CLI"),
     init: bool = typer.Option(False, "--init", help="Initialise"),
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
 ) -> None:
@@ -26,7 +25,6 @@ def main(
     try:
         Application(
             settings,
-            cli=cli,
             init=init,
             no_frontend=no_frontend,
         )
