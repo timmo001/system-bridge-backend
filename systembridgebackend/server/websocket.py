@@ -7,17 +7,15 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
-from systembridgemodels.data import Data
-from systembridgemodels.get_data import GetData
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import Action as MediaAction, MediaControl
 from systembridgemodels.media_get_file import MediaGetFile
 from systembridgemodels.media_get_files import MediaGetFiles
+from systembridgemodels.modules import GetData, ModulesData, RegisterDataListener
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
-from systembridgemodels.register_data_listener import RegisterDataListener
 from systembridgemodels.request import Request
 from systembridgemodels.response import Response
 from systembridgemodels.update import Update as UpdateModel
@@ -157,7 +155,7 @@ class WebSocketHandler(Base):
     async def _data_changed(
         self,
         module: str,
-        data: Data,
+        data: ModulesData,
     ) -> None:
         """Change data."""
         if module not in MODULES:
