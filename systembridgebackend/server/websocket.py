@@ -2,7 +2,7 @@
 import os
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
-from json import JSONDecodeError
+from json import JSONDecodeError, dumps
 from uuid import uuid4
 
 from fastapi import WebSocket
@@ -25,18 +25,31 @@ from systembridgemodels.update import Update as UpdateModel
 from systembridgemodels.update_setting import UpdateSetting
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    EVENT_BASE,
     EVENT_DATA,
     EVENT_EVENT,
     EVENT_MESSAGE,
     EVENT_MODULES,
+    EVENT_PATH,
+    EVENT_SETTING,
+    EVENT_URL,
+    EVENT_VALUE,
+    SUBTYPE_BAD_DIRECTORY,
+    SUBTYPE_BAD_FILE,
     SUBTYPE_BAD_JSON,
+    SUBTYPE_BAD_PATH,
     SUBTYPE_BAD_REQUEST,
     SUBTYPE_BAD_TOKEN,
+    SUBTYPE_INVALID_ACTION,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
+    SUBTYPE_MISSING_ACTION,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MODULES,
+    SUBTYPE_MISSING_PATH_URL,
     SUBTYPE_MISSING_TEXT,
+    SUBTYPE_MISSING_TITLE,
+    SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
@@ -44,17 +57,42 @@ from systembridgeshared.const import (
     TYPE_DATA_LISTENER_REGISTERED,
     TYPE_DATA_LISTENER_UNREGISTERED,
     TYPE_DATA_UPDATE,
+    TYPE_DIRECTORIES,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
+    TYPE_FILE,
+    TYPE_FILES,
     TYPE_GET_DATA,
+    TYPE_GET_DIRECTORIES,
+    TYPE_GET_FILE,
+    TYPE_GET_FILES,
     TYPE_GET_SETTINGS,
     TYPE_KEYBOARD_KEY_PRESSED,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_KEYBOARD_TEXT_SENT,
+    TYPE_MEDIA_CONTROL,
+    TYPE_NOTIFICATION,
+    TYPE_NOTIFICATION_SENT,
+    TYPE_OPEN,
+    TYPE_OPENED,
+    TYPE_POWER_HIBERNATE,
+    TYPE_POWER_HIBERNATING,
+    TYPE_POWER_LOCK,
+    TYPE_POWER_LOCKING,
+    TYPE_POWER_LOGGINGOUT,
+    TYPE_POWER_LOGOUT,
+    TYPE_POWER_RESTART,
+    TYPE_POWER_RESTARTING,
+    TYPE_POWER_SHUTDOWN,
+    TYPE_POWER_SHUTTINGDOWN,
+    TYPE_POWER_SLEEP,
+    TYPE_POWER_SLEEPING,
     TYPE_REGISTER_DATA_LISTENER,
+    TYPE_SETTING_UPDATED,
     TYPE_SETTINGS_RESULT,
     TYPE_UNREGISTER_DATA_LISTENER,
+    TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
@@ -83,8 +121,6 @@ from ..utilities.media import (
 )
 from ..utilities.open import open_path, open_url
 from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
-
-# TODO: Implement websocket types
 
 
 class WebSocketHandler(Base):
@@ -147,13 +183,13 @@ class WebSocketHandler(Base):
     async def _handle_event(
         self,
         listener_id: str,
-        data: dict,
+        response_data: dict,
         request: Request,
     ) -> None:
         """Handle event"""
         if request.event == TYPE_APPLICATION_UPDATE:
             try:
-                model = UpdateModel(**data)
+                model = UpdateModel(**response_data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -184,7 +220,7 @@ class WebSocketHandler(Base):
             self._logger.info("Exit application called")
         elif request.event == TYPE_KEYBOARD_KEYPRESS:
             try:
-                model = KeyboardKey(**data)
+                model = KeyboardKey(**response_data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -235,7 +271,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_KEYBOARD_TEXT:
             try:
-                model = KeyboardText(**data)
+                model = KeyboardText(**response_data)
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -270,231 +306,219 @@ class WebSocketHandler(Base):
                     data={"text": model.text},
                 )
             )
-        # elif request.event == TYPE_MEDIA_CONTROL:
-        #     try:
-        #         model = MediaControl(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.action is None:
-        #         self._logger.warning("No action provided")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_MISSING_ACTION,
-        #                     EVENT_MESSAGE: "No action provided",
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.action not in MediaAction:
-        #         self._logger.warning("Invalid action provided")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_INVALID_ACTION,
-        #                     EVENT_MESSAGE: "Invalid action provided",
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.action == MediaAction.play:
-        #         await control_play()
-        #     elif model.action == MediaAction.pause:
-        #         await control_pause()
-        #     elif model.action == MediaAction.stop:
-        #         await control_stop()
-        #     elif model.action == MediaAction.previous:
-        #         await control_previous()
-        #     elif model.action == MediaAction.next:
-        #         await control_next()
-        #     elif model.action == MediaAction.seek:
-        #         if model.value is None:
-        #             self._logger.warning("No position value provided")
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_ERROR,
-        #                         EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-        #                         EVENT_MESSAGE: "No value provided",
-        #                     }
-        #                 )
-        #             )
-        #             return
-        #         await control_seek(int(model.value))
-        #     elif model.action == MediaAction.rewind:
-        #         await control_rewind()
-        #     elif model.action == MediaAction.fastforward:
-        #         await control_fastforward()
-        #     elif model.action == MediaAction.shuffle:
-        #         if model.value is None:
-        #             self._logger.warning("No shuffle value provided")
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_ERROR,
-        #                         EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-        #                         EVENT_MESSAGE: "No value provided",
-        #                     }
-        #                 )
-        #             )
-        #             return
-        #         await control_shuffle(bool(model.value))
-        #     elif model.action == MediaAction.repeat:
-        #         if model.value is None:
-        #             self._logger.warning("No repeat value provided")
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_ERROR,
-        #                         EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-        #                         EVENT_MESSAGE: "No value provided",
-        #                     }
-        #                 )
-        #             )
-        #             return
-        #         await control_repeat(int(model.value))
-        #     elif model.action == MediaAction.mute:
-        #         await control_mute()
-        #     elif model.action == MediaAction.volumedown:
-        #         await control_volume_down()
-        #     elif model.action == MediaAction.volumeup:
-        #         await control_volume_up()
+        elif request.event == TYPE_MEDIA_CONTROL:
+            try:
+                model = MediaControl(**response_data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
+            if model.action is None:
+                self._logger.warning("No action provided")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_MISSING_ACTION,
+                        message="No action provided",
+                        data={},
+                    )
+                )
+                return
+            if model.action not in MediaAction:
+                self._logger.warning("Invalid action provided")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_INVALID_ACTION,
+                        message="Invalid action provided",
+                        data={},
+                    )
+                )
+                return
+            if model.action == MediaAction.play:
+                await control_play()
+            elif model.action == MediaAction.pause:
+                await control_pause()
+            elif model.action == MediaAction.stop:
+                await control_stop()
+            elif model.action == MediaAction.previous:
+                await control_previous()
+            elif model.action == MediaAction.next:
+                await control_next()
+            elif model.action == MediaAction.seek:
+                if model.value is None:
+                    self._logger.warning("No position value provided")
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            subtype=SUBTYPE_MISSING_VALUE,
+                            message="No value provided",
+                            data={},
+                        )
+                    )
+                    return
+                await control_seek(int(model.value))
+            elif model.action == MediaAction.rewind:
+                await control_rewind()
+            elif model.action == MediaAction.fastforward:
+                await control_fastforward()
+            elif model.action == MediaAction.shuffle:
+                if model.value is None:
+                    self._logger.warning("No shuffle value provided")
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            subtype=SUBTYPE_MISSING_VALUE,
+                            message="No value provided",
+                            data={},
+                        )
+                    )
+                    return
+                await control_shuffle(bool(model.value))
+            elif model.action == MediaAction.repeat:
+                if model.value is None:
+                    self._logger.warning("No repeat value provided")
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            subtype=SUBTYPE_MISSING_VALUE,
+                            message="No value provided",
+                            data={},
+                        )
+                    )
+                    return
+                await control_repeat(int(model.value))
+            elif model.action == MediaAction.mute:
+                await control_mute()
+            elif model.action == MediaAction.volumedown:
+                await control_volume_down()
+            elif model.action == MediaAction.volumeup:
+                await control_volume_up()
 
-        # elif request.event == TYPE_NOTIFICATION:
-        #     try:
-        #         model = Notification(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if model.title is None:
-        #         self._logger.warning("No title provided")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_MISSING_TITLE,
-        #                     EVENT_MESSAGE: "No title provided",
-        #                 }
-        #             )
-        #         )
-        #         return
+        elif request.event == TYPE_NOTIFICATION:
+            try:
+                model = Notification(**response_data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
+            if model.title is None:
+                self._logger.warning("No title provided")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_MISSING_TITLE,
+                        message="No title provided",
+                        data={},
+                    )
+                )
+                return
 
-        #     self._callback_open_gui("notification", model.json())
+            self._callback_open_gui("notification", dumps(asdict(model)))
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_NOTIFICATION_SENT,
-        #                 EVENT_MESSAGE: "Notification sent",
-        #             }
-        #         )
-        #     )
-        # elif request.event == TYPE_OPEN:
-        #     if "path" in data:
-        #         try:
-        #             model = OpenPath(**data)
-        #         except ValueError as error:
-        #             message = f"Invalid request: {error}"
-        #             self._logger.warning(message, exc_info=error)
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_ERROR,
-        #                         EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                         EVENT_MESSAGE: message,
-        #                     }
-        #                 )
-        #             )
-        #             return
-        #         open_path(model.path)  # pylint: disable=no-member
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_OPENED,
-        #                     EVENT_MESSAGE: "Path opened",
-        #                     EVENT_PATH: model.path,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if "url" in data:
-        #         try:
-        #             model = OpenUrl(**data)
-        #         except ValueError as error:
-        #             message = f"Invalid request: {error}"
-        #             self._logger.warning(message, exc_info=error)
-        #             await self._send_response(
-        #                 Response(
-        #                     **{
-        #                         EVENT_ID: request.id,
-        #                         EVENT_TYPE: TYPE_ERROR,
-        #                         EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                         EVENT_MESSAGE: message,
-        #                     }
-        #                 )
-        #             )
-        #             return
-        #         open_url(model.url)  # pylint: disable=no-member
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_OPENED,
-        #                     EVENT_MESSAGE: "URL opened",
-        #                     EVENT_URL: model.url,  # pylint: disable=no-member
-        #                 }
-        #             )
-        #         )
-        #         return
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_NOTIFICATION_SENT,
+                    message="Notification sent",
+                    data={},
+                )
+            )
+        elif request.event == TYPE_OPEN:
+            if "path" in response_data:
+                try:
+                    model = OpenPath(**response_data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message, exc_info=error)
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            subtype=SUBTYPE_BAD_REQUEST,
+                            message=message,
+                            data={},
+                        )
+                    )
+                    return
+                open_path(model.path)  # pylint: disable=no-member
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_OPENED,
+                        subtype=SUBTYPE_MISSING_PATH_URL,
+                        message="Path opened",
+                        data={EVENT_PATH: model.path},
+                    )
+                )
+                return
+            if "url" in response_data:
+                try:
+                    model = OpenUrl(**response_data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message, exc_info=error)
+                    await self._send_response(
+                        Response(
+                            id=request.id,
+                            type=TYPE_ERROR,
+                            subtype=SUBTYPE_BAD_REQUEST,
+                            message=message,
+                            data={},
+                        )
+                    )
+                    return
+                open_url(model.url)  # pylint: disable=no-member
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_OPENED,
+                        subtype=SUBTYPE_MISSING_PATH_URL,
+                        message="URL opened",
+                        data={EVENT_URL: model.url},
+                    )
+                )
+                return
 
-        #     self._logger.warning("No path or url provided")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_ERROR,
-        #                 EVENT_SUBTYPE: SUBTYPE_MISSING_PATH_URL,
-        #                 EVENT_MESSAGE: "No path or url provided",
-        #             }
-        #         )
-        #     )
+            self._logger.warning("No path or url provided")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_ERROR,
+                    subtype=SUBTYPE_MISSING_PATH_URL,
+                    message="No path or url provided",
+                    data={},
+                )
+            )
         elif request.event == TYPE_REGISTER_DATA_LISTENER:
             try:
-                model = RegisterDataListener(modules=data[EVENT_DATA][EVENT_MODULES])
+                model = RegisterDataListener(
+                    modules=response_data[EVENT_DATA][EVENT_MODULES]
+                )
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -580,7 +604,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_GET_DATA:
             try:
-                model = GetData(modules=data[EVENT_DATA][EVENT_MODULES])
+                model = GetData(modules=response_data[EVENT_DATA][EVENT_MODULES])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -616,13 +640,15 @@ class WebSocketHandler(Base):
             )
 
             for module in model.modules:
-                if (data := getattr(self._data_update.data, module)) is None:
+                if (
+                    response_data := getattr(self._data_update.data, str(module))
+                ) is None:
                     await self._send_response(
                         Response(
                             id=request.id,
                             type=TYPE_ERROR,
                             message="Cannot find data for module",
-                            module=module,
+                            module=str(module),
                             data={},
                         )
                     )
@@ -632,199 +658,185 @@ class WebSocketHandler(Base):
                             id=request.id,
                             type=TYPE_DATA_UPDATE,
                             message="Data received",
-                            module=module,
-                            data=data,
+                            module=str(module),
+                            data=response_data,
                         )
                     )
 
-        # elif request.event == TYPE_GET_DIRECTORIES:
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_DIRECTORIES,
-        #                 EVENT_DIRECTORIES: get_directories(self._settings),
-        #             }
-        #         )
-        #     )
-        # elif request.event == TYPE_GET_FILES:
-        #     try:
-        #         model = MediaGetFiles(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
+        elif request.event == TYPE_GET_DIRECTORIES:
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_DIRECTORIES,
+                    message="Got directories",
+                    data=get_directories(self._settings),
+                )
+            )
+        elif request.event == TYPE_GET_FILES:
+            try:
+                model = MediaGetFiles(**response_data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
 
-        #     root_path = None
-        #     for item in get_directories(self._settings):
-        #         if item["key"] == model.base:
-        #             root_path = item["path"]
-        #             break
+            root_path = None
+            for item in get_directories(self._settings):
+                if item["key"] == model.base:
+                    root_path = item["path"]
+                    break
 
-        #     if root_path is None or not os.path.exists(root_path):
-        #         self._logger.warning("Cannot find base path")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
-        #                     EVENT_MESSAGE: "Cannot find base path",
-        #                     EVENT_BASE: model.base,
-        #                 }
-        #             )
-        #         )
-        #         return
+            if root_path is None or not os.path.exists(root_path):
+                self._logger.warning("Cannot find base path")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_PATH,
+                        message="Cannot find base path",
+                        data={EVENT_BASE: model.base},
+                    )
+                )
+                return
 
-        #     path = (
-        #         os.path.join(root_path, model.path)
-        #         if model.path is not None
-        #         else root_path
-        #     )
+            path = (
+                os.path.join(root_path, model.path)
+                if model.path is not None
+                else root_path
+            )
 
-        #     self._logger.info(
-        #         "Getting files: %s - %s - %s",
-        #         model.base,
-        #         model.path,
-        #         path,
-        #     )
+            self._logger.info(
+                "Getting files: %s - %s - %s",
+                model.base,
+                model.path,
+                path,
+            )
 
-        #     if not os.path.exists(path):
-        #         self._logger.warning("Cannot find path")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
-        #                     EVENT_MESSAGE: "Cannot find path",
-        #                     EVENT_PATH: path,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if not os.path.isdir(path):
-        #         self._logger.warning("Path is not a directory")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_DIRECTORY,
-        #                     EVENT_MESSAGE: "Path is not a directory",
-        #                     EVENT_PATH: path,
-        #                 }
-        #             )
-        #         )
-        #         return
+            if not os.path.exists(path):
+                self._logger.warning("Cannot find path")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_PATH,
+                        message="Cannot find path",
+                        data={EVENT_PATH: path},
+                    )
+                )
+                return
+            if not os.path.isdir(path):
+                self._logger.warning("Path is not a directory")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_DIRECTORY,
+                        message="Path is not a directory",
+                        data={EVENT_PATH: path},
+                    )
+                )
+                return
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_FILES,
-        #                 EVENT_FILES: get_files(self._settings, model.base, path),
-        #                 EVENT_PATH: path,
-        #             }
-        #         )
-        #     )
-        # elif request.event == TYPE_GET_FILE:
-        #     try:
-        #         model = MediaGetFile(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_FILES,
+                    message="Got files",
+                    data=get_files(self._settings, model.base, path),
+                )
+            )
+        elif request.event == TYPE_GET_FILE:
+            try:
+                model = MediaGetFile(**response_data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
 
-        #     root_path = None
-        #     for item in get_directories(self._settings):
-        #         if item["key"] == model.base:
-        #             root_path = item["path"]
-        #             break
+            root_path = None
+            for item in get_directories(self._settings):
+                if item["key"] == model.base:
+                    root_path = item["path"]
+                    break
 
-        #     if root_path is None or not os.path.exists(root_path):
-        #         self._logger.warning("Cannot find base path")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
-        #                     EVENT_MESSAGE: "Cannot find base path",
-        #                     EVENT_BASE: model.base,
-        #                 }
-        #             )
-        #         )
-        #         return
+            if root_path is None or not os.path.exists(root_path):
+                self._logger.warning("Cannot find base path")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_PATH,
+                        message="Cannot find base path",
+                        data={EVENT_BASE: model.base},
+                    )
+                )
+                return
 
-        #     path = os.path.join(root_path, model.path)
+            path = os.path.join(root_path, model.path)
 
-        #     self._logger.info(
-        #         "Getting file: %s - %s - %s",
-        #         model.base,
-        #         model.path,
-        #         path,
-        #     )
+            self._logger.info(
+                "Getting file: %s - %s - %s",
+                model.base,
+                model.path,
+                path,
+            )
 
-        #     if not os.path.exists(path):
-        #         self._logger.warning("Cannot find path")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
-        #                     EVENT_MESSAGE: "Cannot find path",
-        #                     EVENT_PATH: path,
-        #                 }
-        #             )
-        #         )
-        #         return
-        #     if not os.path.isfile(path):
-        #         self._logger.warning("Path is not a file")
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_FILE,
-        #                     EVENT_MESSAGE: "Path is not a file",
-        #                     EVENT_PATH: path,
-        #                 }
-        #             )
-        #         )
-        #         return
+            if not os.path.exists(path):
+                self._logger.warning("Cannot find path")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_PATH,
+                        message="Cannot find path",
+                        data={EVENT_PATH: path},
+                    )
+                )
+                return
+            if not os.path.isfile(path):
+                self._logger.warning("Path is not a file")
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_FILE,
+                        message="Path is not a file",
+                        data={EVENT_PATH: path},
+                    )
+                )
+                return
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_FILE,
-        #                 EVENT_FILE: get_file(root_path, path),
-        #                 EVENT_PATH: path,
-        #             }
-        #         )
-        #     )
+            if (file := get_file(root_path, path)) is not None:
+                response_data = asdict(file)
+            else:
+                response_data = {}
+
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_FILE,
+                    message="Got file",
+                    data=response_data,
+                )
+            )
         elif request.event == TYPE_GET_SETTINGS:
             self._logger.info("Getting settings")
             await self._send_response(
@@ -835,154 +847,116 @@ class WebSocketHandler(Base):
                     data=asdict(self._settings.data),
                 )
             )
-        # elif request.event == TYPE_GET_SETTING:
-        #     try:
-        #         model = GetSetting(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
+        elif request.event == TYPE_UPDATE_SETTING:
+            try:
+                model = UpdateSetting(**response_data)
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
 
-        #     self._logger.info("Getting setting: %s", model.setting)
+            self._logger.info(
+                "Setting setting %s to: %s",
+                model.setting,
+                model.value,
+            )
 
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_SETTING_RESULT,
-        #                 EVENT_MESSAGE: "Got setting",
-        #                 EVENT_SETTING: model.setting,
-        #                 EVENT_DATA: self._settings.get(model.setting),
-        #             }
-        #         )
-        #     )
-        # elif request.event == TYPE_UPDATE_SETTING:
-        #     try:
-        #         model = UpdateSetting(**data)
-        #     except ValueError as error:
-        #         message = f"Invalid request: {error}"
-        #         self._logger.warning(message, exc_info=error)
-        #         await self._send_response(
-        #             Response(
-        #                 **{
-        #                     EVENT_ID: request.id,
-        #                     EVENT_TYPE: TYPE_ERROR,
-        #                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
-        #                     EVENT_MESSAGE: message,
-        #                 }
-        #             )
-        #         )
-        #         return
+            self._settings.update(model.setting, model.value)
 
-        #     self._logger.info(
-        #         "Setting setting %s to: %s",
-        #         model.setting,
-        #         model.value,
-        #     )
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_SETTING_UPDATED,
+                    message="Setting updated",
+                    data={
+                        EVENT_SETTING: model.setting,
+                        EVENT_VALUE: model.value,
+                    },
+                )
+            )
 
-        #     self._settings.set(model.setting, model.value)
-
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_SETTING_UPDATED,
-        #                 EVENT_MESSAGE: "Setting updated",
-        #                 EVENT_SETTING: model.setting,
-        #                 EVENT_VALUE: model.value,
-        #             }
-        #         )
-        #     )
-
-        #     if model.setting != SETTING_AUTOSTART:
-        #         return
-        #     self._logger.info("Setting autostart to %s", model.value)
-        #     if model.value is True:
-        #         autostart_enable()
-        #     else:
-        #         autostart_disable()
-        # elif request.event == TYPE_POWER_SLEEP:
-        #     self._logger.info("Sleeping")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_SLEEPING,
-        #                 EVENT_MESSAGE: "Sleeping",
-        #             }
-        #         )
-        #     )
-        #     sleep()
-        # elif request.event == TYPE_POWER_HIBERNATE:
-        #     self._logger.info("Sleeping")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_HIBERNATING,
-        #                 EVENT_MESSAGE: "Hiibernating",
-        #             }
-        #         )
-        #     )
-        #     hibernate()
-        # elif request.event == TYPE_POWER_RESTART:
-        #     self._logger.info("Sleeping")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_RESTARTING,
-        #                 EVENT_MESSAGE: "Restarting",
-        #             }
-        #         )
-        #     )
-        #     restart()
-        # elif request.event == TYPE_POWER_SHUTDOWN:
-        #     self._logger.info("Sleeping")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_SHUTTINGDOWN,
-        #                 EVENT_MESSAGE: "Shutting down",
-        #             }
-        #         )
-        #     )
-        #     shutdown()
-        # elif request.event == TYPE_POWER_LOCK:
-        #     self._logger.info("Locking")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_LOCKING,
-        #                 EVENT_MESSAGE: "Locking",
-        #             }
-        #         )
-        #     )
-        #     lock()
-        # elif request.event == TYPE_POWER_LOGOUT:
-        #     self._logger.info("Logging out")
-        #     await self._send_response(
-        #         Response(
-        #             **{
-        #                 EVENT_ID: request.id,
-        #                 EVENT_TYPE: TYPE_POWER_LOGGINGOUT,
-        #                 EVENT_MESSAGE: "Logging out",
-        #             }
-        #         )
-        #     )
-        #     logout()
+            # TODO: Implement autostart
+            # if model.setting == "autostart":
+            #     self._logger.info("Setting autostart to %s", model.value)
+            #     if model.value is True:
+            #         autostart_enable()
+            #     else:
+            #         autostart_disable()
+        elif request.event == TYPE_POWER_SLEEP:
+            self._logger.info("Sleeping")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_SLEEPING,
+                    message="Sleeping",
+                    data={},
+                )
+            )
+            sleep()
+        elif request.event == TYPE_POWER_HIBERNATE:
+            self._logger.info("Sleeping")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_HIBERNATING,
+                    message="Hibernating",
+                    data={},
+                )
+            )
+            hibernate()
+        elif request.event == TYPE_POWER_RESTART:
+            self._logger.info("Sleeping")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_RESTARTING,
+                    message="Restarting",
+                    data={},
+                )
+            )
+            restart()
+        elif request.event == TYPE_POWER_SHUTDOWN:
+            self._logger.info("Sleeping")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_SHUTTINGDOWN,
+                    message="Shutting down",
+                    data={},
+                )
+            )
+            shutdown()
+        elif request.event == TYPE_POWER_LOCK:
+            self._logger.info("Locking")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_LOCKING,
+                    message="Locking",
+                    data={},
+                )
+            )
+            lock()
+        elif request.event == TYPE_POWER_LOGOUT:
+            self._logger.info("Logging out")
+            await self._send_response(
+                Response(
+                    id=request.id,
+                    type=TYPE_POWER_LOGGINGOUT,
+                    message="Logging out",
+                    data={},
+                )
+            )
+            logout()
         else:
             self._logger.warning("Unknown event: %s", request.event)
             await self._send_response(
