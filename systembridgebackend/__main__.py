@@ -1,9 +1,9 @@
-"""Main"""
+"""Main."""
 import logging
 
-import typer
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
+import typer
 
 from . import Application
 
@@ -21,7 +21,7 @@ def main(
     init: bool = typer.Option(False, "--init", help="Initialise"),
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
 ) -> None:
-    """Main Application"""
+    """Main Application."""
     try:
         Application(
             settings,
