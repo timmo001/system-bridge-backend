@@ -1,12 +1,10 @@
-"""System Bridge: Processes"""
+"""Processes"""
 from __future__ import annotations
 
-import asyncio
-from json import dumps
+from typing import override
 
-from psutil import AccessDenied, NoSuchProcess, Process, process_iter
-from systembridgemodels.processes import Process as ProcessModel
-from systembridgeshared.models.database_data import Processes as DatabaseModel
+from psutil import AccessDenied, NoSuchProcess, process_iter
+from systembridgemodels.processes import Process, Processes
 
 from .._version import __version__
 from .base import ModuleUpdateBase
@@ -15,38 +13,17 @@ from .base import ModuleUpdateBase
 class ProcessesUpdate(ModuleUpdateBase):
     """Processes Update"""
 
-    async def update_count(
-        self,
-        processes: list[Process],
-    ) -> None:
-        """Update count"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="count",
-                value=str(len(list(processes))),
-            ),
-        )
+    @override
+    async def update_all_data(self) -> Processes:
+        """Update all data"""
+        self._logger.debug("Update all data")
 
-    async def update_processes(
-        self,
-        processes: list[Process],
-    ) -> None:
-        """Update processes"""
+        process_list = list(process_iter())
+
         # Get names of processes
         items = []
-        for process in processes:
-            model = ProcessModel(
-                id=process.pid,
-                name="",
-                cpu_usage=None,
-                created=None,
-                memory_usage=None,
-                path=None,
-                status=None,
-                username=None,
-                working_directory=None,
-            )
+        for process in process_list:
+            model = Process(id=process.pid)
 
             try:
                 model.name = process.name()
@@ -64,22 +41,6 @@ class ProcessesUpdate(ModuleUpdateBase):
                 )
             items.append(model)
         # Sort by name
-        items = sorted(items, key=lambda item: item.name)
-        # Update data
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="processes",
-                value=dumps([item.dict(exclude_none=True) for item in items]),
-            ),
-        )
+        items = sorted(items, key=lambda item: item.name or "")
 
-    async def update_all_data(self) -> None:
-        """Update data"""
-        processes = list(process_iter())
-        await asyncio.gather(
-            *[
-                self.update_count(processes),
-                self.update_processes(processes),
-            ]
-        )
+        return items

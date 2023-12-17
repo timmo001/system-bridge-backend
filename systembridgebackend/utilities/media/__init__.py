@@ -1,14 +1,15 @@
-"""System Bridge: Media Utilities"""
+"""Media Utilities."""
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
+from dataclasses import asdict
+from datetime import datetime
 import mimetypes
 import os
 import platform
 import re
 import tempfile
-from collections.abc import Callable
-from datetime import datetime
 from typing import cast
 from urllib.parse import urlencode
 
@@ -19,19 +20,16 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 from mutagen._file import File as MutagenFile
 from plyer import storagepath
-from systembridgemodels.media_files import File as MediaFile
+from systembridgemodels.media_files import MediaFile
 from systembridgemodels.media_play import MediaPlay
 from systembridgeshared.const import (
-    QUERY_API_KEY,
     QUERY_API_PORT,
     QUERY_AUTOPLAY,
     QUERY_BASE,
     QUERY_PATH,
+    QUERY_TOKEN,
     QUERY_URL,
     QUERY_VOLUME,
-    SECRET_API_KEY,
-    SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
-    SETTING_PORT_API,
 )
 from systembridgeshared.settings import Settings
 
@@ -39,7 +37,7 @@ from ..keyboard import keyboard_keypress
 
 
 async def control_play() -> None:
-    """Play current media"""
+    """Play current media."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_play,
@@ -51,7 +49,7 @@ async def control_play() -> None:
 
 
 async def control_pause() -> None:
-    """Pause current media"""
+    """Pause current media."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_pause,
@@ -63,7 +61,7 @@ async def control_pause() -> None:
 
 
 async def control_stop() -> None:
-    """Stop current media"""
+    """Stop current media."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_stop,
@@ -75,7 +73,7 @@ async def control_stop() -> None:
 
 
 async def control_previous() -> None:
-    """Play previous media"""
+    """Play previous media."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_previous,
@@ -87,7 +85,7 @@ async def control_previous() -> None:
 
 
 async def control_next() -> None:
-    """Play next media"""
+    """Play next media."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_next,
@@ -99,7 +97,7 @@ async def control_next() -> None:
 
 
 async def control_seek(position: int) -> None:
-    """Set position"""
+    """Set position."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_seek,
@@ -111,7 +109,7 @@ async def control_seek(position: int) -> None:
 
 
 async def control_rewind() -> None:
-    """Rewind"""
+    """Rewind."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_rewind,
@@ -123,7 +121,7 @@ async def control_rewind() -> None:
 
 
 async def control_fastforward() -> None:
-    """Fast forward"""
+    """Fast forward."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_fastforward,
@@ -135,7 +133,7 @@ async def control_fastforward() -> None:
 
 
 async def control_shuffle(shuffle: bool) -> None:
-    """Set shuffle"""
+    """Set shuffle."""
     if platform.system() == "Windows":
         from .windows import (  # pylint: disable=import-outside-toplevel
             windows_control_shuffle,
@@ -147,7 +145,7 @@ async def control_shuffle(shuffle: bool) -> None:
 
 
 async def control_repeat(repeat: int) -> None:
-    """Set repeat"""
+    """Set repeat."""
     if platform.system() == "Windows":
         from winsdk.windows.media import (  # pylint: disable=import-error, import-outside-toplevel
             MediaPlaybackAutoRepeatMode,
@@ -168,22 +166,22 @@ async def control_repeat(repeat: int) -> None:
 
 
 async def control_mute() -> None:
-    """Set mute"""
+    """Set mute."""
     keyboard_keypress("volumemute")
 
 
 async def control_volume_down() -> None:
-    """Decrease volume"""
+    """Decrease volume."""
     keyboard_keypress("volumedown")
 
 
 async def control_volume_up() -> None:
-    """Increase volume"""
+    """Increase volume."""
     keyboard_keypress("volumeup")
 
 
 def get_directories(settings: Settings) -> list[dict[str, str]]:
-    """Get directories"""
+    """Get directories."""
     directories = [
         {
             "key": "documents",
@@ -211,15 +209,10 @@ def get_directories(settings: Settings) -> list[dict[str, str]]:
         },
     ]
 
-    additional_directories = settings.get(SETTING_ADDITIONAL_MEDIA_DIRECTORIES)
+    additional_directories = settings.data.media.directories
     if additional_directories is not None and isinstance(additional_directories, list):
         for directory in additional_directories:
-            directories.append(
-                {
-                    "key": directory["name"],
-                    "path": directory["value"],
-                }
-            )
+            directories.append(asdict(directory))
 
     return directories
 
@@ -229,7 +222,7 @@ def get_files(
     base_path: str,
     path: str,
 ) -> list[MediaFile]:
-    """Get files from path"""
+    """Get files from path."""
     root_path = None
     for item in get_directories(settings):
         if item["key"] == base_path:
@@ -252,7 +245,7 @@ def get_file(
     base_path: str,
     filepath: str,
 ) -> MediaFile | None:
-    """Get file from path"""
+    """Get file from path."""
     try:
         stat = os.stat(filepath)
     except FileNotFoundError:
@@ -280,7 +273,7 @@ def get_file(
 def get_file_data(
     filepath: str,
 ) -> FileResponse:
-    """Get file data"""
+    """Get file data."""
     return FileResponse(filepath)
 
 
@@ -288,7 +281,7 @@ async def write_file(
     filepath: str,
     data: bytes,
 ) -> None:
-    """Write file"""
+    """Write file."""
     async with aiofiles.open(filepath, "wb") as new_file:
         await new_file.write(data)
         await new_file.close()
@@ -306,7 +299,7 @@ async def play_media(
     request_host: str | None = None,
     request_scheme: str | None = "http",
 ):
-    """Handler for media play requests"""
+    """Handle media play requests."""
     mime_type = None
     path = None
     if query_url is None:
@@ -359,8 +352,8 @@ async def play_media(
             )
 
         query_url = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                        QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                        QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                        QUERY_TOKEN: settings.data.api.token,
+                        QUERY_API_PORT: settings.data.api.port,
                         QUERY_BASE: query_base,
                         QUERY_PATH: query_path,
                     })}"""
@@ -389,19 +382,17 @@ async def play_media(
                     "mime_type": mime_type,
                 },
             )
-    else:
-        if query_type == "audio":
-            path = os.path.join(tempfile.gettempdir(), "tmp.mp3")
-            # Download local version to get metadata
-            async with ClientSession() as session:
-                async with session.get(query_url) as response:
-                    data = await response.read()
-                    async with aiofiles.open(
-                        path,
-                        "wb",
-                    ) as new_file:
-                        await new_file.write(data)
-                        await new_file.close()
+    elif query_type == "audio":
+        path = os.path.join(tempfile.gettempdir(), "tmp.mp3")
+        # Download local version to get metadata
+        async with ClientSession() as session, session.get(query_url) as response:
+            data = await response.read()
+            async with aiofiles.open(
+                path,
+                "wb",
+            ) as new_file:
+                await new_file.write(data)
+                await new_file.close()
 
     media_play = MediaPlay(
         **{
@@ -410,9 +401,6 @@ async def play_media(
             QUERY_VOLUME: query_volume,
         }
     )
-
-    api_port = settings.get(SETTING_PORT_API)
-    api_key = settings.get_secret(SECRET_API_KEY)
 
     if query_type == "audio":
         if path is None:
@@ -450,7 +438,7 @@ async def play_media(
             media_play.title = title.text[0]
 
         # MP3 etc.
-        for key in metadata.keys():
+        for key in metadata:
             if key.startswith("APIC"):
                 if (cover := metadata.get(key)) is not None:
                     cover_filename = _save_cover_from_binary(
@@ -460,12 +448,12 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_TOKEN: settings.data.api.token,
+                                                QUERY_API_PORT: settings.data.api.port,
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
-                        asyncio.create_task(_delete_cover_delayed(cover_filename))
+                        _ = asyncio.create_task(_delete_cover_delayed(cover_filename))
                     break
 
         # FLAC
@@ -482,12 +470,12 @@ async def play_media(
                     )
                     if cover_filename is not None:
                         media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
-                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_TOKEN: settings.data.api.token,
+                                                QUERY_API_PORT: settings.data.api.port,
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
-                        asyncio.create_task(_delete_cover_delayed(cover_filename))
+                        _ = asyncio.create_task(_delete_cover_delayed(cover_filename))
             except AttributeError:
                 pass
 
@@ -509,11 +497,11 @@ async def play_media(
         "mime_type": mime_type,
         "path": path,
         "player_url": f"""{request_scheme}://{request_host}/app/player/{query_type}.html?{urlencode({
-                    QUERY_API_KEY: api_key,
-                    QUERY_API_PORT: api_port,
-                    **media_play.dict(exclude_none=True),
+                    QUERY_TOKEN: settings.data.api.token,
+                    QUERY_API_PORT: settings.data.api.port,
+                    **asdict(media_play),
                 })}""",
-        **media_play.dict(exclude_none=True),
+        **asdict(media_play),
     }
 
 

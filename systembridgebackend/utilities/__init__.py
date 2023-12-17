@@ -1,1 +1,1 @@
-"""System Bridge: Utilities"""
+"""Utilities."""

@@ -1,20 +1,17 @@
-"""System Bridge: Modules Base"""
+"""Modules Base"""
+
+from typing import Any
 
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
 
 
 class ModuleUpdateBase(Base):
     """Module Base"""
 
-    def __init__(
-        self,
-        database: Database,
-    ):
-        super().__init__()
+    data: Any | None = None
 
-        self._database = database
-
-    async def update_all_data(self) -> None:
+    async def update_all_data(self) -> Any:
         """Update data"""
-        raise NotImplementedError()
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not implement update_all_data"
+        )

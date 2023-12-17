@@ -1,17 +1,18 @@
-"""System Bridge: Modules"""
+"""Modules."""
 import asyncio
 from collections.abc import Awaitable, Callable
+from threading import Thread
+from typing import Any
 
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
 
 from .battery import BatteryUpdate
 from .cpu import CPUUpdate
-from .disk import DiskUpdate
-from .display import DisplayUpdate
-from .gpu import GPUUpdate
+from .disks import DisksUpdate
+from .displays import DisplaysUpdate
+from .gpus import GPUsUpdate
 from .memory import MemoryUpdate
-from .network import NetworkUpdate
+from .networks import NetworksUpdate
 from .processes import ProcessesUpdate
 from .sensors import SensorsUpdate
 from .system import SystemUpdate
@@ -19,71 +20,89 @@ from .system import SystemUpdate
 MODULES = [
     "battery",
     "cpu",
-    "disk",
-    "display",
-    "gpu",
+    "disks",
+    "displays",
+    "gpus",
     "media",
     "memory",
-    "network",
+    "networks",
     "processes",
     "sensors",
     "system",
 ]
 
 
-class Update(Base):
-    """Modules Update"""
+class UpdateDataThread(Thread):
+    """Update data thread."""
 
     def __init__(
         self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
+        class_obj: dict[str, Any],
+        updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
-        self._database = database  # pylint: disable=duplicate-code
-        self.updated_callback = updated_callback
+        self._class_obj = class_obj
+        self._updated_callback = updated_callback
 
-        self._classes = [
-            {"name": "battery", "cls": BatteryUpdate(self._database)},
-            {"name": "disk", "cls": DiskUpdate(self._database)},
-            {"name": "system", "cls": SystemUpdate(self._database)},
-        ]
-        self._classes_frequent = [
-            {"name": "cpu", "cls": CPUUpdate(self._database)},
-            {"name": "display", "cls": DisplayUpdate(self._database)},
-            {"name": "gpu", "cls": GPUUpdate(self._database)},
-            {"name": "memory", "cls": MemoryUpdate(self._database)},
-            {"name": "network", "cls": NetworkUpdate(self._database)},
-            {"name": "processes", "cls": ProcessesUpdate(self._database)},
-        ]
+    async def _update(self) -> None:
+        """Update."""
+        data = await self._class_obj["cls"].update_all_data()
+        await self._updated_callback(
+            self._class_obj["name"],
+            data,
+        )
 
-    async def _update(
+    def run(self) -> None:
+        """Run."""
+        asyncio.run(self._update())
+
+
+class Update(Base):
+    """Modules Update."""
+
+    def __init__(
         self,
-        class_obj: dict,
+        updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Update"""
-        await class_obj["cls"].update_all_data()
-        await self.updated_callback(class_obj["name"])
+        """Initialise."""
+        super().__init__()
+        self._updated_callback = updated_callback
+
+        self._classes: list[dict[str, Any]] = [
+            {"name": "system", "cls": SystemUpdate()},
+            {"name": "battery", "cls": BatteryUpdate()},
+            {"name": "cpu", "cls": CPUUpdate()},
+            {"name": "disks", "cls": DisksUpdate()},
+            {"name": "displays", "cls": DisplaysUpdate()},
+            {"name": "gpus", "cls": GPUsUpdate()},
+            {"name": "memory", "cls": MemoryUpdate()},
+            {"name": "networks", "cls": NetworksUpdate()},
+            {"name": "processes", "cls": ProcessesUpdate()},
+        ]
+
+        self.threads: dict[str, Thread] = {}
 
     async def update_data(self) -> None:
-        """Update Data"""
-        self._logger.info("Update data")
+        """Update Data."""
+        self._logger.info("Request update data")
 
-        tasks = [self._update(cls) for cls in self._classes]
-        await asyncio.gather(*tasks)
+        sensors_update = SensorsUpdate()
+        sensors_data = await sensors_update.update_all_data()
+        await self._updated_callback("sensors", sensors_data)
 
-        self._logger.info("Finished updating data")
+        for class_obj in self._classes:
+            # If the class has a sensors attribute, set it
+            if class_obj["cls"].__dict__.get("sensors", {}) != {}:
+                class_obj["cls"].sensors = sensors_data
 
-    async def update_frequent_data(self) -> None:
-        """Update Data"""
-        self._logger.info("Update frequent data")
+            self.threads[class_obj["name"]] = UpdateDataThread(
+                class_obj,
+                self._updated_callback,
+            )
+            self.threads[class_obj["name"]].start()
 
-        sensors_update = SensorsUpdate(self._database)
-        await sensors_update.update_all_data()
-        await self.updated_callback("sensors")
+            # Stagger the updates to avoid overloading the system
+            await asyncio.sleep(1)
 
-        tasks = [self._update(cls) for cls in self._classes_frequent]
-        await asyncio.gather(*tasks)
-
-        self._logger.info("Finished updating frequent data")
+        self._logger.info("Data updates requested")

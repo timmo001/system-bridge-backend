@@ -1,43 +1,48 @@
-"""System Bridge: Data"""
+"""Data."""
 import asyncio
 import platform
 from collections.abc import Awaitable, Callable
 from threading import Thread
+from typing import Any
 
+from systembridgemodels.data import Data
+from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
 
 from .modules import Update
 
 
 class UpdateThread(Thread):
-    """Update thread"""
+    """Update thread."""
 
     def __init__(
         self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
+        updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
-        self._database = database
-        self._updated_callback = updated_callback
-        self._update = Update(self._database, self._updated_callback)
+        self._update = Update(updated_callback)
 
     def run(self) -> None:
-        """Run"""
+        """Run."""
         asyncio.run(self._update.update_data())
 
+    def join(self, timeout: float | None = None) -> None:
+        """Join."""
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        loop.stop()
+        super().join(timeout)
 
-class UpdateEventsThread(Thread):
-    """Update events thread"""
+
+class UpdateMediaThread(Thread):
+    """Update media thread."""
 
     def __init__(
         self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
+        updated_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
 
         if platform.system() != "Windows":
@@ -47,71 +52,56 @@ class UpdateEventsThread(Thread):
             Media,
         )
 
-        self._media = Media(
-            database,
-            updated_callback,
-        )
+        self._media = Media(updated_callback)
 
     def run(self) -> None:
-        """Run"""
+        """Run."""
         if platform.system() != "Windows":
             return
 
         asyncio.run(self._media.update_media_info())
 
-
-class UpdateFrequentThread(Thread):
-    """Update frequent thread"""
-
-    def __init__(
-        self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
-    ) -> None:
-        """Initialize"""
-        super().__init__()
-        self._database = database
-        self._updated_callback = updated_callback
-        self._update = Update(self._database, self._updated_callback)
-
-    def run(self) -> None:
-        """Run"""
-        asyncio.run(self._update.update_frequent_data())
+    def join(self, timeout: float | None = None) -> None:
+        """Join."""
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        loop.stop()
+        super().join(timeout)
 
 
-class Data(Base):
-    """Data"""
+class DataUpdate(Base):
+    """Data Update."""
 
     def __init__(
         self,
-        database: Database,
         updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
-        self._database = database
+        self.data = Data()
         self._updated_callback = updated_callback
+        self.update_thread = UpdateThread(self._data_updated_callback)
+        self.update_media_thread = UpdateMediaThread(self._data_updated_callback)
+
+    async def _data_updated_callback(
+        self,
+        name: str,
+        data: Any,
+    ) -> None:
+        """Update the data with the given name and value and invoke the updated callback."""
+        setattr(self.data, name, data)
+        await self._updated_callback(name)
 
     def request_update_data(self) -> None:
-        """Request update data"""
-        thread = UpdateThread(
-            self._database,
-            self._updated_callback,
-        )
-        thread.start()
+        """Request update data."""
+        if self.update_thread.is_alive():
+            self._logger.warning("Update thread is already alive")
+            return
+        self.update_thread.start()
 
-    def request_update_events_data(self) -> None:
-        """Request update events data"""
-        thread = UpdateEventsThread(
-            self._database,
-            self._updated_callback,
-        )
-        thread.start()
-
-    def request_update_frequent_data(self) -> None:
-        """Request update frequent data"""
-        thread = UpdateFrequentThread(
-            self._database,
-            self._updated_callback,
-        )
-        thread.start()
+    def request_update_media_data(self) -> None:
+        """Request update media data."""
+        if self.update_media_thread.is_alive():
+            self._logger.warning("Update media thread is already alive")
+            return
+        self.update_media_thread.start()

@@ -1,40 +1,35 @@
-"""System Bridge: Server"""
+"""System Bridge: Server."""
 import asyncio
-import sys
 from collections.abc import Callable
-from json import loads
+import sys
 
-import uvicorn
-from systembridgemodels.action import Action
+from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
-    SETTING_KEYBOARD_HOTKEYS,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
-from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
+import uvicorn
 
-from ..data import Data
+from ..data import DataUpdate
 from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
-from ..utilities.action import ActionHandler
+from ..utilities.action import Action, ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
 
 class APIServer(uvicorn.Server):
-    """Customized uvicorn.Server
+    """Customized uvicorn.Server.
 
     Uvicorn server overrides signals and we need to include
-    Tasks to the signals."""
+    Tasks to the signals.
+    """
 
     def __init__(
         self,
         config: uvicorn.Config,
         exit_callback: Callable[[], None],
     ) -> None:
+        """Initialise."""
         super().__init__(config)
         self._exit_callback = exit_callback
 
@@ -45,27 +40,24 @@ class APIServer(uvicorn.Server):
 
 
 class Server(Base):
-    """Server"""
+    """Server."""
 
     def __init__(
         self,
-        database: Database,
         settings: Settings,
         listeners: Listeners,
         no_frontend: bool = False,
-        no_gui: bool = False,
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
         self.no_frontend = no_frontend
-        self.no_gui = no_gui
 
-        self._gui_notification: GUI | None = None
-        self._gui_player: GUI | None = None
-        self._gui: GUI | None = None
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
+
+        self._gui_notification: GUI | None = None
+        self._gui_player: GUI | None = None
 
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
@@ -73,6 +65,7 @@ class Server(Base):
         self._logger.info("Setup API app")
         api_app.callback_exit = self.exit_application
         api_app.callback_open_gui = self.callback_open_gui
+        api_app.data_update = DataUpdate(self.data_updated_callback)
         api_app.listeners = listeners
         api_app.loop = asyncio.get_event_loop()
 
@@ -83,17 +76,16 @@ class Server(Base):
                 host="0.0.0.0",
                 loop="asyncio",
                 log_config=None,
-                log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
-                port=int(str(settings.get(SETTING_PORT_API))),
+                log_level=settings.data.log_level.lower(),
+                port=settings.data.api.port,
                 workers=4,
             ),
             exit_callback=self.exit_application,
         )
-        self._data = Data(database, self.callback_data_updated)
-        self._logger.info("Server initialized")
+        self._logger.info("Server Initialised")
 
     async def start(self) -> None:
-        """Start the server"""
+        """Start the server."""
         self._logger.info("Start server")
         self._tasks.extend(
             [
@@ -106,47 +98,33 @@ class Server(Base):
                     name="Update data",
                 ),
                 api_app.loop.create_task(
-                    self.indefinite_func_wrapper(self.update_frequent_data),
-                    name="Update frequent data",
-                ),
-                api_app.loop.create_task(
-                    self.update_events_data(),
-                    name="Update events data",
+                    self.update_media_data(),
+                    name="Update media data",
                 ),
             ]
         )
-        if not self.no_gui:
-            self._gui = GUI(self._settings)
-            self._tasks.extend(
-                [
-                    api_app.loop.create_task(
-                        self._gui.start(self.exit_application),
-                        name="GUI",
-                    ),
-                    api_app.loop.create_task(
-                        self.register_hotkeys(),
-                        name="Register hotkeys",
-                    ),
-                ]
-            )
 
         await asyncio.wait(self._tasks)
 
-    async def callback_data_updated(
+    async def data_updated_callback(
         self,
         module: str,
     ) -> None:
-        """Data updated"""
-        await self._listeners.refresh_data_by_module(module)
+        """Update data."""
+        await self._listeners.refresh_data_by_module(
+            api_app.data_update.data,
+            module,
+        )
 
     def callback_open_gui(
         self,
         command: str,
         data: str,
     ) -> None:
-        """Open GUI"""
+        """Open GUI."""
         if command == "notification":
-            if self._gui_notification:
+            self._logger.info("Launch Notification GUI as a detached process")
+            if self._gui_notification is not None:
                 self._gui_notification.stop()
             self._gui_notification = GUI(self._settings)
             self._tasks.append(
@@ -160,6 +138,7 @@ class Server(Base):
                 )
             )
         elif command == "player":
+            self._logger.info("Launch Player GUI as a detached process")
             if self._gui_player:
                 self._gui_player.stop()
             self._gui_player = GUI(self._settings)
@@ -173,31 +152,48 @@ class Server(Base):
                     name="GUI Media Player",
                 )
             )
+        else:
+            raise NotImplementedError(f"Command not implemented: {command}")
 
     async def indefinite_func_wrapper(self, func) -> None:
-        """Indefinite function wrapper"""
+        """Indefinite function wrapper."""
         while True:
             await func()
 
     def exit_application(self) -> None:
-        """Exit application"""
+        """Exit application."""
         self._logger.info("Exiting application")
+
+        # Stop the API server
+        self._logger.info("Stop API server")
+        self._api_server.should_exit = True
+        self._api_server.force_exit = True
+        self._logger.info("API server stopped")
+
+        # Stop all tasks
         for task in self._tasks:
             task.cancel()
         self._logger.info("Tasks cancelled")
-        if self._gui:
-            self._gui.stop()
-        if self._gui_notification:
-            self._gui_notification.stop()
-        if self._gui_player:
-            self._gui_player.stop()
-        self._logger.info("GUI stopped. Exiting Application")
+
+        # Stop the event loop
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        self._logger.info("Tasks cleared")
+        loop.stop()
+        self._logger.info("Event loop stopped")
+
+        # Stop threads
+        api_app.data_update.update_thread.join(timeout=2)
+        api_app.data_update.update_media_thread.join(timeout=2)
+        self._logger.info("Threads joined")
+
+        self._logger.info("Exit Application")
         sys.exit(0)
 
     async def register_hotkeys(self) -> None:
-        """Register hotkeys"""
+        """Register hotkeys."""
         self._logger.info("Register hotkeys")
-        hotkeys = self._settings.get(SETTING_KEYBOARD_HOTKEYS)
+        hotkeys = self._settings.data.keyboard_hotkeys
         if hotkeys is not None and isinstance(hotkeys, list):
             self._logger.info("Found %s hotkeys", len(hotkeys))
             for item in hotkeys:
@@ -205,40 +201,31 @@ class Server(Base):
 
     def register_hotkey(
         self,
-        item: dict,
+        hotkey: SettingHotkey,
     ) -> None:
-        """Register hotkey"""
-        hotkey = item["name"]
-        self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])
-        action = Action(**loads(item["value"]))
+        """Register hotkey."""
+        self._logger.info("Register hotkey: %s", hotkey)
 
         def hotkey_callback() -> None:
-            """Hotkey callback"""
-            self._logger.info("Hotkey '%s' pressed", hotkey)
+            """Hotkey callback."""
+            self._logger.info("Hotkey pressed: %s", hotkey)
             action_handler = ActionHandler(self._settings)
-            api_app.loop.create_task(action_handler.handle(action))
+            api_app.loop.create_task(action_handler.handle(Action(hotkey.key)))
 
         keyboard_hotkey_register(
-            hotkey,
+            hotkey.key,
             hotkey_callback,
         )
 
     async def update_data(self) -> None:
-        """Update data"""
+        """Update data."""
         self._logger.info("Update data")
-        self._data.request_update_data()
-        self._logger.info("Schedule next update in 2 minutes")
-        await asyncio.sleep(120)
+        api_app.data_update.request_update_data()
+        self._logger.info("Schedule next update in 60 seconds")
+        await asyncio.sleep(60)
 
-    async def update_events_data(self) -> None:
-        """Update events data"""
-        self._logger.info("Update events data")
-        self._data.request_update_events_data()
+    async def update_media_data(self) -> None:
+        """Update media data."""
+        self._logger.info("Update media data")
+        api_app.data_update.request_update_media_data()
         asyncio.get_running_loop().run_forever()
-
-    async def update_frequent_data(self) -> None:
-        """Update frequent data"""
-        self._logger.info("Update frequent data")
-        self._data.request_update_frequent_data()
-        self._logger.info("Schedule next frequent update in 30 seconds")
-        await asyncio.sleep(30)

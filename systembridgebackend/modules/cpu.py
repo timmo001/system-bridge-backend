@@ -1,7 +1,8 @@
-"""System Bridge: CPU"""
+"""CPU"""
 from __future__ import annotations
 
 import asyncio
+from typing import override
 
 from psutil import (
     cpu_count,
@@ -13,354 +14,276 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import CPU as DatabaseModel
-from systembridgeshared.models.database_data_sensors import (
-    Sensors as SensorsDatabaseModel,
-)
+from systembridgemodels.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
+from systembridgemodels.sensors import Sensors
 
 from .base import ModuleUpdateBase
-
-
-class CPU(Base):
-    """CPU"""
-
-    def count(self) -> int:
-        """CPU count"""
-        return cpu_count()
-
-    def freq(self) -> scpufreq:
-        """CPU frequency"""
-        return cpu_freq()
-
-    def freq_per_cpu(self) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
-        """CPU frequency per CPU"""
-        return cpu_freq(percpu=True)  # type: ignore
-
-    def load_average(
-        self,
-    ) -> tuple[float, float, float]:  # pylint: disable=unsubscriptable-object
-        """Get load average"""
-        return getloadavg()
-
-    def power_package(
-        self,
-        database: Database,
-    ) -> float | None:
-        """CPU package power"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "cpu" in item.hardware_type.lower()
-                and "power" in item.type.lower()
-                and "package" in item.name.lower()
-            ):
-                self._logger.debug(
-                    "Found CPU package power: %s = %s", item.key, item.value
-                )
-                return item.value
-        return None
-
-    def power_per_cpu(
-        self,
-        database: Database,
-    ) -> list[tuple[int, float]] | None:
-        """CPU package power"""
-        result: list[tuple[int, float]] = []
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "cpu" in item.hardware_type.lower()
-                and "power" in item.type.lower()
-                and "core" in item.name.lower()
-            ):
-                key: int = int(item.key.split("#")[1].split("_")[0])
-                self._logger.debug(
-                    "Found per CPU power: %s (%s) = %s", key, item.key, item.value
-                )
-                if key is not None:
-                    result.append((key - 1, item.value))
-        self._logger.debug("Per CPU power result: %s", result)
-        if len(result) > 0:
-            return result
-        return None
-
-    def stats(self) -> scpustats:
-        """CPU stats"""
-        return cpu_stats()
-
-    def temperature(
-        self,
-        database: Database,
-    ) -> float | None:
-        """CPU temperature"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if item.hardware_type is not None and (
-                (
-                    "cpu" in item.hardware_type.lower()
-                    and "temperature" in item.type.lower()
-                )
-                or (
-                    "k10temp" in item.hardware_type.lower()
-                    and "current" in item.type.lower()
-                )
-            ):
-                self._logger.debug(
-                    "Found CPU temperature: %s = %s",
-                    item.key,
-                    item.value,
-                )
-                return item.value
-        return None
-
-    def times(self) -> pcputimes:
-        """CPU times"""
-        return cpu_times(percpu=False)
-
-    def times_percent(self) -> pcputimes:
-        """CPU times percent"""
-        return cpu_times_percent(interval=1, percpu=False)
-
-    def times_per_cpu(
-        self,
-    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
-        """CPU times per CPU"""
-        return cpu_times(percpu=True)
-
-    def times_per_cpu_percent(
-        self,
-    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
-        """CPU times per CPU percent"""
-        return cpu_times_percent(interval=1, percpu=True)
-
-    def usage(self) -> float:
-        """CPU usage"""
-        return cpu_percent(interval=1, percpu=False)
-
-    def usage_per_cpu(self) -> list[float]:  # pylint: disable=unsubscriptable-object
-        """CPU usage per CPU"""
-        return cpu_percent(interval=1, percpu=True)  # type: ignore
-
-    def voltage(
-        self,
-        database: Database,
-    ) -> float | None:
-        """CPU voltage"""
-        for item in database.get_data(SensorsDatabaseModel):
-            if (
-                item.hardware_type is not None
-                and "cpu" in item.hardware_type.lower()
-                and "voltage" in item.type.lower()
-            ):
-                self._logger.debug("Found CPU voltage: %s = %s", item.key, item.value)
-                return item.value
-        return None
 
 
 class CPUUpdate(ModuleUpdateBase):
     """CPU Update"""
 
-    def __init__(
+    def __init__(self) -> None:
+        """Initialise."""
+        super().__init__()
+        self.sensors: Sensors | None = None
+
+    async def _get_count(self) -> int:
+        """CPU count"""
+        return cpu_count()
+
+    async def _get_frequency(self) -> scpufreq:
+        """CPU frequency"""
+        return cpu_freq()
+
+    async def _get_frequency_per_cpu(
         self,
-        database: Database,
-    ) -> None:
-        """Initialize"""
-        super().__init__(database)
-        self._cpu = CPU()
+    ) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
+        """CPU frequency per CPU"""
+        return cpu_freq(percpu=True)  # type: ignore
 
-    async def update_count(self) -> None:
-        """Update CPU count"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="count",
-                value=str(self._cpu.count()),
-            ),
-        )
+    async def _get_load_average(self) -> float:
+        """Get load average"""
+        avg_tuple = getloadavg()
+        return sum([avg_tuple[0], avg_tuple[1], avg_tuple[2]]) / 3
 
-    async def update_frequency(self) -> None:
-        """Update CPU frequency"""
-        for key, value in self._cpu.freq()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"frequency_{key}",
-                    value=value,
-                ),
-            )
-
-    async def update_frequency_per_cpu(self) -> None:
-        """Update CPU frequency per CPU"""
-        count = 0
-        for data in [freq._asdict() for freq in self._cpu.freq_per_cpu()]:
-            for key, value in data.items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"frequency_{count}_{key}",
-                        value=value,
-                    ),
-                )
-            count += 1
-
-    async def update_load_average(self) -> None:
-        """Update load average"""
-        avg_tuple = self._cpu.load_average()
-        result = sum([avg_tuple[0], avg_tuple[1], avg_tuple[2]]) / 3
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="load_average",
-                value=str(result),
-            ),
-        )
-
-    async def update_power_package(self) -> None:
-        """Update package power"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="power_package",
-                value=str(self._cpu.power_package(self._database)),
-            ),
-        )
-
-    async def update_power_per_cpu(self) -> None:
-        """Update per cpu power"""
-        if (result := self._cpu.power_per_cpu(self._database)) is None:
+    async def _get_power_package(self) -> float | None:
+        """CPU package power"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
             return None
-        for key, value in result:
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"power_per_cpu_{key}",
-                    value=str(value),
-                ),
-            )
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "POWER" and name "PACKAGE"
+                if (
+                    "POWER" in sensor.type.upper()
+                    and "PACKAGE" in sensor.name.upper()
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU package power: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
+        return None
 
-    async def update_stats(self) -> None:
-        """Update stats"""
-        for key, value in self._cpu.stats()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"stats_{key}",
-                    value=value,
-                ),
-            )
+    async def _get_power_per_cpu(self) -> list[tuple[int, float]] | None:
+        """CPU package power"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "POWER" and name "CORE"
+                if (
+                    "POWER" in sensor.type.upper()
+                    and "CORE" in sensor.name.upper()
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU core power: %s = %s", sensor.name, sensor.value
+                    )
+                    return [
+                        (int(sensor.name.split()[1]), sensor.value)
+                        for sensor in hardware.sensors
+                        if "POWER" in sensor.type.upper()
+                        and "CORE" in sensor.name.upper()
+                        and sensor.value is not None
+                    ]
+        return None
 
-    async def update_temperature(self) -> None:
-        """Update temperature"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="temperature",
-                value=str(self._cpu.temperature(self._database)),
-            ),
-        )
+    async def _get_stats(self) -> scpustats:
+        """CPU stats"""
+        return cpu_stats()
 
-    async def update_times(self) -> None:
-        """Update times"""
-        for key, value in self._cpu.times()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"times_{key}",
-                    value=value,
-                ),
-            )
+    async def _get_temperature(self) -> float | None:
+        """CPU temperature"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                name = sensor.name.upper()
+                # Find type "TEMPERATURE" and name "PACKAGE" or "AVERAGE"
+                if (
+                    "TEMPERATURE" in sensor.type.upper()
+                    and ("PACKAGE" in name or "AVERAGE" in name)
+                    and sensor.value is not None
+                ):
+                    self._logger.debug(
+                        "Found CPU temperature: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
+        return None
 
-    async def update_times_percent(self) -> None:
-        """Update times percent"""
-        for key, value in self._cpu.times_percent()._asdict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"times_percent_{key}",
-                    value=value,
-                ),
-            )
+    async def _get_times(self) -> pcputimes:
+        """CPU times"""
+        return cpu_times(percpu=False)
 
-    async def update_times_per_cpu(self) -> None:
-        """Update times per CPU"""
-        count = 0
-        for data in [freq._asdict() for freq in self._cpu.times_per_cpu()]:
-            for key, value in data.items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"times_per_cpu_{count}_{key}",
-                        value=value,
-                    ),
-                )
-            count += 1
+    async def _get_times_percent(self) -> pcputimes:
+        """CPU times percent"""
+        return cpu_times_percent(interval=1, percpu=False)
 
-    async def update_times_per_cpu_percent(self) -> None:
-        """Update times per CPU percent"""
-        count = 0
-        for data in [freq._asdict() for freq in self._cpu.times_per_cpu_percent()]:
-            for key, value in data.items():
-                self._database.update_data(
-                    DatabaseModel,
-                    DatabaseModel(
-                        key=f"times_per_cpu_percent_{count}_{key}",
-                        value=value,
-                    ),
-                )
-            count += 1
+    async def _get_times_per_cpu(
+        self,
+    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
+        """CPU times per CPU"""
+        return cpu_times(percpu=True)
 
-    async def update_usage(self) -> None:
-        """Update usage"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="usage",
-                value=str(self._cpu.usage()),
-            ),
-        )
+    async def _get_times_per_cpu_percent(
+        self,
+    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
+        """CPU times per CPU percent"""
+        return cpu_times_percent(interval=1, percpu=True)
 
-    async def update_usage_per_cpu(self) -> None:
-        """Update usage per CPU"""
-        count = 0
-        for value in self._cpu.usage_per_cpu():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=f"usage_{count}",
-                    value=str(value),
-                ),
-            )
-            count += 1
+    async def _get_usage(self) -> float:
+        """CPU usage"""
+        return cpu_percent(interval=1, percpu=False)
 
-    async def update_voltage(self) -> None:
-        """Update voltage"""
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="voltage",
-                value=str(self._cpu.voltage(self._database)),
-            ),
-        )
+    async def _get_usage_per_cpu(
+        self,
+    ) -> list[float]:  # pylint: disable=unsubscriptable-object
+        """CPU usage per CPU"""
+        return cpu_percent(interval=1, percpu=True)  # type: ignore
 
-    async def update_all_data(self) -> None:
-        """Update data"""
-        await asyncio.gather(
+    async def _get_voltage(self) -> float | None:
+        """CPU voltage"""
+        if (
+            self.sensors is None
+            or self.sensors.windows_sensors is None
+            or self.sensors.windows_sensors.hardware is None
+        ):
+            return None
+        for hardware in self.sensors.windows_sensors.hardware:
+            # Find type "CPU"
+            if "CPU" not in hardware.type.upper():
+                continue
+            for sensor in hardware.sensors:
+                # Find type "VOLTAGE"
+                if "VOLTAGE" in sensor.type.upper() and sensor.value is not None:
+                    self._logger.debug(
+                        "Found CPU voltage: %s = %s", sensor.name, sensor.value
+                    )
+                    return sensor.value
+        return None
+
+    @override
+    async def update_all_data(self) -> CPU:
+        """Update all data"""
+        self._logger.debug("Update all data")
+        (
+            count,
+            frequency,
+            frequency_per_cpu,
+            load_average,
+            power_package,
+            power_per_cpu,
+            stats,
+            temperature,
+            times,
+            times_percent,
+            times_per_cpu,
+            times_per_cpu_percent,
+            usage,
+            usage_per_cpu,
+            voltage,
+        ) = await asyncio.gather(
             *[
-                self.update_count(),
-                self.update_frequency(),
-                self.update_frequency_per_cpu(),
-                self.update_load_average(),
-                self.update_power_package(),
-                self.update_power_per_cpu(),
-                self.update_stats(),
-                self.update_temperature(),
-                self.update_times(),
-                self.update_times_percent(),
-                self.update_times_per_cpu(),
-                self.update_times_per_cpu_percent(),
-                self.update_usage(),
-                self.update_usage_per_cpu(),
-                self.update_voltage(),
+                self._get_count(),
+                self._get_frequency(),
+                self._get_frequency_per_cpu(),
+                self._get_load_average(),
+                self._get_power_package(),
+                self._get_power_per_cpu(),
+                self._get_stats(),
+                self._get_temperature(),
+                self._get_times(),
+                self._get_times_percent(),
+                self._get_times_per_cpu(),
+                self._get_times_per_cpu_percent(),
+                self._get_usage(),
+                self._get_usage_per_cpu(),
+                self._get_voltage(),
             ]
+        )
+
+        return CPU(
+            count=count,
+            frequency=CPUFrequency(
+                current=frequency.current,
+                min=frequency.min,
+                max=frequency.max,
+            ),
+            frequency_per_cpu=[
+                CPUFrequency(
+                    current=item.current,
+                    min=item.min,
+                    max=item.max,
+                )
+                for item in frequency_per_cpu
+            ],
+            load_average=load_average,
+            power_package=power_package,
+            power_per_cpu=power_per_cpu,
+            stats=CPUStats(
+                ctx_switches=stats.ctx_switches,
+                interrupts=stats.interrupts,
+                soft_interrupts=stats.soft_interrupts,
+                syscalls=stats.syscalls,
+            ),
+            temperature=temperature,
+            times=CPUTimes(
+                user=times.user,
+                system=times.system,
+                idle=times.idle,
+                interrupt=times.interrupt,
+                dpc=times.dpc,
+            ),
+            times_per_cpu=[
+                CPUTimes(
+                    user=item.user,
+                    system=item.system,
+                    idle=item.idle,
+                    interrupt=item.interrupt,
+                    dpc=item.dpc,
+                )
+                for item in times_per_cpu
+            ],
+            times_percent=CPUTimes(
+                user=times_percent.user,
+                system=times_percent.system,
+                idle=times_percent.idle,
+                interrupt=times_percent.interrupt,
+                dpc=times_percent.dpc,
+            ),
+            times_percent_per_cpu=[
+                CPUTimes(
+                    user=item.user,
+                    system=item.system,
+                    idle=item.idle,
+                    interrupt=item.interrupt,
+                    dpc=item.dpc,
+                )
+                for item in times_per_cpu_percent
+            ],
+            usage=usage,
+            usage_per_cpu=usage_per_cpu,
+            voltage=voltage,
         )

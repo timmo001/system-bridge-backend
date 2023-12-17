@@ -1,25 +1,24 @@
-"""System Bridge: Action Utilities"""
+"""Action Utilities."""
 from typing import Any
 
+from systembridgeconnector.http_client import HTTPClient
 from systembridgemodels.action import Action
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
 from systembridgeshared.exceptions import (
     AuthenticationException,
     ConnectionErrorException,
 )
-from systembridgeshared.http_client import HTTPClient
 from systembridgeshared.settings import Settings
 
 
 class ActionHandler(Base):
-    """Handle actions"""
+    """Handle actions."""
 
     def __init__(
         self,
         settings: Settings,
     ) -> None:
-        """Initialize the action handler"""
+        """Initialise the action handler."""
         super().__init__()
         self._settings = settings
 
@@ -27,8 +26,8 @@ class ActionHandler(Base):
         self,
         action: Action,
     ) -> None:
-        """Handle an action"""
-        self._logger.info("Action: %s", action.json())
+        """Handle an action."""
+        self._logger.info("Action: %s", action)
         if action.command == "api" and action.data is not None:
             await self.api_action(action.data)
         else:
@@ -38,19 +37,19 @@ class ActionHandler(Base):
         self,
         data: dict[str, Any],
     ) -> Any:
-        """Handle an API action"""
+        """Handle an API action."""
         self._logger.info("API Action: %s", data)
 
-        api_port = self._settings.get(SETTING_PORT_API)
-        api_key = self._settings.get_secret(SECRET_API_KEY)
-        if api_port is None or api_key is None:
+        api_port = self._settings.data.api.port
+        token = self._settings.data.api.token
+        if api_port is None or token is None:
             self._logger.warning("API not configured")
             return
 
         http_client = HTTPClient(
             "localhost",
-            int(str(api_port)),
-            str(api_key),
+            api_port,
+            token,
         )
         method = str(data["method"]).upper()
         try:
@@ -73,7 +72,7 @@ class ActionHandler(Base):
                 )
             self._logger.warning("Unknown API method: %s", method)
             return None
-        except AuthenticationException as exception:
-            self._logger.warning("API authentication error: %s", exception)
-        except ConnectionErrorException as exception:
-            self._logger.warning("API connection error: %s", exception)
+        except AuthenticationException as error:
+            self._logger.warning("API authentication error", exc_info=error)
+        except ConnectionErrorException as error:
+            self._logger.warning("API connection error", exc_info=error)

@@ -1,4 +1,4 @@
-"""System Bridge: Media"""
+"""Media"""
 from __future__ import annotations
 
 import asyncio
@@ -9,8 +9,6 @@ from collections.abc import Awaitable, Callable
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.media import Media as MediaInfo
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import Media as DatabaseModel
 from winsdk.windows.foundation import (  # pylint: disable=import-error
     EventRegistrationToken,
 )
@@ -20,11 +18,11 @@ class Media(Base):
     """Media"""
 
     def __init__(
-        self, database: Database, changed_callback: Callable[[str], Awaitable[None]]
+        self,
+        changed_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
-        """Initialize"""
+        """Initialise."""
         super().__init__()
-        self._database = database
         self._changed_callback = changed_callback
 
         self.sessions: None | (
@@ -74,22 +72,11 @@ class Media(Base):
         media_info: MediaInfo | None = None,
     ) -> None:
         """Update data"""
-        self._logger.info("Updating media data")
         if media_info is None:
-            self._database.clear_table(DatabaseModel)
-            await self._changed_callback("media")
-            return
+            media_info = MediaInfo(updated_at=datetime.datetime.now().timestamp())
 
-        for key, value in media_info.dict().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=key,
-                    value=value,
-                ),
-            )
-
-        await self._changed_callback("media")
+        self._logger.info("Updating media data")
+        await self._changed_callback("media", media_info)
 
     async def update_media_info(self) -> None:
         """Update media info from the current session."""
