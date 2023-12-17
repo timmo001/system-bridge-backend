@@ -16,8 +16,13 @@ class BatteryUpdate(ModuleUpdateBase):
     async def update_all_data(self) -> Battery:
         """Update all data"""
         self._logger.debug("Update all data")
-        status = battery.status
+
+        if (status := battery.status) is None:
+            return Battery(
+                is_charging=None,
+                percentage=None,
+            )
         return Battery(
-            is_charging=getattr(status, "isCharging", None),
-            percentage=getattr(status, "percentage", None),
+            is_charging=status["isCharging"],
+            percentage=status["percentage"],
         )
