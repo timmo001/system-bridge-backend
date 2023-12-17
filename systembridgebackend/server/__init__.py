@@ -174,7 +174,7 @@ class Server(Base):
         #     self._gui_notification.stop()
         # if self._gui_player:
         #     self._gui_player.stop()
-        self._logger.info("GUI stopped. Exiting Application")
+        # self._logger.info("GUI stopped. Exiting Application")
         sys.exit(0)
 
     async def register_hotkeys(self) -> None:
