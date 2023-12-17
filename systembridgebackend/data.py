@@ -88,7 +88,7 @@ class DataUpdate(Base):
         name: str,
         data: Any,
     ) -> None:
-        """Data updated callback."""
+        """Update the data with the given name and value and invoke the updated callback."""
         setattr(self.data, name, data)
         await self._updated_callback(name)
 
