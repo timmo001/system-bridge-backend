@@ -1,4 +1,4 @@
-"""Battery"""
+"""Battery."""
 from __future__ import annotations
 
 from typing import override
@@ -10,11 +10,11 @@ from .base import ModuleUpdateBase
 
 
 class BatteryUpdate(ModuleUpdateBase):
-    """Battery Update"""
+    """Battery Update."""
 
     @override
     async def update_all_data(self) -> Battery:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         if (status := battery.status) is None:
