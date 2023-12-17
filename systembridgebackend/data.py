@@ -1,12 +1,12 @@
 """Data."""
 import asyncio
-import platform
 from collections.abc import Awaitable, Callable
+import platform
 from threading import Thread
 from typing import Any
 
-from systembridgemodels.data import Data
-from systembridgemodels.media import Media as MediaInfo
+from systembridgemodels.modules import ModulesData
+from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
 
 from .modules import Update
@@ -78,7 +78,7 @@ class DataUpdate(Base):
     ) -> None:
         """Initialise."""
         super().__init__()
-        self.data = Data()
+        self.data = ModulesData()
         self._updated_callback = updated_callback
         self.update_thread = UpdateThread(self._data_updated_callback)
         self.update_media_thread = UpdateMediaThread(self._data_updated_callback)
