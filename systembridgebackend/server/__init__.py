@@ -14,13 +14,6 @@ from ..server.mdns import MDNSAdvertisement
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
-# TODO: Frontend
-# TODO: GUI
-# TODO: GUI Notification
-# TODO: Reduce complexity throughout application
-# TODO: Launch backend and gui from package
-# TODO: Fix sensors
-
 class APIServer(uvicorn.Server):
     """Customized uvicorn.Server
 
