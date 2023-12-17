@@ -115,5 +115,7 @@ class SensorsUpdate(ModuleUpdateBase):
                     )
                     for hardware in windows_sensors["hardware"]
                 ],
-            ),
+            )
+            if windows_sensors
+            else None,
         )
