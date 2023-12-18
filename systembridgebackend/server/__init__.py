@@ -157,8 +157,12 @@ class Server(Base):
 
     async def indefinite_func_wrapper(self, func) -> None:
         """Indefinite function wrapper."""
-        while True:
+        while not self._api_server.should_exit:
             await func()
+        self._logger.info(
+            "Indefinite function wrapper exited for: %s",
+            func.__name__,
+        )
 
     def exit_application(self) -> None:
         """Exit application."""
@@ -221,8 +225,8 @@ class Server(Base):
         """Update data."""
         self._logger.info("Update data")
         api_app.data_update.request_update_data()
-        self._logger.info("Schedule next update in 60 seconds")
-        await asyncio.sleep(60)
+        self._logger.info("Schedule next update in 30 seconds")
+        await asyncio.sleep(30)
 
     async def update_media_data(self) -> None:
         """Update media data."""

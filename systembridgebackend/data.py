@@ -101,14 +101,8 @@ class DataUpdate(Base):
 
     def request_update_data(self) -> None:
         """Request update data."""
-        if self.update_thread.is_alive():
-            self._logger.warning("Update thread is already alive")
-            return
         self.update_thread.start()
 
     def request_update_media_data(self) -> None:
         """Request update media data."""
-        if self.update_media_thread.is_alive():
-            self._logger.warning("Update media thread is already alive")
-            return
         self.update_media_thread.start()
