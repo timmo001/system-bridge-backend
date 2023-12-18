@@ -96,11 +96,15 @@ class CPUUpdate(ModuleUpdateBase):
                     and sensor.value is not None
                 ):
                     self._logger.debug(
-                        "Found CPU core power: %s = %s", sensor.name, sensor.value
+                        "Found CPU core power: %s (%s) = %s",
+                        sensor.name,
+                        sensor.id,
+                        sensor.value,
                     )
+
                     return [
                         (
-                            int(sensor.name.split()[1].replace("#", "")),
+                            int(sensor.id.split("/")[-1]),
                             float(sensor.value),
                         )
                         for sensor in hardware.sensors
@@ -174,14 +178,18 @@ class CPUUpdate(ModuleUpdateBase):
         """CPU usage per CPU."""
         return cpu_percent(interval=1, percpu=True)  # type: ignore
 
-    async def _get_voltage(self) -> float | None:
+    async def _get_voltages(self) -> tuple[float | None, list[float]]:
         """CPU voltage."""
+        count = await self._get_count()
+        voltage: float | None = None
+        voltages: list[float] = [-1] * count
+        voltage_sensors = []
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
             or self.sensors.windows_sensors.hardware is None
         ):
-            return None
+            return (voltage, voltages)
         for hardware in self.sensors.windows_sensors.hardware:
             # Find type "CPU"
             if "CPU" not in hardware.type.upper():
@@ -190,14 +198,39 @@ class CPUUpdate(ModuleUpdateBase):
                 # Find type "VOLTAGE"
                 if "VOLTAGE" in sensor.type.upper() and sensor.value is not None:
                     self._logger.debug(
-                        "Found CPU voltage: %s = %s", sensor.name, sensor.value
+                        "Found CPU voltage: %s (%s) = %s",
+                        sensor.name,
+                        sensor.id,
+                        sensor.value,
                     )
-                    return (
-                        float(sensor.value)
-                        if isinstance(sensor.value, (int, float, str))
-                        else None
+                    voltage_sensors.append(sensor)
+
+        # Handle voltages
+        if voltage_sensors is not None and len(voltage_sensors) > 0:
+            for sensor in voltage_sensors:
+                if sensor.value is not None:
+                    self._logger.debug(
+                        "CPU voltage: %s (%s) = %s",
+                        sensor.name,
+                        sensor.type,
+                        sensor.value,
                     )
-        return None
+                    # "/amdcpu/0/voltage/16" -> 16
+                    # Get the last part of the id
+                    index = int(sensor.id.split("/")[-1])
+                    if index > -1 and index < count:
+                        voltages[index] = float(sensor.value)
+            voltage_sum = 0
+            for voltage in voltages:
+                if voltage is not None:
+                    voltage_sum += voltage
+            if voltage_sum > 0:
+                voltage = voltage_sum / count
+            else:
+                # If we can't get the average, just use the first value
+                voltage = voltage_sensors[0].value
+
+        return (voltage, voltages)
 
     @override
     async def update_all_data(self) -> CPU:
@@ -218,7 +251,7 @@ class CPUUpdate(ModuleUpdateBase):
             times_per_cpu_percent,
             usage,
             usage_per_cpu,
-            voltage,
+            [voltage, voltages],
         ) = await asyncio.gather(
             *[
                 self._get_count(),
@@ -235,7 +268,7 @@ class CPUUpdate(ModuleUpdateBase):
                 self._get_times_per_cpu_percent(),
                 self._get_usage(),
                 self._get_usage_per_cpu(),
-                self._get_voltage(),
+                self._get_voltages(),
             ]
         )
 
@@ -301,4 +334,5 @@ class CPUUpdate(ModuleUpdateBase):
             usage=usage,
             usage_per_cpu=usage_per_cpu,
             voltage=voltage,
+            voltage_per_cpu=voltages,
         )
