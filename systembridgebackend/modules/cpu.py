@@ -130,7 +130,7 @@ class CPUUpdate(ModuleUpdateBase):
                     self._logger.debug(
                         "Found CPU temperature: %s = %s", sensor.name, sensor.value
                     )
-                    return sensor.value
+                    return float(sensor.value) if isinstance(sensor.value, (int, float, str)) else None
         return None
 
     async def _get_times(self) -> pcputimes:
@@ -181,7 +181,7 @@ class CPUUpdate(ModuleUpdateBase):
                     self._logger.debug(
                         "Found CPU voltage: %s = %s", sensor.name, sensor.value
                     )
-                    return sensor.value
+                    return float(sensor.value) if isinstance(sensor.value, (int, float, str)) else None
         return None
 
     @override
