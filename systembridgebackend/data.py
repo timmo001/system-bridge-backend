@@ -12,7 +12,7 @@ from systembridgeshared.base import Base
 from .modules import Update
 
 
-class UpdateThread(Thread):
+class UpdateThread(Thread, Base):
     """Update thread."""
 
     def __init__(
@@ -25,7 +25,10 @@ class UpdateThread(Thread):
 
     def run(self) -> None:
         """Run."""
-        asyncio.run(self._update.update_data())
+        try:
+            asyncio.run(self._update.update_data())
+        except Exception as exception:  # pylint: disable=broad-except
+            self._logger.exception(exception)
 
     def join(self, timeout: float | None = None) -> None:
         """Join."""
@@ -35,7 +38,7 @@ class UpdateThread(Thread):
         super().join(timeout)
 
 
-class UpdateMediaThread(Thread):
+class UpdateMediaThread(Thread, Base):
     """Update media thread."""
 
     def __init__(
@@ -48,8 +51,8 @@ class UpdateMediaThread(Thread):
         if platform.system() != "Windows":
             return
 
-        from .modules.media import (  # pylint: disable=import-error, import-outside-toplevel
-            Media,
+        from .modules.media import (
+            Media,  # pylint: disable=import-error, import-outside-toplevel
         )
 
         self._media = Media(updated_callback)
@@ -59,7 +62,10 @@ class UpdateMediaThread(Thread):
         if platform.system() != "Windows":
             return
 
-        asyncio.run(self._media.update_media_info())
+        try:
+            asyncio.run(self._media.update_media_info())
+        except Exception as exception:  # pylint: disable=broad-except
+            self._logger.exception(exception)
 
     def join(self, timeout: float | None = None) -> None:
         """Join."""

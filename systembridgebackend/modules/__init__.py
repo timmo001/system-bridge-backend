@@ -32,7 +32,7 @@ MODULES = [
 ]
 
 
-class UpdateDataThread(Thread):
+class UpdateDataThread(Thread, Base):
     """Update data thread."""
 
     def __init__(
@@ -55,7 +55,10 @@ class UpdateDataThread(Thread):
 
     def run(self) -> None:
         """Run."""
-        asyncio.run(self._update())
+        try:
+            asyncio.run(self._update())
+        except Exception as exception: # pylint: disable=broad-except
+            self._logger.exception(exception)
 
 
 class Update(Base):
