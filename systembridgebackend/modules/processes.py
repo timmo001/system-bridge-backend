@@ -1,4 +1,4 @@
-"""Processes"""
+"""Processes."""
 from __future__ import annotations
 
 from typing import override
@@ -6,16 +6,15 @@ from typing import override
 from psutil import AccessDenied, NoSuchProcess, process_iter
 from systembridgemodels.modules.processes import Process, Processes
 
-from .._version import __version__
 from .base import ModuleUpdateBase
 
 
 class ProcessesUpdate(ModuleUpdateBase):
-    """Processes Update"""
+    """Processes Update."""
 
     @override
     async def update_all_data(self) -> Processes:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         process_list = list(process_iter())
@@ -33,12 +32,8 @@ class ProcessesUpdate(ModuleUpdateBase):
                 model.path = process.exe()
                 model.status = process.status()
                 model.username = process.username()
-            except (AccessDenied, NoSuchProcess, OSError) as error:
-                self._logger.debug(
-                    "Failed to get process information for PID %s",
-                    process.pid,
-                    exc_info=error,
-                )
+            except (AccessDenied, NoSuchProcess, OSError):
+                pass
             items.append(model)
         # Sort by name
         items = sorted(items, key=lambda item: item.name or "")
