@@ -69,7 +69,7 @@ class CPUUpdate(ModuleUpdateBase):
                     self._logger.debug(
                         "Found CPU package power: %s = %s", sensor.name, sensor.value
                     )
-                    return sensor.value
+                    return float(sensor.value) if isinstance(sensor.value, (int, float)) else None
         return None
 
     async def _get_power_per_cpu(self) -> list[tuple[int, float]] | None:
@@ -95,7 +95,7 @@ class CPUUpdate(ModuleUpdateBase):
                         "Found CPU core power: %s = %s", sensor.name, sensor.value
                     )
                     return [
-                        (int(sensor.name.split()[1]), sensor.value)
+                        (int(sensor.name.split()[1]), float(sensor.value))
                         for sensor in hardware.sensors
                         if "POWER" in sensor.type.upper()
                         and "CORE" in sensor.name.upper()
