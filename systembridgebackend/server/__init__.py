@@ -1,12 +1,12 @@
 """System Bridge: Server."""
 import asyncio
-from collections.abc import Callable
 import sys
+from collections.abc import Callable
 
+import uvicorn
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
-import uvicorn
 
 from ..data import DataUpdate
 from ..gui import GUI
@@ -227,8 +227,8 @@ class Server(Base):
         """Update data."""
         self._logger.info("Update data")
         api_app.data_update.request_update_data()
-        self._logger.info("Schedule next update in 30 seconds")
-        await asyncio.sleep(30)
+        self._logger.info("Schedule next update in 60 seconds")
+        await asyncio.sleep(60)
         self._logger.info("Sleep finished")
 
     async def update_media_data(self) -> None:
