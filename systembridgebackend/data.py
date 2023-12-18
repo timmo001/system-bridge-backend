@@ -20,7 +20,8 @@ class UpdateThread(Thread, Base):
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
         """Initialise."""
-        super().__init__()
+        Thread.__init__(self)
+        Base.__init__(self)
         self._update = Update(updated_callback)
 
     def run(self) -> None:

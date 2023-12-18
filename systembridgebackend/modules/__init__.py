@@ -41,7 +41,8 @@ class UpdateDataThread(Thread, Base):
         updated_callback: Callable[[str, Any], Awaitable[None]],
     ) -> None:
         """Initialise."""
-        super().__init__()
+        Thread.__init__(self)
+        Base.__init__(self)
         self._class_obj = class_obj
         self._updated_callback = updated_callback
 
