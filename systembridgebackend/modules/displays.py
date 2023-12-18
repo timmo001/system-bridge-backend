@@ -1,4 +1,4 @@
-"""Displays"""
+"""Displays."""
 from __future__ import annotations
 
 from typing import override
@@ -11,7 +11,7 @@ from .base import ModuleUpdateBase
 
 
 class DisplaysUpdate(ModuleUpdateBase):
-    """Displays Update"""
+    """Displays Update."""
 
     def __init__(self) -> None:
         """Initialise."""
@@ -22,7 +22,7 @@ class DisplaysUpdate(ModuleUpdateBase):
         self,
         display_key: str,
     ) -> float | None:
-        """Display pixel clock"""
+        """Display pixel clock."""
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -53,7 +53,7 @@ class DisplaysUpdate(ModuleUpdateBase):
         self,
         display_key: str,
     ) -> float | None:
-        """Display refresh rate"""
+        """Display refresh rate."""
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -84,7 +84,7 @@ class DisplaysUpdate(ModuleUpdateBase):
         self,
         display_key: str,
     ) -> int | None:
-        """Display resolution horizontal"""
+        """Display resolution horizontal."""
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -115,7 +115,7 @@ class DisplaysUpdate(ModuleUpdateBase):
         self,
         display_key: str,
     ) -> int | None:
-        """Display resolution vertical"""
+        """Display resolution vertical."""
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -144,7 +144,7 @@ class DisplaysUpdate(ModuleUpdateBase):
 
     @override
     async def update_all_data(self) -> Displays:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         return [

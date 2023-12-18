@@ -1,4 +1,4 @@
-"""GPUs"""
+"""GPUs."""
 from __future__ import annotations
 
 from typing import override
@@ -10,7 +10,7 @@ from .base import ModuleUpdateBase
 
 
 class GPUsUpdate(ModuleUpdateBase):
-    """GPUs Update"""
+    """GPUs Update."""
 
     def __init__(self) -> None:
         """Initialise."""
@@ -19,7 +19,7 @@ class GPUsUpdate(ModuleUpdateBase):
 
     @override
     async def update_all_data(self) -> GPUs:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         if (
