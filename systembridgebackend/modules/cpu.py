@@ -76,8 +76,10 @@ class CPUUpdate(ModuleUpdateBase):
                     )
         return None
 
-    async def _get_power_per_cpu(self) -> list[tuple[int, float]] | None:
+    async def _get_power_per_cpu(self) -> list[float] | None:
         """CPU package power."""
+        count = await self._get_count()
+        powers: list[float] = [-1] * count
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -101,18 +103,23 @@ class CPUUpdate(ModuleUpdateBase):
                         sensor.id,
                         sensor.value,
                     )
+                    for sensor in hardware.sensors:
+                        # Find type "POWER" and name "PACKAGE"
+                        if (
+                            "POWER" in sensor.type.upper()
+                            and "PACKAGE" not in sensor.name.upper()
+                            and sensor.value is not None
+                        ):
+                            self._logger.debug(
+                                "Found CPU package power: %s (%s) = %s",
+                                sensor.name,
+                                sensor.id,
+                                sensor.value,
+                            )
+                            index = int(sensor.id.split("/")[-1])
+                            powers[index] = float(sensor.value)
 
-                    return [
-                        (
-                            int(sensor.id.split("/")[-1]),
-                            float(sensor.value),
-                        )
-                        for sensor in hardware.sensors
-                        if "POWER" in sensor.type.upper()
-                        and "CORE" in sensor.name.upper()
-                        and sensor.value is not None
-                    ]
-        return None
+        return powers
 
     async def _get_stats(self) -> scpustats:
         """CPU stats."""
