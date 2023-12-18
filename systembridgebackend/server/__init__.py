@@ -98,7 +98,7 @@ class Server(Base):
                     name="Update data",
                 ),
                 api_app.loop.create_task(
-                    self.update_media_data(),
+                    self.indefinite_func_wrapper(self.update_media_data),
                     name="Update media data",
                 ),
             ]
@@ -187,8 +187,10 @@ class Server(Base):
         self._logger.info("Event loop stopped")
 
         # Stop threads
-        api_app.data_update.update_thread.join(timeout=2)
-        api_app.data_update.update_media_thread.join(timeout=2)
+        if api_app.data_update.update_thread is not None:
+            api_app.data_update.update_thread.join(timeout=2)
+        if api_app.data_update.update_media_thread is not None:
+            api_app.data_update.update_media_thread.join(timeout=2)
         self._logger.info("Threads joined")
 
         self._logger.info("Exit Application")
@@ -227,6 +229,7 @@ class Server(Base):
         api_app.data_update.request_update_data()
         self._logger.info("Schedule next update in 30 seconds")
         await asyncio.sleep(30)
+        self._logger.info("Sleep finished")
 
     async def update_media_data(self) -> None:
         """Update media data."""
