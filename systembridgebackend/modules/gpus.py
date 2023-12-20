@@ -69,7 +69,9 @@ class GPUsUpdate(ModuleUpdateBase):
                     )
                     # Only use the first fan speed or if the fan speed is None
                     if sensor.id.endswith("1") or gpu.fan_speed is None:
-                        gpu.fan_speed = float(sensor.value) if sensor.value else None
+                        gpu.fan_speed = (
+                            float(sensor.value) if sensor.value is not None else None
+                        )
                 # Find "CLOCK" in type and "MEMORY" in name
                 elif "CLOCK" in sensor_type and "MEMORY" in sensor_name:
                     self._logger.debug(
@@ -125,7 +127,7 @@ class GPUsUpdate(ModuleUpdateBase):
                     )
                     gpu.power_usage = float(sensor.value) if sensor.value else None
                 # Find "TEMPERATURE" and "CORE" in name
-                elif "TEMPERATURE" in sensor_name and "CORE" in sensor_name:
+                elif "TEMPERATURE" in sensor_type and "CORE" in sensor_name:
                     self._logger.debug(
                         "Found GPU temperature: %s (%s) = %s",
                         sensor_name,
