@@ -39,84 +39,97 @@ class GPUsUpdate(ModuleUpdateBase):
             gpu = GPU(name=hardware.name)
 
             for sensor in hardware.sensors:
-                name = sensor.name.upper()
-                # Find "CLOCK" and "CORE" in name
-                if "CLOCK" in name and "CORE" in name:
+                sensor_name = sensor.name.upper()
+                sensor_type = sensor.type.upper()
+                # Find "CLOCK" in type and "CORE" in name
+                if "CLOCK" in sensor_type and "CORE" in sensor_name:
                     self._logger.debug(
-                        "Found GPU core clock: %s = %s",
-                        sensor.name,
+                        "Found GPU core clock: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.core_clock = float(sensor.value) if sensor.value else None
-                # Find "LOAD" and "CORE" in name
-                elif "LOAD" in name and "CORE" in name:
+                # Find "LOAD" in type and "CORE" in name
+                elif "LOAD" in sensor_type and "CORE" in sensor_name:
                     self._logger.debug(
-                        "Found GPU core load: %s = %s",
-                        sensor.name,
+                        "Found GPU core load: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.core_load = float(sensor.value) if sensor.value else None
-                # Find "FAN" in name
-                elif "FAN" in name:
+                # Find "FAN" in type
+                elif "FAN" in sensor_type:
                     self._logger.debug(
-                        "Found GPU fan speed: %s = %s",
-                        sensor.name,
+                        "Found GPU fan speed: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
-                    gpu.fan_speed = float(sensor.value) if sensor.value else None
-                # Find "CLOCK" and "MEMORY" in name
-                elif "CLOCK" in name and "MEMORY" in name:
+                    # Only use the first fan speed or if the fan speed is None
+                    if sensor.id.endswith("1") or gpu.fan_speed is None:
+                        gpu.fan_speed = float(sensor.value) if sensor.value else None
+                # Find "CLOCK" in type and "MEMORY" in name
+                elif "CLOCK" in sensor_type and "MEMORY" in sensor_name:
                     self._logger.debug(
-                        "Found GPU memory clock: %s = %s",
-                        sensor.name,
+                        "Found GPU memory clock: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.memory_clock = float(sensor.value) if sensor.value else None
-                # Find "LOAD" and "MEMORY" in name
-                elif "LOAD" in name and "MEMORY" in name:
+                # Find "LOAD" in type and "MEMORY" in name
+                elif "LOAD" in sensor_type and "MEMORY" in sensor_name:
                     self._logger.debug(
-                        "Found GPU memory load: %s = %s",
-                        sensor.name,
+                        "Found GPU memory load: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.memory_load = float(sensor.value) if sensor.value else None
                 # Find "FREE" and "MEMORY" in name
-                elif "FREE" in name and "MEMORY" in name:
+                elif "FREE" in sensor_name and "MEMORY" in sensor_name:
                     self._logger.debug(
-                        "Found GPU memory free: %s = %s",
-                        sensor.name,
+                        "Found GPU memory free: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.memory_free = float(sensor.value) if sensor.value else None
                 # Find "USED" and "MEMORY" in name
-                elif "USED" in name and "MEMORY" in name:
+                elif "USED" in sensor_name and "MEMORY" in sensor_name:
                     self._logger.debug(
-                        "Found GPU memory used: %s = %s",
-                        sensor.name,
+                        "Found GPU memory used: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.memory_used = float(sensor.value) if sensor.value else None
                 # Find "TOTAL" and "MEMORY" in name
-                elif "TOTAL" in name and "MEMORY" in name:
+                elif "TOTAL" in sensor_name and "MEMORY" in sensor_name:
                     self._logger.debug(
-                        "Found GPU memory total: %s = %s",
-                        sensor.name,
+                        "Found GPU memory total: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.memory_total = float(sensor.value) if sensor.value else None
                 # Find "POWER" in name
-                elif "POWER" in name:
+                elif "POWER" in sensor_name:
                     self._logger.debug(
-                        "Found GPU power: %s = %s",
-                        sensor.name,
+                        "Found GPU power: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.power_usage = float(sensor.value) if sensor.value else None
                 # Find "TEMPERATURE" and "CORE" in name
-                elif "TEMPERATURE" in name and "CORE" in name:
+                elif "TEMPERATURE" in sensor_name and "CORE" in sensor_name:
                     self._logger.debug(
-                        "Found GPU temperature: %s = %s",
-                        sensor.name,
+                        "Found GPU temperature: %s (%s) = %s",
+                        sensor_name,
+                        sensor_type,
                         sensor.value,
                     )
                     gpu.temperature = float(sensor.value) if sensor.value else None
