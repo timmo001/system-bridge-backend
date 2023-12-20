@@ -297,7 +297,7 @@ def get_media_directories() -> dict[str, list[dict[str, str]]]:
 def get_media_files(
     query_base: str = Query(..., alias="base"),
     query_path: str | None = Query(None, alias="path"),
-) -> MediaFiles:
+) -> dict[str, Any]:
     """Get media files."""
     root_path = None
     for item in get_directories(settings):
@@ -332,9 +332,11 @@ def get_media_files(
             {"message": "Path is not a directory", "path": path},
         )
 
-    return MediaFiles(
-        files=get_files(settings, query_base, path),
-        path=path,
+    return asdict(
+        MediaFiles(
+            files=get_files(settings, query_base, path),
+            path=path,
+        )
     )
 
 
@@ -342,7 +344,7 @@ def get_media_files(
 def get_media_file(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
-) -> MediaFile:
+) -> dict[str, Any]:
     """Get media file info."""
     root_path = None
     for item in get_directories(settings):
@@ -382,7 +384,7 @@ def get_media_file(
             status.HTTP_404_NOT_FOUND,
             {"message": "Cannot get file", "path": path},
         )
-    return file
+    return asdict(file) if is_dataclass(file) else {}
 
 
 @app.get("/api/media/file/data", dependencies=[Depends(security_token)])
