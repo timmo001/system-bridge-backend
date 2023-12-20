@@ -8,8 +8,8 @@ import platform
 
 from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
-from winsdk.windows.foundation import (  # pylint: disable=import-error
-    EventRegistrationToken,
+from winsdk.windows.foundation import (
+    EventRegistrationToken,  # pylint: disable=import-error
 )
 import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 
@@ -42,7 +42,7 @@ class Media(Base):
         _sender,
         _result,
     ) -> None:
-        """Session changed handler"""
+        """Session changed handler."""
         self._logger.info("Session changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
@@ -52,7 +52,7 @@ class Media(Base):
         _sender,
         _result,
     ) -> None:
-        """Properties changed handler"""
+        """Properties changed handler."""
         self._logger.info("Media properties changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
@@ -62,7 +62,7 @@ class Media(Base):
         _sender,
         _result,
     ) -> None:
-        """Playback info changed handler"""
+        """Playback info changed handler."""
         self._logger.info("Media properties changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
@@ -71,7 +71,7 @@ class Media(Base):
         self,
         media_info: MediaInfo | None = None,
     ) -> None:
-        """Update data"""
+        """Update data."""
         if media_info is None:
             media_info = MediaInfo(updated_at=datetime.datetime.now().timestamp())
 

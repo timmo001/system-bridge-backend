@@ -1,7 +1,7 @@
 """Data."""
 import asyncio
-import platform
 from collections.abc import Awaitable, Callable
+import platform
 from threading import Thread
 from typing import Any
 
@@ -38,7 +38,7 @@ class UpdateThread(Thread, Base):
         loop.stop()
         super().join(timeout)
 
-
+# pylint: disable=import-error, import-outside-toplevel
 class UpdateMediaThread(Thread, Base):
     """Update media thread."""
 
@@ -52,9 +52,8 @@ class UpdateMediaThread(Thread, Base):
         if platform.system() != "Windows":
             return
 
-        from .modules.media import (
-            Media,  # pylint: disable=import-error, import-outside-toplevel
-        )
+        from .modules.media import Media
+
 
         self._media = Media(updated_callback)
 
