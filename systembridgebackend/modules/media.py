@@ -1,4 +1,5 @@
 """Media."""
+# pylint: disable=import-error
 from __future__ import annotations
 
 import asyncio
@@ -8,10 +9,8 @@ import platform
 
 from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
-from winsdk.windows.foundation import (
-    EventRegistrationToken,  # pylint: disable=import-error
-)
-import winsdk.windows.media.control as wmc  # pylint: disable=import-error
+from winsdk.windows.foundation import EventRegistrationToken
+import winsdk.windows.media.control as wmc
 
 
 class Media(Base):
