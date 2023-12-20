@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
-from systembridgemodels.media_control import Action as MediaAction, MediaControl
+from systembridgemodels.media_control import MediaControl
 from systembridgemodels.media_files import MediaFile, MediaFiles
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
