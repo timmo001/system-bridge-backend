@@ -3,8 +3,6 @@ import asyncio
 from collections.abc import Callable
 import sys
 
-from systembridgemodels.action import Action
-from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 import uvicorn
@@ -13,8 +11,6 @@ from ..data import DataUpdate
 from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
-from ..utilities.action import ActionHandler
-from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
 
@@ -196,33 +192,6 @@ class Server(Base):
 
         self._logger.info("Exit Application")
         sys.exit(0)
-
-    async def register_hotkeys(self) -> None:
-        """Register hotkeys."""
-        self._logger.info("Register hotkeys")
-        hotkeys = self._settings.data.keyboard_hotkeys
-        if hotkeys is not None and isinstance(hotkeys, list):
-            self._logger.info("Found %s hotkeys", len(hotkeys))
-            for item in hotkeys:
-                self.register_hotkey(item)
-
-    def register_hotkey(
-        self,
-        hotkey: SettingHotkey,
-    ) -> None:
-        """Register hotkey."""
-        self._logger.info("Register hotkey: %s", hotkey)
-
-        def hotkey_callback() -> None:
-            """Hotkey callback."""
-            self._logger.info("Hotkey pressed: %s", hotkey)
-            action_handler = ActionHandler(self._settings)
-            api_app.loop.create_task(action_handler.handle(Action(hotkey.key)))
-
-        keyboard_hotkey_register(
-            hotkey.key,
-            hotkey_callback,
-        )
 
     async def update_data(self) -> None:
         """Update data."""
