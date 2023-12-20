@@ -9,6 +9,11 @@ import sys
 import psutil
 from systembridgemodels.modules.sensors import (
     Sensors,
+    SensorsNVIDIA,
+    SensorsNVIDIAChipset,
+    SensorsNVIDIADisplay,
+    SensorsNVIDIADriver,
+    SensorsNVIDIAGPU,
     SensorsWindows,
     SensorsWindowsHardware,
     SensorsWindowsSensor,
@@ -117,6 +122,66 @@ class SensorsUpdate(ModuleUpdateBase):
                     )
                     for hardware in windows_sensors["hardware"]
                 ],
+                nvidia=SensorsNVIDIA(
+                    chipset=SensorsNVIDIAChipset(
+                        id=windows_sensors["nvidia"]["chipset"]["id"],
+                        name=windows_sensors["nvidia"]["chipset"]["name"],
+                        flags=windows_sensors["nvidia"]["chipset"]["flags"],
+                        vendor_id=windows_sensors["nvidia"]["chipset"]["vendor_id"],
+                        vendor_name=windows_sensors["nvidia"]["chipset"]["vendor_name"],
+                    ),
+                    displays=[
+                        SensorsNVIDIADisplay(
+                            id=display["id"],
+                            name=display["name"],
+                            active=display["active"],
+                            available=display["available"],
+                            connected=display["connected"],
+                            dynamic=display["dynamic"],
+                            aspect_horizontal=display["aspect_horizontal"],
+                            aspect_vertical=display["aspect_vertical"],
+                            brightness_current=display["brightness_current"],
+                            brightness_default=display["brightness_default"],
+                            brightness_max=display["brightness_max"],
+                            brightness_min=display["brightness_min"],
+                            color_depth=display["color_depth"],
+                            connection_type=display["connection_type"],
+                            pixel_clock=display["pixel_clock"],
+                            refresh_rate=display["refresh_rate"],
+                            resolution_horizontal=display["resolution_horizontal"],
+                            resolution_vertical=display["resolution_vertical"],
+                        )
+                        for display in windows_sensors["nvidia"]["displays"]
+                    ],
+                    driver=SensorsNVIDIADriver(
+                        branch_version=windows_sensors["nvidia"]["driver"][
+                            "branch_version"
+                        ],
+                        interface_version=windows_sensors["nvidia"]["driver"][
+                            "interface_version"
+                        ],
+                        version=windows_sensors["nvidia"]["driver"]["version"],
+                    ),
+                    gpus=[
+                        SensorsNVIDIAGPU(
+                            id=gpu["id"],
+                            name=gpu["name"],
+                            bios_oem_revision=gpu["bios_oem_revision"],
+                            bios_revision=gpu["bios_revision"],
+                            bios_version=gpu["bios_version"],
+                            current_fan_speed_level=gpu["current_fan_speed_level"],
+                            current_fan_speed_rpm=gpu["current_fan_speed_rpm"],
+                            driver_model=gpu["driver_model"],
+                            memory_available=gpu["memory_available"],
+                            memory_capacity=gpu["memory_capacity"],
+                            memory_maker=gpu["memory_maker"],
+                            serial=gpu["serial"],
+                            system_type=gpu["system_type"],
+                            type=gpu["type"],
+                        )
+                        for gpu in windows_sensors["nvidia"]["gpus"]
+                    ]
+                ),
             )
             if windows_sensors
             else None,
