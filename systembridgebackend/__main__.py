@@ -9,12 +9,6 @@ from . import Application
 
 app = typer.Typer()
 
-settings = Settings()
-
-LOG_LEVEL = settings.data.log_level
-logger = setup_logger(LOG_LEVEL, "system-bridge")
-logging.getLogger("zeroconf").setLevel(logging.ERROR)
-
 
 @app.command(name=None, short_help="Main Application")
 def main(
@@ -22,6 +16,12 @@ def main(
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
 ) -> None:
     """Run the main application."""
+    settings = Settings()
+
+    LOG_LEVEL = settings.data.log_level
+    logger = setup_logger(LOG_LEVEL, "system-bridge")
+    logging.getLogger("zeroconf").setLevel(logging.ERROR)
+
     try:
         Application(
             settings,
