@@ -339,17 +339,17 @@ class WebSocketHandler(Base):
                     )
                 )
                 return
-            if model.action == MediaAction.play:
+            if model.action == MediaAction.PLAY:
                 await control_play()
-            elif model.action == MediaAction.pause:
+            elif model.action == MediaAction.PAUSE:
                 await control_pause()
-            elif model.action == MediaAction.stop:
+            elif model.action == MediaAction.STOP:
                 await control_stop()
-            elif model.action == MediaAction.previous:
+            elif model.action == MediaAction.PREVIOUS:
                 await control_previous()
-            elif model.action == MediaAction.next:
+            elif model.action == MediaAction.NEXT:
                 await control_next()
-            elif model.action == MediaAction.seek:
+            elif model.action == MediaAction.SEEK:
                 if model.value is None:
                     self._logger.warning("No position value provided")
                     await self._send_response(
@@ -363,11 +363,11 @@ class WebSocketHandler(Base):
                     )
                     return
                 await control_seek(int(model.value))
-            elif model.action == MediaAction.rewind:
+            elif model.action == MediaAction.REWIND:
                 await control_rewind()
-            elif model.action == MediaAction.fastforward:
+            elif model.action == MediaAction.FASTFORWARD:
                 await control_fastforward()
-            elif model.action == MediaAction.shuffle:
+            elif model.action == MediaAction.SHUFFLE:
                 if model.value is None:
                     self._logger.warning("No shuffle value provided")
                     await self._send_response(
@@ -381,7 +381,7 @@ class WebSocketHandler(Base):
                     )
                     return
                 await control_shuffle(bool(model.value))
-            elif model.action == MediaAction.repeat:
+            elif model.action == MediaAction.REPEAT:
                 if model.value is None:
                     self._logger.warning("No repeat value provided")
                     await self._send_response(
@@ -395,11 +395,11 @@ class WebSocketHandler(Base):
                     )
                     return
                 await control_repeat(int(model.value))
-            elif model.action == MediaAction.mute:
+            elif model.action == MediaAction.MUTE:
                 await control_mute()
-            elif model.action == MediaAction.volumedown:
+            elif model.action == MediaAction.VOLUMEDOWN:
                 await control_volume_down()
-            elif model.action == MediaAction.volumeup:
+            elif model.action == MediaAction.VOLUMEUP:
                 await control_volume_up()
 
         elif request.event == TYPE_NOTIFICATION:
