@@ -221,10 +221,7 @@ class SystemUpdate(ModuleUpdateBase):
         ) as response:
             if response.status == 200:
                 data = await response.json()
-                if (
-                    data is not None
-                    and (tag_name := data.get("tag_name")) is not None
-                ):
+                if data is not None and (tag_name := data.get("tag_name")) is not None:
                     return tag_name.replace("v", "")
 
         return None

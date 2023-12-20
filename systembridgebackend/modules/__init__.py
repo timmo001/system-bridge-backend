@@ -58,7 +58,7 @@ class UpdateDataThread(Thread, Base):
         """Run."""
         try:
             asyncio.run(self._update())
-        except Exception as exception: # pylint: disable=broad-except
+        except Exception as exception:  # pylint: disable=broad-except
             self._logger.exception(exception)
 
 

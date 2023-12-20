@@ -179,7 +179,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             type=gpu["type"],
                         )
                         for gpu in windows_sensors["nvidia"]["gpus"]
-                    ]
+                    ],
                 ),
             )
             if windows_sensors
