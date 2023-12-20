@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import MediaAction, MediaControl
-from systembridgemodels.media_files import MediaFile, MediaFiles
+from systembridgemodels.media_files import MediaFiles
 from systembridgemodels.notification import Notification
 from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
