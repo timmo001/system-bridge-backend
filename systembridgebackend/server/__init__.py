@@ -3,6 +3,7 @@ import asyncio
 from collections.abc import Callable
 import sys
 
+from systembridgemodels.action import Action
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
@@ -12,7 +13,7 @@ from ..data import DataUpdate
 from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
-from ..utilities.action import Action, ActionHandler
+from ..utilities.action import ActionHandler
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
