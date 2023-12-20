@@ -18,8 +18,7 @@ def main(
     """Run the main application."""
     settings = Settings()
 
-    LOG_LEVEL = settings.data.log_level
-    logger = setup_logger(LOG_LEVEL, "system-bridge")
+    logger = setup_logger(settings.data.log_level, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
     try:
