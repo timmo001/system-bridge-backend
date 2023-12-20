@@ -1,9 +1,10 @@
-"""MDNS/Zeroconf Advertisement"""
+"""MDNS/Zeroconf Advertisement."""
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
-from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
-from ..modules.system import System
+# from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
+
+# from ..modules.system import System
 
 ZEROCONF_TYPE = "_system-bridge._tcp.local."
 
