@@ -9,7 +9,7 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
-from systembridgemodels.media_control import Action as MediaAction, MediaControl
+from systembridgemodels.media_control import MediaAction, MediaControl
 from systembridgemodels.media_get_file import MediaGetFile
 from systembridgemodels.media_get_files import MediaGetFiles
 from systembridgemodels.modules import GetData, ModulesData, RegisterDataListener
