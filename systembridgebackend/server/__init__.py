@@ -1,12 +1,12 @@
 """System Bridge: Server."""
 import asyncio
-import sys
 from collections.abc import Callable
+import sys
 
-import uvicorn
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
+import uvicorn
 
 from ..data import DataUpdate
 from ..gui import GUI

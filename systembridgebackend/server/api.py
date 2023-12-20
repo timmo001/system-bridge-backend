@@ -1,4 +1,4 @@
-"""API"""
+"""API."""
 import asyncio
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
