@@ -225,7 +225,7 @@ class CPUUpdate(ModuleUpdateBase):
                     # "/amdcpu/0/voltage/16" -> 16
                     # Get the last part of the id
                     index = int(sensor.id.split("/")[-1])
-                    if index > -1 and index < count:
+                    if 0 <= index < count:
                         voltages[index] = float(sensor.value)
             voltage_sum = 0
             for voltage in voltages:
