@@ -5,6 +5,7 @@ import asyncio
 import json
 import subprocess
 import sys
+from typing import Any
 
 import psutil
 from systembridgemodels.modules.sensors import (
@@ -21,19 +22,17 @@ from systembridgemodels.modules.sensors import (
 
 from .base import ModuleUpdateBase
 
-# TODO: Fix sensors
-
 
 class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update."""
 
-    async def _get_fans(self) -> dict | None:
+    async def _get_fans(self) -> Any | None:
         """Get fans."""
         if not hasattr(psutil, "sensors_fans"):
             return None
         return psutil.sensors_fans()  # type: ignore
 
-    async def _get_temperatures(self) -> dict | None:
+    async def _get_temperatures(self) -> Any | None:
         """Get temperatures."""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
