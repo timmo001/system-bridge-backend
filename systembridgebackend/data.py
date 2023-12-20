@@ -38,6 +38,7 @@ class UpdateThread(Thread, Base):
         loop.stop()
         super().join(timeout)
 
+
 # pylint: disable=import-error, import-outside-toplevel
 class UpdateMediaThread(Thread, Base):
     """Update media thread."""
@@ -53,7 +54,6 @@ class UpdateMediaThread(Thread, Base):
             return
 
         from .modules.media import Media
-
 
         self._media = Media(updated_callback)
 
