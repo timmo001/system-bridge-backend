@@ -1,7 +1,7 @@
 """Data."""
 import asyncio
-from collections.abc import Awaitable, Callable
 import platform
+from collections.abc import Awaitable, Callable
 from threading import Thread
 from typing import Any
 
@@ -87,8 +87,8 @@ class DataUpdate(Base):
         super().__init__()
         self.data = ModulesData()
         self._updated_callback = updated_callback
-        self.update_thread = UpdateThread(self._data_updated_callback)
-        self.update_media_thread = UpdateMediaThread(self._data_updated_callback)
+        self.update_thread: UpdateThread | None = None
+        self.update_media_thread: UpdateMediaThread | None = None
 
     async def _data_updated_callback(
         self,
@@ -101,14 +101,10 @@ class DataUpdate(Base):
 
     def request_update_data(self) -> None:
         """Request update data."""
-        if self.update_thread.is_alive():
-            self._logger.warning("Update thread is already alive")
-            return
+        self.update_thread = UpdateThread(self._data_updated_callback)
         self.update_thread.start()
 
     def request_update_media_data(self) -> None:
         """Request update media data."""
-        if self.update_media_thread.is_alive():
-            self._logger.warning("Update media thread is already alive")
-            return
+        self.update_media_thread = UpdateMediaThread(self._data_updated_callback)
         self.update_media_thread.start()

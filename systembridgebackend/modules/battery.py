@@ -17,7 +17,10 @@ class BatteryUpdate(ModuleUpdateBase):
         """Update all data."""
         self._logger.debug("Update all data")
 
-        if (status := battery.status) is None:
+        status = battery.status
+        if (status) is None or (
+            status["percentage"] == 255 and status["isCharging"] is False
+        ):
             return Battery(
                 is_charging=None,
                 percentage=None,
