@@ -18,5 +18,5 @@ jobs:
     with:
       module-name: systembridgebackend
       pre-install-command: |
-        pip install -r requirements_setup.txt
+        pip install .
       use-incremental: true
