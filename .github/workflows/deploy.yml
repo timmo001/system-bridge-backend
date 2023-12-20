@@ -17,4 +17,5 @@ jobs:
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       module-name: systembridgebackend
+      skip-version-check: true
       use-incremental: true
