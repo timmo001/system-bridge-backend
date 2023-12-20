@@ -1,4 +1,4 @@
-"""Network"""
+"""Network."""
 import asyncio
 from typing import override
 
@@ -17,29 +17,29 @@ from .base import ModuleUpdateBase
 
 
 class NetworksUpdate(ModuleUpdateBase):
-    """Networks Update"""
+    """Networks Update."""
 
     async def _get_addresses(
         self,
     ) -> dict[str, list[snicaddr]]:
-        """Addresses"""
+        """Addresses."""
         return net_if_addrs()
 
     async def _get_connections(self) -> list[sconn]:
-        """Connections"""
+        """Get connections."""
         return net_connections("all")
 
     async def _get_io_counters(self) -> snetio:
-        """IO Counters"""
+        """IO Counters."""
         return net_io_counters()
 
     async def _get_stats(self) -> dict[str, snicstats]:
-        """Stats"""
+        """Stats."""
         return net_if_stats()
 
     @override
     async def update_all_data(self) -> Networks:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         (addresses, connections, io_counters, stats) = await asyncio.gather(

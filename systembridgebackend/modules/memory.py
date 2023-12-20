@@ -1,4 +1,4 @@
-"""Memory"""
+"""Memory."""
 import asyncio
 from typing import NamedTuple, override
 
@@ -10,19 +10,19 @@ from .base import ModuleUpdateBase
 
 
 class MemoryUpdate(ModuleUpdateBase):
-    """Memory Update"""
+    """Memory Update."""
 
     async def _get_swap(self) -> sswap:
-        """Swap memory"""
+        """Swap memory."""
         return swap_memory()
 
     async def _get_virtual(self) -> NamedTuple:
-        """Virtual memory"""
+        """Virtual memory."""
         return virtual_memory()
 
     @override
     async def update_all_data(self) -> Memory:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         swap, virtual = await asyncio.gather(

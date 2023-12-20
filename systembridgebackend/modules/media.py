@@ -2,16 +2,16 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import datetime
 import platform
-from collections.abc import Awaitable, Callable
 
-import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
 from winsdk.windows.foundation import (  # pylint: disable=import-error
     EventRegistrationToken,
 )
+import winsdk.windows.media.control as wmc  # pylint: disable=import-error
 
 
 class Media(Base):

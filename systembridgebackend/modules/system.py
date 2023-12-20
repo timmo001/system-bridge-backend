@@ -1,4 +1,4 @@
-"""System"""
+"""System."""
 from __future__ import annotations
 
 import asyncio
@@ -22,7 +22,7 @@ from .base import ModuleUpdateBase
 
 
 class SystemUpdate(ModuleUpdateBase):
-    """System Update"""
+    """System Update."""
 
     def __init__(self) -> None:
         """Initialise."""
@@ -32,20 +32,20 @@ class SystemUpdate(ModuleUpdateBase):
         self._version_latest: str | None = None
 
     async def _get_active_user_id(self) -> int:
-        """Get active user ID"""
+        """Get active user ID."""
         return os.getpid()
 
     async def _get_active_user_name(self) -> str:
-        """Get active user"""
+        """Get active user."""
         return os.getlogin()
 
     async def _get_boot_time(self) -> float:
-        """Get boot time"""
+        """Get boot time."""
         return boot_time()
 
     async def _get_camera_usage(self) -> list[str]:
-        """Returns a list of apps that are currently using the webcam."""
-        active_apps = []
+        """Return a list of apps that are currently using the webcam."""
+        active_apps: list[str] = []
         if sys.platform == "win32":
             # Read from registry for camera usage
             import winreg  # pylint: disable=import-error,import-outside-toplevel
@@ -53,7 +53,7 @@ class SystemUpdate(ModuleUpdateBase):
             subkey_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam"
 
             def get_subkey_timestamp(subkey) -> int | None:
-                """Returns the timestamp of the subkey"""
+                """Return the timestamp of the subkey."""
                 try:
                     value, _ = winreg.QueryValueEx(subkey, "LastUsedTimeStop")
                     return value
@@ -84,9 +84,8 @@ class SystemUpdate(ModuleUpdateBase):
                             )
                             if get_subkey_timestamp(subkey_np) == 0:
                                 active_apps.append(subkey_name_np)
-                    else:
-                        if get_subkey_timestamp(subkey) == 0:
-                            active_apps.append(subkey_name)
+                    elif get_subkey_timestamp(subkey) == 0:
+                        active_apps.append(subkey_name)
                     winreg.CloseKey(subkey)
                 winreg.CloseKey(key)
             except OSError:
@@ -97,15 +96,15 @@ class SystemUpdate(ModuleUpdateBase):
         return active_apps
 
     async def _get_fqdn(self) -> str:
-        """Get FQDN"""
+        """Get FQDN."""
         return socket.getfqdn()
 
     async def _get_hostname(self) -> str:
-        """Get hostname"""
+        """Get hostname."""
         return socket.gethostname()
 
     async def _get_ip_address_4(self) -> str:
-        """Get IPv4 address"""
+        """Get IPv4 address."""
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.connect(("8.8.8.8", 80))
@@ -114,7 +113,7 @@ class SystemUpdate(ModuleUpdateBase):
             return ""
 
     async def _get_ip_address_6(self) -> str:
-        """Get IPv6 address"""
+        """Get IPv6 address."""
         try:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
             sock.connect(("2001:4860:4860::8888", 80))
@@ -123,12 +122,12 @@ class SystemUpdate(ModuleUpdateBase):
             return ""
 
     def _get_mac_address(self) -> str:
-        """Get MAC address"""
+        """Get MAC address."""
         # pylint: disable=consider-using-f-string
         return ":".join(re.findall("..", "%012x" % uuid.getnode()))
 
     async def _get_pending_reboot(self) -> bool:
-        """Check if there is a pending reboot"""
+        """Check if there is a pending reboot."""
         if sys.platform == "win32":
             # Read from registry for pending reboot
             import winreg  # pylint: disable=import-error,import-outside-toplevel
@@ -193,53 +192,52 @@ class SystemUpdate(ModuleUpdateBase):
         return False
 
     async def _get_platform(self) -> str:
-        """Get platform"""
+        """Get platform."""
         return platform.system()
 
     async def _get_platform_version(self) -> str:
-        """Get platform version"""
+        """Get platform version."""
         return platform.version()
 
     async def _get_uptime(self) -> float:
-        """Get uptime"""
+        """Get uptime."""
         return os.times().system
 
     async def _get_users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
-        """Get users"""
+        """Get users."""
         return users()
 
     @property
     def _uuid(self) -> str:
-        """Get UUID"""
+        """Get UUID."""
         return uniqueid.id or self._mac_address
 
     async def _get_version_latest(self) -> Any | None:
-        """Get latest version from GitHub"""
+        """Get latest version from GitHub."""
         self._logger.info("Get latest version from GitHub")
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.github.com/repos/timmo001/system-bridge/releases/latest"
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if (
-                        data is not None
-                        and (tag_name := data.get("tag_name")) is not None
-                    ):
-                        return tag_name.replace("v", "")
+        async with aiohttp.ClientSession() as session, session.get(
+            "https://api.github.com/repos/timmo001/system-bridge/releases/latest"
+        ) as response:
+            if response.status == 200:
+                data = await response.json()
+                if (
+                    data is not None
+                    and (tag_name := data.get("tag_name")) is not None
+                ):
+                    return tag_name.replace("v", "")
 
         return None
 
     async def _get_version_newer_available(self) -> bool | None:
-        """Check if newer version is available"""
+        """Check if newer version is available."""
         if self._version_latest is not None:
             return parse_version(self._version_latest) > parse_version(self._version)
         return None
 
     @override
     async def update_all_data(self) -> System:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         (
