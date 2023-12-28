@@ -12,7 +12,7 @@ with open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 # Add windows specific requirements if applicable
-if platform.system() == "Windows":
+if platform.system().lower() == "windows":
     with open("requirements_windows.txt", encoding="utf-8") as f:
         requirements.extend(f.read().splitlines())
 
