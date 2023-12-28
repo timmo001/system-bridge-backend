@@ -25,7 +25,7 @@ setup(
     keywords="system-bridge",
     author="Aidan Timson (Timmo)",
     author_email="aidan@timmo.dev",
-    license="MIT",
+    license="Apache-2.0",
     url="https://github.com/timmo001/system-bridge-backend",
     packages=find_packages(exclude=["tests", "generator"]),
     package_data={"": package_data},
