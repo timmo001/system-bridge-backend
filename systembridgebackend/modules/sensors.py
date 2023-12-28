@@ -120,7 +120,9 @@ class SensorsUpdate(ModuleUpdateBase):
                         ],
                     )
                     for hardware in windows_sensors["hardware"]
-                ],
+                ]
+                if windows_sensors and windows_sensors.get("hardware")
+                else None,
                 nvidia=SensorsNVIDIA(
                     chipset=SensorsNVIDIAChipset(
                         id=windows_sensors["nvidia"]["chipset"]["id"],
@@ -182,6 +184,6 @@ class SensorsUpdate(ModuleUpdateBase):
                     ],
                 ),
             )
-            if windows_sensors
+            if windows_sensors and windows_sensors.get("nvidia")
             else None,
         )
