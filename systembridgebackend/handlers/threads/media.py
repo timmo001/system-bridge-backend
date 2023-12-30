@@ -5,7 +5,6 @@ from typing import Final, override
 
 from systembridgemodels.modules.media import Media as MediaInfo
 
-from ...modules.media import Media
 from .update import UpdateThread
 
 UPDATE_INTERVAL: Final[int] = 60
@@ -23,6 +22,10 @@ class MediaUpdateThread(UpdateThread):
 
         if platform.system() != "Windows":
             return
+
+        from ...modules.media import (
+            Media,  # pylint: disable=import-outside-toplevel, import-error
+        )
 
         self._update_cls = Media(
             changed_callback=updated_callback,
