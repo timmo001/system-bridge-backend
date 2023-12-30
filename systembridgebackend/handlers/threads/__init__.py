@@ -17,8 +17,12 @@ class BaseThread(Thread, Base):
         """Run."""
         raise NotImplementedError
 
-    def join(self, timeout: float | None = None) -> None:
+    def join(
+        self,
+        timeout: float | None = None,
+    ) -> None:
         """Join."""
+        self._logger.info("Stopping thread")
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()

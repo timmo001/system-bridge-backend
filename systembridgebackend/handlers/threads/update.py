@@ -29,7 +29,7 @@ class UpdateThread(BaseThread):
 
             # Run the update
             try:
-                asyncio.run(self.update())
+                asyncio.new_event_loop().run_until_complete(self.update())
             except Exception as exception:  # pylint: disable=broad-except
                 self._logger.exception(exception)
 
