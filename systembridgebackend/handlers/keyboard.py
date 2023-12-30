@@ -1,4 +1,4 @@
-"""Keyboard Utilities."""
+"""Keyboard handlers."""
 from collections.abc import Callable
 
 from keyboard import (

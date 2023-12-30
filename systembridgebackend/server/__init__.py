@@ -3,17 +3,18 @@ import asyncio
 from collections.abc import Callable
 import sys
 
+import uvicorn
+
 from systembridgemodels.action import Action
 from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
-import uvicorn
 
-from ..data import DataUpdate
-from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from ..utilities.action import ActionHandler
+from ..utilities.data import DataUpdate
+from ..utilities.gui import GUI
 from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
@@ -228,12 +229,9 @@ class Server(Base):
         """Update data."""
         self._logger.info("Update data")
         api_app.data_update.request_update_data()
-        self._logger.info("Schedule next update in 60 seconds")
-        await asyncio.sleep(60)
-        self._logger.info("Sleep finished")
 
     async def update_media_data(self) -> None:
         """Update media data."""
         self._logger.info("Update media data")
         api_app.data_update.request_update_media_data()
-        asyncio.get_running_loop().run_forever()
+        # asyncio.get_running_loop().run_forever()
