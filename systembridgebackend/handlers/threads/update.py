@@ -31,7 +31,7 @@ class UpdateThread(BaseThread):
             try:
                 asyncio.run(self.update())
                 self._logger.info("Update successful")
-            except asyncio.CancelledError as exception:
+            except Exception as exception: # pylint: disable=broad-except
                 self._logger.exception(exception)
 
             # Wait for the next run
