@@ -1,4 +1,4 @@
-"""Media Thread."""
+"""Media thread handler."""
 import asyncio
 from collections.abc import Awaitable, Callable
 import platform

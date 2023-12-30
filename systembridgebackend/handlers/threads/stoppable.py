@@ -1,4 +1,4 @@
-"""Stoppable thread ."""
+"""Stoppable thread handler."""
 from asyncio import Event
 from threading import Thread
 
