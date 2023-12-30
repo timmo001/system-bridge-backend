@@ -96,10 +96,6 @@ class Server(Base):
                     name="API",
                 ),
                 api_app.loop.create_task(
-                    self.ping(),
-                    name="Ping",
-                ),
-                api_app.loop.create_task(
                     self.register_hotkeys(),
                     name="Hotkeys",
                 ),
@@ -192,12 +188,6 @@ class Server(Base):
 
         self._logger.info("Exit Application")
         sys.exit(0)
-
-    async def ping(self) -> None:
-        """Ping."""
-        while True:
-            await asyncio.sleep(5)
-            self._logger.info("Ping")
 
     async def register_hotkeys(self) -> None:
         """Register hotkeys."""
