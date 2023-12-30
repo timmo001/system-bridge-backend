@@ -74,7 +74,7 @@ class ModulesUpdate(Base):
             module_data = await module_class.cls.update_all_data()
             await self._updated_callback(module_class.name, module_data)
         except Exception as exception:  # pylint: disable=broad-except
-            self._logger.error(
+            self._logger.exception(
                 "Failed to update module: %s",
                 module_class.name,
                 exc_info=exception,
@@ -107,7 +107,7 @@ class ModulesUpdate(Base):
                     name=f"Module Update: {module_class.name}",
                 )
             except Exception as exception:  # pylint: disable=broad-except
-                self._logger.error(
+                self._logger.exception(
                     "Failed to update module: %s",
                     module_class.name,
                     exc_info=exception,

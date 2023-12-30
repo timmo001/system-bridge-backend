@@ -48,8 +48,8 @@ class SensorsUpdate(ModuleUpdateBase):
             # Import here to not raise error when importing file on linux
             # pylint: disable=import-error, import-outside-toplevel
             from systembridgewindowssensors import get_windowssensors_path
-        except (ImportError, ModuleNotFoundError) as error:
-            self._logger.error("Windows sensors not found", exc_info=error)
+        except (ImportError, ModuleNotFoundError) as exception:
+            self._logger.warning("Windows sensors not found", exc_info=exception)
             return None
 
         path = get_windowssensors_path()
@@ -62,16 +62,16 @@ class SensorsUpdate(ModuleUpdateBase):
             ) as pipe:
                 result = pipe.communicate()[0].decode()
             self._logger.debug("Windows sensors result: %s", result)
-        except Exception as error:  # pylint: disable=broad-except
+        except Exception as exception:  # pylint: disable=broad-except
             self._logger.error(
-                "Windows sensors error for path: %s", path, exc_info=error
+                "Windows sensors error for path: %s", path, exc_info=exception
             )
             return None
 
         try:
             return json.loads(result)
-        except json.decoder.JSONDecodeError as error:
-            self._logger.error("JSONDecodeError", exc_info=error)
+        except json.decoder.JSONDecodeError as exception:
+            self._logger.error("JSONDecodeError", exc_info=exception)
             return None
 
     async def update_all_data(self) -> Sensors:
