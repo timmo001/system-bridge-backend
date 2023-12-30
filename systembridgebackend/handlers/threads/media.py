@@ -23,7 +23,7 @@ class MediaUpdateThread(UpdateThread):
         if platform.system() != "Windows":
             return
 
-        from ...modules.media import (
+        from ...modules.media import (  # pylint: disable=import-outside-toplevel, import-error
             Media,  # pylint: disable=import-outside-toplevel, import-error
         )
 
