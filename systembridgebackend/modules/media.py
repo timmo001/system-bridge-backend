@@ -6,6 +6,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 import datetime
 import platform
+from typing import Final
 
 from winsdk.windows.foundation import EventRegistrationToken
 import winsdk.windows.media.control as wmc
@@ -13,6 +14,8 @@ import winsdk.windows.media.control as wmc
 from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
 
+IDLE_UPDATE_INTERVAL: Final[int] = 60
+PLAYING_UPDATE_INTERVAL: Final[int] = 10
 
 class Media(Base):
     """Media."""
@@ -165,10 +168,10 @@ class Media(Base):
 
             if media_info.status == "PLAYING":
                 self._logger.info("Reducing update interval to 10 seconds..")
-                self.update_media_info_interval(10)
+                self.update_media_info_interval(PLAYING_UPDATE_INTERVAL)
             else:
                 self._logger.info("Increasing update interval to 60 seconds..")
-                self.update_media_info_interval(60)
+                self.update_media_info_interval(IDLE_UPDATE_INTERVAL)
         else:
             await self._update_data(
                 MediaInfo(updated_at=datetime.datetime.now().timestamp())
