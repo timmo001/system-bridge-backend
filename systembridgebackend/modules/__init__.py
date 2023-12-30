@@ -74,7 +74,7 @@ class ModulesUpdate(Base):
             module_data = await module_class.cls.update_all_data()
             await self._updated_callback(module_class.name, module_data)
         except Exception as exception:  # pylint: disable=broad-except
-            self._logger.exception(
+            self._logger.error(
                 "Failed to update module: %s",
                 module_class.name,
                 exc_info=exception,
@@ -100,14 +100,14 @@ class ModulesUpdate(Base):
             ):
                 continue
 
-            # Start the thread
+            # Start the task
             try:
                 self.tasks[module_class.name] = asyncio.create_task(
                     self.update_module(module_class),
                     name=f"Module Update: {module_class.name}",
                 )
             except Exception as exception:  # pylint: disable=broad-except
-                self._logger.exception(
+                self._logger.error(
                     "Failed to update module: %s",
                     module_class.name,
                     exc_info=exception,
@@ -116,4 +116,4 @@ class ModulesUpdate(Base):
             # Stagger the updates to avoid overloading the system
             await asyncio.sleep(1)
 
-        self._logger.info("Data update threads started")
+        self._logger.info("Data update tasks started")
