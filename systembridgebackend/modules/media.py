@@ -20,6 +20,7 @@ class Media(Base):
     def __init__(
         self,
         changed_callback: Callable[[str, MediaInfo], Awaitable[None]],
+        update_media_info_interval: Callable[[int], None],
     ) -> None:
         """Initialise."""
         super().__init__()
@@ -36,6 +37,8 @@ class Media(Base):
         ) = None
         self.properties_changed_handler_token: EventRegistrationToken | None = None
         self.playback_info_changed_handler_token: None | (EventRegistrationToken) = None
+
+        self.update_media_info_interval = update_media_info_interval
 
     def _current_session_changed_handler(
         self,
@@ -161,9 +164,11 @@ class Media(Base):
             await self._update_data(media_info)
 
             if media_info.status == "PLAYING":
-                self._logger.info("Schedule media update in 5 seconds..")
-                await asyncio.sleep(5)
-                await self.update_media_info()
+                self._logger.info("Reducing update interval to 10 seconds..")
+                self.update_media_info_interval(10)
+            else:
+                self._logger.info("Increasing update interval to 60 seconds..")
+                self.update_media_info_interval(60)
         else:
             await self._update_data(
                 MediaInfo(updated_at=datetime.datetime.now().timestamp())

@@ -24,7 +24,10 @@ class MediaUpdateThread(UpdateThread):
         if platform.system() != "Windows":
             return
 
-        self._update_cls = Media(updated_callback)
+        self._update_cls = Media(
+            changed_callback=updated_callback,
+            update_media_info_interval=self._update_interval,
+        )
 
     @override
     async def update(self) -> None:

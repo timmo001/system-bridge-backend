@@ -37,6 +37,14 @@ class UpdateThread(BaseThread):
             # Wait for the next run
             time.sleep(self.interval)
 
+    def _update_interval(
+        self,
+        interval: int,
+    ) -> None:
+        """Update interval."""
+        self.interval = interval
+        self._logger.info("Updated update interval to: %s", self.interval)
+
     def run(self) -> None:
         """Run."""
         # Start the automatic update in a separate thread

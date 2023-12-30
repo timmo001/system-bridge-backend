@@ -176,10 +176,10 @@ class Server(Base):
         self._logger.info("Event loop stopped")
 
         # Stop threads
-        if api_app.data_update.update_thread is not None:
-            api_app.data_update.update_thread.join(timeout=2)
-        if api_app.data_update.update_media_thread is not None:
-            api_app.data_update.update_media_thread.join(timeout=2)
+        if api_app.data_update._update_thread is not None:
+            api_app.data_update._update_thread.join(timeout=2)
+        if api_app.data_update._update_media_thread is not None:
+            api_app.data_update._update_media_thread.join(timeout=2)
         self._logger.info("Threads joined")
 
         self._logger.info("Exit Application")
