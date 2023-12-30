@@ -41,8 +41,7 @@ class UpdateThread(BaseThread):
         self,
         interval: int,
     ) -> None:
-        """Update interval."""
-        # Update the interval if it has changed
+        """Update the interval if it has changed."""
         if self.interval == interval:
             return
 
