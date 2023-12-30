@@ -174,7 +174,7 @@ class WebSocketHandler(Base):
             )
         )
 
-    async def _handle_event(
+    async def _handle_event(  # noqa: C901
         self,
         listener_id: str,
         response_data: dict,

@@ -288,7 +288,7 @@ async def write_file(
         await new_file.close()
 
 
-async def play_media(
+async def play_media(  # noqa: C901
     settings: Settings,
     callback: Callable[[str, MediaPlay], None],
     query_autoplay: bool | None = False,
@@ -454,7 +454,7 @@ async def play_media(
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
-                        _ = asyncio.create_task(_delete_cover_delayed(cover_filename))
+                        asyncio.create_task(_delete_cover_delayed(cover_filename))  # noqa: RUF006
                     break
 
         # FLAC
@@ -476,7 +476,7 @@ async def play_media(
                                                 QUERY_BASE: "pictures",
                                                 QUERY_PATH: cover_filename,
                                             })}"""
-                        _ = asyncio.create_task(_delete_cover_delayed(cover_filename))
+                        asyncio.create_task(_delete_cover_delayed(cover_filename))  # noqa: RUF006
             except AttributeError:
                 pass
 
