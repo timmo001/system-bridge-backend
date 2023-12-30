@@ -109,4 +109,4 @@ class ModulesUpdate(Base):
             # Stagger the updates to avoid overloading the system
             await asyncio.sleep(1)
 
-        self._logger.info("Data updates requested")
+        self._logger.info("Data update threads started")

@@ -19,8 +19,8 @@ class DataUpdate(Base):
         """Initialise."""
         super().__init__()
         self._updated_callback = updated_callback
-        self._update_thread: DataUpdateThread | None = None
-        self._update_media_thread: MediaUpdateThread | None = None
+        self.update_data_thread: DataUpdateThread | None = None
+        self.update_media_thread: MediaUpdateThread | None = None
 
         self.data = ModulesData()
 
@@ -35,23 +35,23 @@ class DataUpdate(Base):
 
     def request_update_data(self) -> None:
         """Request update data."""
-        if self._update_thread is not None and self._update_thread.is_alive():
+        if self.update_data_thread is not None and self.update_data_thread.is_alive():
             self._logger.info("Update data thread already running")
             return
 
         self._logger.info("Starting update data thread..")
-        self._update_thread = DataUpdateThread(self._data_updated_callback)
-        self._update_thread.start()
+        self.update_data_thread = DataUpdateThread(self._data_updated_callback)
+        self.update_data_thread.start()
 
     def request_update_media_data(self) -> None:
         """Request update media data."""
         if (
-            self._update_media_thread is not None
-            and self._update_media_thread.is_alive()
+            self.update_media_thread is not None
+            and self.update_media_thread.is_alive()
         ):
             self._logger.info("Update media thread already running")
             return
 
         self._logger.info("Starting update media thread..")
-        self._update_media_thread = MediaUpdateThread(self._data_updated_callback)
-        self._update_media_thread.start()
+        self.update_media_thread = MediaUpdateThread(self._data_updated_callback)
+        self.update_media_thread.start()
