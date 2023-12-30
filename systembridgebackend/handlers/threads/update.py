@@ -42,6 +42,10 @@ class UpdateThread(BaseThread):
         interval: int,
     ) -> None:
         """Update interval."""
+        # Update the interval if it has changed
+        if self.interval == interval:
+            return
+
         self.interval = interval
         self._logger.info("Updated update interval to: %s", self.interval)
 

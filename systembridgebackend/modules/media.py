@@ -167,10 +167,8 @@ class Media(Base):
             await self._update_data(media_info)
 
             if media_info.status == "PLAYING":
-                self._logger.info("Reducing update interval to 10 seconds..")
                 self.update_media_info_interval(PLAYING_UPDATE_INTERVAL)
             else:
-                self._logger.info("Increasing update interval to 60 seconds..")
                 self.update_media_info_interval(IDLE_UPDATE_INTERVAL)
         else:
             await self._update_data(
