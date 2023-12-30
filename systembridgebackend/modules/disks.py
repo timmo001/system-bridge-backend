@@ -6,6 +6,7 @@ from typing import override
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart, sdiskusage
+
 from systembridgemodels.modules.disks import (
     Disk,
     DiskIOCounters,
@@ -18,22 +19,22 @@ from .base import ModuleUpdateBase
 
 
 class DisksUpdate(ModuleUpdateBase):
-    """Disks Update"""
+    """Disks Update."""
 
     async def _get_io_counters(self) -> sdiskio | None:
-        """Disk IO counters"""
+        """Disk IO counters."""
         return disk_io_counters()
 
     async def _get_io_counters_per_disk(self) -> dict[str, sdiskio]:
-        """Disk IO counters per disk"""
+        """Disk IO counters per disk."""
         return disk_io_counters(perdisk=True)
 
     async def _get_partitions(self) -> list[sdiskpart]:
-        """Disk partitions"""
+        """Disk partitions."""
         return disk_partitions(all=True)
 
     async def _get_usage(self, path: str) -> sdiskusage | None:
-        """Disk usage"""
+        """Disk usage."""
         try:
             return disk_usage(path)
         except PermissionError as error:
@@ -42,7 +43,7 @@ class DisksUpdate(ModuleUpdateBase):
 
     @override
     async def update_all_data(self) -> Disks:
-        """Update all data"""
+        """Update all data."""
         self._logger.debug("Update all data")
 
         io_counters, io_counters_per_disk, partitions = await asyncio.gather(

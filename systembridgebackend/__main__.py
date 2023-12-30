@@ -1,9 +1,10 @@
 """Main."""
 import logging
 
+import typer
+
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
-import typer
 
 from . import Application
 

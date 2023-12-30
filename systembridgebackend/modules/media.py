@@ -7,10 +7,11 @@ from collections.abc import Awaitable, Callable
 import datetime
 import platform
 
-from systembridgemodels.modules.media import Media as MediaInfo
-from systembridgeshared.base import Base
 from winsdk.windows.foundation import EventRegistrationToken
 import winsdk.windows.media.control as wmc
+
+from systembridgemodels.modules.media import Media as MediaInfo
+from systembridgeshared.base import Base
 
 
 class Media(Base):

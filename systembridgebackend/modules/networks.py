@@ -4,6 +4,7 @@ from typing import override
 
 from psutil import net_connections, net_if_addrs, net_if_stats, net_io_counters
 from psutil._common import sconn, snetio, snicaddr, snicstats
+
 from systembridgemodels.modules.networks import (
     Network,
     NetworkAddress,

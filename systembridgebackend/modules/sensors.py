@@ -8,6 +8,7 @@ import sys
 from typing import Any
 
 import psutil
+
 from systembridgemodels.modules.sensors import (
     Sensors,
     SensorsNVIDIA,

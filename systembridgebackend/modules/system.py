@@ -15,6 +15,7 @@ from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
+
 from systembridgemodels.modules.system import System, SystemUser
 
 from .._version import __version__

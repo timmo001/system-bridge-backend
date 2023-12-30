@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
+
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import MediaAction, MediaControl
@@ -90,11 +91,9 @@ from systembridgeshared.const import (
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
-from ..data import DataUpdate
-from ..modules import MODULES
-from ..modules.listeners import Listeners
-from ..utilities.keyboard import keyboard_keypress, keyboard_text
-from ..utilities.media import (
+from ..handlers.data import DataUpdate
+from ..handlers.keyboard import keyboard_keypress, keyboard_text
+from ..handlers.media import (
     control_fastforward,
     control_mute,
     control_next,
@@ -112,8 +111,10 @@ from ..utilities.media import (
     get_file,
     get_files,
 )
-from ..utilities.open import open_path, open_url
-from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
+from ..handlers.open import open_path, open_url
+from ..handlers.power import hibernate, lock, logout, restart, shutdown, sleep
+from ..modules import MODULES
+from ..modules.listeners import Listeners
 
 
 class WebSocketHandler(Base):

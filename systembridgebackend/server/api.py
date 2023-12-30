@@ -10,12 +10,13 @@ from fastapi import Depends, FastAPI, Header, Query, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
 from systembridgeshared.common import asyncio_get_loop
 from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
-from ..data import DataUpdate
+from ..handlers.data import DataUpdate
 from ..modules import MODULES
 from ..modules.listeners import Listeners
 from .websocket import WebSocketHandler
