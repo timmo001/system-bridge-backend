@@ -30,9 +30,12 @@ class UpdateThread(BaseThread):
             # Run the update
             try:
                 asyncio.run(self.update())
-                self._logger.info("Update successful")
-            except Exception as exception: # pylint: disable=broad-except
+            except Exception as exception:  # pylint: disable=broad-except
                 self._logger.exception(exception)
+
+            self._logger.info(
+                "Update finished, waiting for next run at: %s", self.next_run
+            )
 
             # Wait for the next run
             time.sleep(self.interval)
@@ -66,7 +69,7 @@ class UpdateThread(BaseThread):
         # Stop the automatic update thread if it is running
         if self._thread and self._thread.is_alive():
             self._stop.set()
-            self._thread.join()
+            self._thread.join(timeout=4)
             self._logger.info("Stopped update thread")
 
     async def update(self) -> None:
