@@ -110,6 +110,8 @@ class Server(Base):
         api_app.data_update.request_update_data()
         api_app.data_update.request_update_media_data()
 
+        await asyncio.wait(self._tasks)
+
     async def data_updated_callback(
         self,
         module: str,
