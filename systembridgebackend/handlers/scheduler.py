@@ -1,12 +1,15 @@
-"""Scheduler used to run tasks in the background at specific intervals."""
+"""Schedule handler."""
 import datetime
 
+from systembridgeshared.base import Base
 
-class Scheduler:
+
+class Scheduler(Base):
     """Scheduler used to run tasks in the background at specific intervals."""
 
     def __init__(self, interval):
         """Initialise."""
+        super().__init__()
         self.interval = interval
         self.next_run = datetime.datetime.now()
 

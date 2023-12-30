@@ -10,12 +10,12 @@ from systembridgemodels.settings import SettingHotkey
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
+from ..handlers.action import ActionHandler
+from ..handlers.data import DataUpdate
+from ..handlers.gui import GUI
+from ..handlers.keyboard import keyboard_hotkey_register
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
-from ..utilities.action import ActionHandler
-from ..utilities.data import DataUpdate
-from ..utilities.gui import GUI
-from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
 

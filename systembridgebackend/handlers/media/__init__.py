@@ -1,4 +1,4 @@
-"""Media Utilities."""
+"""Media handlers."""
 from __future__ import annotations
 
 import asyncio
@@ -20,6 +20,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 from mutagen._file import File as MutagenFile
 from plyer import storagepath
+
 from systembridgemodels.media_files import MediaFile
 from systembridgemodels.media_play import MediaPlay
 from systembridgeshared.const import (
