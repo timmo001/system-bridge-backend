@@ -106,11 +106,19 @@ class ModulesUpdate(Base):
             if module_class.name == "system":
                 module_class.cls.sensors = sensors_data
 
-            self.threads[module_class.name] = UpdateDataThread(
-                module_class,
-                self._updated_callback,
-            )
-            self.threads[module_class.name].start()
+            # If the thread is already running, skip it
+            if module_class.name in self.threads:
+                continue
+
+            try:
+                # Start the thread
+                self.threads[module_class.name] = UpdateDataThread(
+                    module_class,
+                    self._updated_callback,
+                )
+                self.threads[module_class.name].start()
+            except RuntimeError as exception:
+                self._logger.exception("Failed to start thread", exc_info=exception)
 
             # Stagger the updates to avoid overloading the system
             await asyncio.sleep(1)
