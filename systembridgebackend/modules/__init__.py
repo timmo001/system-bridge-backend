@@ -1,8 +1,8 @@
 """Modules."""
 import asyncio
+from asyncio import Task
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from threading import Thread
 from typing import Any
 
 from systembridgeshared.base import Base
@@ -41,33 +41,6 @@ class ModuleClass:
     cls: Any
 
 
-class UpdateDataThread(Thread, Base):
-    """Update data thread."""
-
-    def __init__(
-        self,
-        class_obj: ModuleClass,
-        updated_callback: Callable[[str, Any], Awaitable[None]],
-    ) -> None:
-        """Initialise."""
-        Thread.__init__(self)
-        Base.__init__(self)
-        self._module_class = class_obj
-        self._updated_callback = updated_callback
-
-    async def _update(self) -> None:
-        """Update."""
-        data = await self._module_class.cls.update_all_data()
-        await self._updated_callback(self._module_class.name, data)
-
-    def run(self) -> None:
-        """Run."""
-        try:
-            asyncio.run(self._update())
-        except Exception as exception:  # pylint: disable=broad-except
-            self._logger.exception(exception)
-
-
 class ModulesUpdate(Base):
     """Modules Update."""
 
@@ -91,7 +64,21 @@ class ModulesUpdate(Base):
             ModuleClass(name="processes", cls=ProcessesUpdate()),
         ]
 
-        self.threads: dict[str, Thread] = {}
+        self.tasks: dict[str, Task] = {}
+
+    async def update_module(self, module_class: ModuleClass) -> None:
+        """Update Module."""
+        self._logger.info("Request update module: %s", module_class.name)
+
+        try:
+            module_data = await module_class.cls.update_all_data()
+            await self._updated_callback(module_class.name, module_data)
+        except Exception as exception:  # pylint: disable=broad-except
+            self._logger.exception(
+                "Failed to update module: %s",
+                module_class.name,
+                exc_info=exception,
+            )
 
     async def update_data(self) -> None:
         """Update Data."""
@@ -106,22 +93,25 @@ class ModulesUpdate(Base):
             if module_class.name == "system":
                 module_class.cls.sensors = sensors_data
 
-            # If the thread is already running, skip it
+            # If the task is already running, skip it
             if (
-                module_class.name in self.threads
-                and self.threads[module_class.name].is_alive()
+                module_class.name in self.tasks
+                and not self.tasks[module_class.name].done()
             ):
                 continue
 
+            # Start the thread
             try:
-                # Start the thread
-                self.threads[module_class.name] = UpdateDataThread(
-                    module_class,
-                    self._updated_callback,
+                self.tasks[module_class.name] = asyncio.create_task(
+                    self.update_module(module_class),
+                    name=f"Module Update: {module_class.name}",
                 )
-                self.threads[module_class.name].start()
-            except RuntimeError as exception:
-                self._logger.exception("Failed to start thread", exc_info=exception)
+            except Exception as exception:  # pylint: disable=broad-except
+                self._logger.exception(
+                    "Failed to update module: %s",
+                    module_class.name,
+                    exc_info=exception,
+                )
 
             # Stagger the updates to avoid overloading the system
             await asyncio.sleep(1)
