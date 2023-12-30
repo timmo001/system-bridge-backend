@@ -107,7 +107,10 @@ class ModulesUpdate(Base):
                 module_class.cls.sensors = sensors_data
 
             # If the thread is already running, skip it
-            if module_class.name in self.threads:
+            if (
+                module_class.name in self.threads
+                and self.threads[module_class.name].is_alive()
+            ):
                 continue
 
             try:
