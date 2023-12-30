@@ -31,7 +31,7 @@ class UpdateThread(BaseThread):
             try:
                 asyncio.run(self.update())
             except Exception as exception:  # pylint: disable=broad-except
-                self._logger.exception(exception)
+                self._logger.error(exception)
 
             self._logger.info(
                 "Update finished, waiting for next run at: %s", self.next_run
