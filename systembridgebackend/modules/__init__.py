@@ -62,7 +62,7 @@ class UpdateDataThread(Thread, Base):
             self._logger.exception(exception)
 
 
-class Update(Base):
+class ModulesUpdate(Base):
     """Modules Update."""
 
     def __init__(

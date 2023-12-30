@@ -1,35 +1,35 @@
-"""Media thread handler."""
-import asyncio
+"""Media update thread handler."""
 from collections.abc import Awaitable, Callable
 import platform
+from typing import Final, override
 
 from systembridgemodels.modules.media import Media as MediaInfo
 
-from ..modules.media import Media
-from . import BaseThread
+from ...modules.media import Media
+from .update import UpdateThread
+
+UPDATE_INTERVAL: Final[int] = 10
 
 
-class UpdateMediaThread(BaseThread):
-    """Update media thread."""
+class MediaUpdateThread(UpdateThread):
+    """Media update thread."""
 
     def __init__(
         self,
         updated_callback: Callable[[str, MediaInfo], Awaitable[None]],
     ) -> None:
         """Initialise."""
-        super().__init__()
+        super().__init__(UPDATE_INTERVAL)
 
         if platform.system() != "Windows":
             return
 
-        self._media = Media(updated_callback)
+        self._update_cls = Media(updated_callback)
 
-    def run(self) -> None:
-        """Run."""
+    @override
+    async def update(self) -> None:
+        """Update."""
         if platform.system() != "Windows":
             return
 
-        try:
-            asyncio.run(self._media.update_media_info())
-        except Exception as exception:  # pylint: disable=broad-except
-            self._logger.exception(exception)
+        await self._update_cls.update_media_info()

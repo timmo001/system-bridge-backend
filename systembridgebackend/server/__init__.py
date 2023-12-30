@@ -84,7 +84,7 @@ class Server(Base):
             ),
             exit_callback=self.exit_application,
         )
-        self._logger.info("Server Initialised")
+        self._logger.info("Server initialised")
 
     async def start(self) -> None:
         """Start the server."""
@@ -95,16 +95,12 @@ class Server(Base):
                     self._api_server.serve(),
                     name="API",
                 ),
-                api_app.loop.create_task(
-                    self.indefinite_func_wrapper(self.update_data),
-                    name="Update data",
-                ),
-                api_app.loop.create_task(
-                    self.indefinite_func_wrapper(self.update_media_data),
-                    name="Update media data",
-                ),
             ]
         )
+
+        # Start update threads
+        api_app.data_update.request_update_data()
+        api_app.data_update.request_update_media_data()
 
         await asyncio.wait(self._tasks)
 
@@ -156,15 +152,6 @@ class Server(Base):
             )
         else:
             raise NotImplementedError(f"Command not implemented: {command}")
-
-    async def indefinite_func_wrapper(self, func) -> None:
-        """Indefinite function wrapper."""
-        while not self._api_server.should_exit:
-            await func()
-        self._logger.info(
-            "Indefinite function wrapper exited for: %s",
-            func.__name__,
-        )
 
     def exit_application(self) -> None:
         """Exit application."""
@@ -224,14 +211,3 @@ class Server(Base):
             hotkey.key,
             hotkey_callback,
         )
-
-    async def update_data(self) -> None:
-        """Update data."""
-        self._logger.info("Update data")
-        api_app.data_update.request_update_data()
-
-    async def update_media_data(self) -> None:
-        """Update media data."""
-        self._logger.info("Update media data")
-        api_app.data_update.request_update_media_data()
-        # asyncio.get_running_loop().run_forever()

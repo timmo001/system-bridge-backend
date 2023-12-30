@@ -7,7 +7,7 @@ import sys
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
-from ..threads.stoppable import StoppableThread
+from .threads.stoppable import StoppableThread
 
 
 class GUI(Base):
