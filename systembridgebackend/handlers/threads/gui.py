@@ -56,7 +56,7 @@ class GUIThread(BaseThread):
             self._logger.info("GUI started with PID: %s", self._process.pid)
             if (exit_code := self._process.wait()) != 0:
                 if not self.stopping:
-                    self._logger.error("GUI exited with code: %s", exit_code)
+                    self._logger.error("GUI exited abnormally with code: %s", exit_code)
                     await self._start(
                         *args,
                         failed_callback=failed_callback,
@@ -64,7 +64,10 @@ class GUIThread(BaseThread):
                         command=command,
                     )
                     return
-            self._logger.info("GUI exited with code: %s", exit_code)
+            self._logger.info("GUI exited normally with code: %s", exit_code)
+
+        # Stop the thread
+        self.join()
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
         self,
