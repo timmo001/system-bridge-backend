@@ -24,6 +24,9 @@ class UpdateThread(BaseThread):
     def _run(self) -> None:
         """Automatically update the schedule."""
         while not self.stopping:
+            # Wait for the next run
+            time.sleep(self.interval)
+
             # Update the next run before running the update
             self.update_next_run()
 
@@ -33,12 +36,7 @@ class UpdateThread(BaseThread):
             except Exception as exception:  # pylint: disable=broad-except
                 self._logger.exception(exception)
 
-            self._logger.info(
-                "Update finished, waiting for next run at: %s", self.next_run
-            )
-
-            # Wait for the next run
-            time.sleep(self.interval)
+            self._logger.info("Update finished, next run will be at: %s", self.next_run)
 
     def _update_interval(
         self,
