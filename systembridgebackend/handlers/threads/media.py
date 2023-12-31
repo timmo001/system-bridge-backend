@@ -38,5 +38,4 @@ class MediaUpdateThread(UpdateThread):
         if platform.system() != "Windows":
             return
 
-        while not self.stopping:
-            await self._update_cls.update_media_info()
+        await self._update_cls.update_media_info()
