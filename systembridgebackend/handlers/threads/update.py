@@ -25,7 +25,10 @@ class UpdateThread(BaseThread):
         """Automatically update the schedule."""
         while not self.stopping:
             # Wait for the next run
-            time.sleep(self.interval)
+            if self.next_run is not None:
+                interval = self.next_run.timestamp() - datetime.now().timestamp()
+                self._logger.info("Waiting for next update in: %s", interval)
+                time.sleep(interval)
 
             # Update the next run before running the update
             self.update_next_run()
