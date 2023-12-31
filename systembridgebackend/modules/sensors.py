@@ -83,6 +83,7 @@ class SensorsUpdate(ModuleUpdateBase):
                 self._get_windows_sensors(),
             ]
         )
+
         return Sensors(
             fans=fans,
             temperatures=temperatures,
@@ -122,7 +123,7 @@ class SensorsUpdate(ModuleUpdateBase):
                     )
                     for hardware in windows_sensors["hardware"]
                 ]
-                if windows_sensors and windows_sensors.get("hardware")
+                if "hardware" in windows_sensors
                 else None,
                 nvidia=SensorsNVIDIA(
                     chipset=SensorsNVIDIAChipset(
@@ -154,7 +155,9 @@ class SensorsUpdate(ModuleUpdateBase):
                             resolution_vertical=display["resolution_vertical"],
                         )
                         for display in windows_sensors["nvidia"]["displays"]
-                    ],
+                    ]
+                    if "displays" in windows_sensors["nvidia"]
+                    else [],
                     driver=SensorsNVIDIADriver(
                         branch_version=windows_sensors["nvidia"]["driver"][
                             "branch_version"
@@ -182,9 +185,14 @@ class SensorsUpdate(ModuleUpdateBase):
                             type=gpu["type"],
                         )
                         for gpu in windows_sensors["nvidia"]["gpus"]
-                    ],
-                ),
+                        if gpu is not None
+                    ]
+                    if "gpus" in windows_sensors["nvidia"]
+                    else [],
+                )
+                if "nvidia" in windows_sensors
+                else None,
             )
-            if windows_sensors and windows_sensors.get("nvidia")
+            if windows_sensors is not None
             else None,
         )
