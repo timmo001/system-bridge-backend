@@ -124,6 +124,7 @@ class SensorsUpdate(ModuleUpdateBase):
                     for hardware in windows_sensors["hardware"]
                 ]
                 if "hardware" in windows_sensors
+                and windows_sensors["hardware"] is not None
                 else None,
                 nvidia=SensorsNVIDIA(
                     chipset=SensorsNVIDIAChipset(
@@ -157,6 +158,7 @@ class SensorsUpdate(ModuleUpdateBase):
                         for display in windows_sensors["nvidia"]["displays"]
                     ]
                     if "displays" in windows_sensors["nvidia"]
+                    and windows_sensors["nvidia"]["displays"] is not None
                     else [],
                     driver=SensorsNVIDIADriver(
                         branch_version=windows_sensors["nvidia"]["driver"][
@@ -188,9 +190,10 @@ class SensorsUpdate(ModuleUpdateBase):
                         if gpu is not None
                     ]
                     if "gpus" in windows_sensors["nvidia"]
+                    and windows_sensors["nvidia"]["gpus"] is not None
                     else [],
                 )
-                if "nvidia" in windows_sensors
+                if "nvidia" in windows_sensors and windows_sensors["nvidia"] is not None
                 else None,
             )
             if windows_sensors is not None
