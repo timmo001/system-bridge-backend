@@ -7,7 +7,7 @@ from systembridgemodels.modules.media import Media as MediaInfo
 
 from .update import UpdateThread
 
-UPDATE_INTERVAL: Final[int] = 60
+UPDATE_INTERVAL: Final[int] = 20
 
 
 class MediaUpdateThread(UpdateThread):
