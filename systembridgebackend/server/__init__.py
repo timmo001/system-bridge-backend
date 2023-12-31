@@ -190,23 +190,16 @@ class Server(Base):
             api_app.data_update.update_media_thread.join()
         self._logger.info("Update threads joined")
 
-        # Stop the API server
-        self._logger.info("Stop API server")
-        self._api_server.should_exit = True
-        self._api_server.force_exit = True
-        self._logger.info("API server stopped")
-
         # Stop all tasks
         for task in self._tasks:
             task.cancel()
         self._logger.info("Tasks cancelled")
 
-        # Stop the event loop
-        loop = asyncio.get_event_loop()
-        asyncio.tasks.all_tasks(loop).clear()
-        self._logger.info("Tasks cleared")
-        loop.stop()
-        self._logger.info("Event loop stopped")
+        # Stop the API server
+        self._logger.info("Stop API server")
+        self._api_server.should_exit = True
+        self._api_server.force_exit = True
+        self._logger.info("API server stopped")
 
         # Stop GUI threads
         if self._gui_main is not None:
@@ -216,6 +209,14 @@ class Server(Base):
         if self._gui_player is not None:
             self._gui_player.stop()
         self._logger.info("GUI threads joined")
+
+        # Stop the event loop
+        loop = asyncio.get_event_loop()
+        asyncio.tasks.all_tasks(loop).clear()
+        self._logger.info("Tasks cleared")
+        loop.stop()
+        loop.close()
+        self._logger.info("Event loop stopped")
 
         self._logger.info("Exit Application")
         sys.exit(0)
