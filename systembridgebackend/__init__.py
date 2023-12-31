@@ -20,6 +20,7 @@ class Application(Base):
         settings: Settings,
         init: bool = False,
         no_frontend: bool = False,
+        no_gui: bool = False,
     ) -> None:
         """Initialise."""
         super().__init__()
@@ -40,5 +41,6 @@ class Application(Base):
             settings,
             listeners,
             no_frontend=no_frontend,
+            no_gui=no_gui,
         )
         loop.run_until_complete(self._server.start())

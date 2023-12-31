@@ -3,6 +3,7 @@ import asyncio
 from datetime import datetime, timedelta
 import threading
 import time
+from typing import override
 
 from . import BaseThread
 
@@ -51,7 +52,11 @@ class UpdateThread(BaseThread):
         self.interval = interval
         self._logger.info("Updated update interval to: %s", self.interval)
 
-    def run(self) -> None:
+    @override
+    def run(
+        self,
+        *_,
+    ) -> None:
         """Run."""
         # Start the automatic update in a separate thread
         self._thread = threading.Thread(target=self._run)

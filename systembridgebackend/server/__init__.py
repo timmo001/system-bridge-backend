@@ -12,7 +12,7 @@ from systembridgeshared.settings import Settings
 
 from ..handlers.action import ActionHandler
 from ..handlers.data import DataUpdate
-from ..handlers.gui import GUI
+from ..handlers.gui import GUI, GUICommand
 from ..handlers.keyboard import keyboard_hotkey_register
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
@@ -49,15 +49,18 @@ class Server(Base):
         settings: Settings,
         listeners: Listeners,
         no_frontend: bool = False,
+        no_gui: bool = False,
     ) -> None:
         """Initialise."""
         super().__init__()
         self.no_frontend = no_frontend
+        self.no_gui = no_gui
 
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
 
+        self._gui_main: GUI | None = None
         self._gui_notification: GUI | None = None
         self._gui_player: GUI | None = None
 
@@ -66,8 +69,8 @@ class Server(Base):
 
         self._logger.info("Setup API app")
         api_app.callback_exit = self.exit_application
-        api_app.callback_open_gui = self.callback_open_gui
-        api_app.data_update = DataUpdate(self.data_updated_callback)
+        api_app.callback_open_gui = self.open_gui
+        api_app.data_update = DataUpdate(self.data_updated)
         api_app.listeners = listeners
         api_app.loop = asyncio.get_event_loop()
 
@@ -80,7 +83,7 @@ class Server(Base):
                 log_config=None,
                 log_level=settings.data.log_level.lower(),
                 port=settings.data.api.port,
-                workers=4,
+                workers=8,
             ),
             exit_callback=self.exit_application,
         )
@@ -106,9 +109,13 @@ class Server(Base):
         api_app.data_update.request_update_data()
         api_app.data_update.request_update_media_data()
 
+        # Start the GUI
+        if not self.no_gui:
+            self.open_gui(GUICommand.MAIN, "")
+
         await asyncio.wait(self._tasks)
 
-    async def data_updated_callback(
+    async def data_updated(
         self,
         module: str,
     ) -> None:
@@ -118,13 +125,28 @@ class Server(Base):
             module,
         )
 
-    def callback_open_gui(
+    def open_gui(
         self,
-        command: str,
+        command: GUICommand,
         data: str,
     ) -> None:
         """Open GUI."""
-        if command == "notification":
+        if command == GUICommand.MAIN:
+            self._logger.info("Launch Main GUI as a detached process")
+            if self._gui_main is not None:
+                self._gui_main.stop()
+            self._gui_main = GUI(self._settings)
+            self._tasks.append(
+                api_app.loop.create_task(
+                    self._gui_main.start(
+                        self.exit_application,
+                        command,
+                        data,
+                    ),
+                    name="GUI Main",
+                )
+            )
+        elif command == GUICommand.NOTIFICATION:
             self._logger.info("Launch Notification GUI as a detached process")
             if self._gui_notification is not None:
                 self._gui_notification.stop()
@@ -139,7 +161,7 @@ class Server(Base):
                     name="GUI Notification",
                 )
             )
-        elif command == "player":
+        elif command == GUICommand.PLAYER:
             self._logger.info("Launch Player GUI as a detached process")
             if self._gui_player:
                 self._gui_player.stop()
