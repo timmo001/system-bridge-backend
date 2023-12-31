@@ -35,5 +35,4 @@ class BaseThread(Thread, Base):
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()
         loop.stop()
-        loop.close()
         super().join(timeout)

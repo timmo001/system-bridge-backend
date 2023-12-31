@@ -215,7 +215,6 @@ class Server(Base):
         asyncio.tasks.all_tasks(loop).clear()
         self._logger.info("Tasks cleared")
         loop.stop()
-        loop.close()
         self._logger.info("Event loop stopped")
 
         self._logger.info("Exit Application")
