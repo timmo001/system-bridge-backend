@@ -18,14 +18,14 @@ class UpdateThread(BaseThread):
         """Initialise."""
         super().__init__()
         self.interval = interval
-        self.next_run: datetime | None = None
+        self.next_run: datetime = datetime.now()
         self._thread: threading.Thread | None = None
 
     def _run(self) -> None:
         """Automatically update the schedule."""
         while not self.stopping:
             # Wait for the next run
-            if self.next_run is not None:
+            if self.next_run > datetime.now():
                 interval = self.next_run.timestamp() - datetime.now().timestamp()
                 self._logger.info("Waiting for next update in %s seconds", interval)
                 time.sleep(interval)
@@ -80,6 +80,10 @@ class UpdateThread(BaseThread):
 
     def update_next_run(self) -> None:
         """Update next run."""
+        # Log how long the update took
+        time_taken = datetime.now() - self.next_run
+        self._logger.info("Update took %s seconds", round(time_taken.seconds, 2))
+
         # Update the next run time to be the current time plus the interval
         self.next_run = datetime.now() + timedelta(seconds=self.interval)
         self._logger.info("Scheduled next update for: %s", self.next_run)
