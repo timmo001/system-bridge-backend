@@ -183,6 +183,13 @@ class Server(Base):
         """Exit application."""
         self._logger.info("Exiting application")
 
+        # Stop update threads
+        if api_app.data_update.update_data_thread is not None:
+            api_app.data_update.update_data_thread.join()
+        if api_app.data_update.update_media_thread is not None:
+            api_app.data_update.update_media_thread.join()
+        self._logger.info("Update threads joined")
+
         # Stop the API server
         self._logger.info("Stop API server")
         self._api_server.should_exit = True
@@ -201,12 +208,7 @@ class Server(Base):
         loop.stop()
         self._logger.info("Event loop stopped")
 
-        # Stop threads
-        if api_app.data_update.update_data_thread is not None:
-            api_app.data_update.update_data_thread.join()
-        if api_app.data_update.update_media_thread is not None:
-            api_app.data_update.update_media_thread.join()
-        self._logger.info("Update threads joined")
+        # Stop GUI threads
         if self._gui_main is not None:
             self._gui_main.stop()
         if self._gui_notification is not None:
