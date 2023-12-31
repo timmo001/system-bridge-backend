@@ -14,8 +14,8 @@ import winsdk.windows.media.control as wmc
 from systembridgemodels.modules.media import Media as MediaInfo
 from systembridgeshared.base import Base
 
-IDLE_UPDATE_INTERVAL: Final[int] = 60
-PLAYING_UPDATE_INTERVAL: Final[int] = 10
+IDLE_UPDATE_INTERVAL: Final[int] = 20
+PLAYING_UPDATE_INTERVAL: Final[int] = 5
 
 class Media(Base):
     """Media."""
