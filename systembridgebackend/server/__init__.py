@@ -206,14 +206,14 @@ class Server(Base):
             api_app.data_update.update_data_thread.stop()
         if api_app.data_update.update_media_thread is not None:
             api_app.data_update.update_media_thread.stop()
-        self._logger.info("Update threads joined")
+        self._logger.info("Update threads stopped")
         if self._gui_main is not None:
             self._gui_main.stop()
         if self._gui_notification is not None:
             self._gui_notification.stop()
         if self._gui_player is not None:
             self._gui_player.stop()
-        self._logger.info("GUI threads joined")
+        self._logger.info("GUI threads stopped")
 
         self._logger.info("Exit Application")
         sys.exit(0)
