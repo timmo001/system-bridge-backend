@@ -82,7 +82,7 @@ class ModulesUpdate(Base):
 
     async def update_data(self) -> None:
         """Update Data."""
-        self._logger.info("Request update data")
+        self._logger.info("Update data")
 
         sensors_update = SensorsUpdate()
         sensors_data = await sensors_update.update_all_data()

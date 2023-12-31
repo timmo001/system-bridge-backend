@@ -29,7 +29,7 @@ class DataUpdate(Base):
         name: str,
         data: Any,
     ) -> None:
-        """Update the data with the given name and value and invoke the updated callback."""
+        """Update the data with the given name and value, and invoke the updated callback."""
         setattr(self.data, name, data)
         await self._updated_callback(name)
 
@@ -45,10 +45,7 @@ class DataUpdate(Base):
 
     def request_update_media_data(self) -> None:
         """Request update media data."""
-        if (
-            self.update_media_thread is not None
-            and self.update_media_thread.is_alive()
-        ):
+        if self.update_media_thread is not None and self.update_media_thread.is_alive():
             self._logger.info("Update media thread already running")
             return
 
