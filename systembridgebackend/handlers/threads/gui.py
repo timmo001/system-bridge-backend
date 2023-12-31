@@ -92,3 +92,18 @@ class GUIThread(BaseThread):
         )
 
         self.stopping = True
+
+    @override
+    def join(
+        self,
+        timeout: float | None = None,
+    ) -> None:
+        """Join."""
+        self.stopping = True
+
+        # Stop the GUI process if it is running
+        if self._process is not None:
+            self._logger.info("Stopping GUI process")
+            self._process.terminate()
+
+        super().join(timeout)

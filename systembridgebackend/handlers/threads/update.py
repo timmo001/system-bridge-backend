@@ -19,12 +19,11 @@ class UpdateThread(BaseThread):
         super().__init__()
         self.interval = interval
         self.next_run: datetime | None = None
-        self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
     def _run(self) -> None:
-        """Private method to automatically update the schedule."""
-        while not self._stop.is_set():
+        """Automatically update the schedule."""
+        while not self.stopping:
             # Update the next run before running the update
             self.update_next_run()
 
@@ -63,20 +62,23 @@ class UpdateThread(BaseThread):
         self._thread.start()
         self._logger.info("Started update thread")
 
+    def join(self, timeout=8) -> None:
+        """Stop the automatic update."""
+        self.stopping = True
+
+        # Stop the automatic update thread if it is running
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=4)
+            self._logger.info("Stopped update thread")
+
+        super().join(timeout)
+
+    async def update(self) -> None:
+        """Update."""
+        raise NotImplementedError
+
     def update_next_run(self) -> None:
         """Update next run."""
         # Update the next run time to be the current time plus the interval
         self.next_run = datetime.now() + timedelta(seconds=self.interval)
         self._logger.info("Scheduled next update for: %s", self.next_run)
-
-    def stop(self) -> None:
-        """Stop the automatic update."""
-        # Stop the automatic update thread if it is running
-        if self._thread and self._thread.is_alive():
-            self._stop.set()
-            self._thread.join(timeout=4)
-            self._logger.info("Stopped update thread")
-
-    async def update(self) -> None:
-        """Update."""
-        raise NotImplementedError
