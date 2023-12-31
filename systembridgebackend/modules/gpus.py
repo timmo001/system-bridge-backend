@@ -32,8 +32,13 @@ class GPUsUpdate(ModuleUpdateBase):
         gpus: GPUs = []
 
         for hardware in self.sensors.windows_sensors.hardware:
-            # Find type "GPU" and name gpu_key
-            if "GPU" not in hardware.type.upper():
+            hardware_type = hardware.type.upper()
+            if (
+                "GPU" not in hardware_type
+                or "GPUAMD" not in hardware_type
+                or "GPUINTEL" not in hardware_type
+                or "GPUNVIDIA" not in hardware_type
+            ):
                 continue
 
             gpu = GPU(name=hardware.name)
