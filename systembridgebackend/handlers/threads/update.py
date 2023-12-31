@@ -27,7 +27,9 @@ class UpdateThread(BaseThread):
             # Wait for the next run
             if self.next_run > datetime.now():
                 interval = self.next_run.timestamp() - datetime.now().timestamp()
-                self._logger.info("Waiting for next update in %s seconds", interval)
+                self._logger.info(
+                    "Waiting for next update in %s seconds", round(interval, 2)
+                )
                 time.sleep(interval)
 
             # Update the next run before running the update
