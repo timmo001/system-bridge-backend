@@ -23,11 +23,15 @@ class GUIThread(BaseThread):
     async def _start(
         self,
         *args,
-        failed_callback: Callable[[], None] | None = None,
         attempt: int = 1,
         command: str = "main",
+        failed_callback: Callable[[], None] | None = None,
     ) -> None:
         """Start the GUI."""
+        if self.stopping:
+            self._logger.warning("Thread is stopping, cannot start GUI")
+            return
+
         if attempt > 2:
             self._logger.error("Failed to start GUI after 2 attempts")
             if failed_callback is not None:
@@ -66,35 +70,25 @@ class GUIThread(BaseThread):
                     return
             self._logger.info("GUI exited normally with code: %s", exit_code)
 
-        # Stop the thread
-        self.join()
-
-    def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
-        self,
-        *args,
-        failed_callback: Callable[[], None] | None = None,
-        command: str = "main",
-    ) -> None:
-        """Start the GUI in a synchronous thread."""
-        asyncio.run(
-            self._start(
-                *args,
-                failed_callback=failed_callback,
-                attempt=1,
-                command=command,
-            )
-        )
-
     @override
     def run(
         self,
         *args,
-        failed_callback: Callable[[], None] | None = None,
         command: str = "main",
+        failed_callback: Callable[[], None] | None = None,
     ) -> None:
         """Run the thread."""
-        self._start_gui_sync(
-            *args,
-            failed_callback=failed_callback,
-            command=command,
+        if self.stopping:
+            self._logger.warning("Thread is stopping, cannot start GUI")
+            return
+
+        asyncio.run(
+            self._start(
+                *args,
+                attempt=1,
+                command=command,
+                failed_callback=failed_callback,
+            )
         )
+
+        self.stopping = True

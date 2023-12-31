@@ -42,6 +42,10 @@ class GUI(Base):
             )
             return
 
+        if self._thread.stopping:
+            self._logger.warning("System is stopping, cannot start GUI")
+            return
+
         self._logger.info("Starting GUI thread: %s", command)
         self._name = command.value
         self._thread = GUIThread(
