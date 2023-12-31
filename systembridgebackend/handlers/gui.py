@@ -55,7 +55,8 @@ class GUI(Base):
 
     def stop(self) -> None:
         """Stop the GUI."""
-        if self._thread is None:
+        # Stop the thread if it is running
+        if self._thread is None or not self._thread.is_alive():
             self._logger.warning("GUI thread not running, cannot stop")
             return
 
