@@ -35,9 +35,9 @@ class GPUsUpdate(ModuleUpdateBase):
             hardware_type = hardware.type.upper()
             if (
                 "GPU" not in hardware_type
-                or "GPUAMD" not in hardware_type
-                or "GPUINTEL" not in hardware_type
-                or "GPUNVIDIA" not in hardware_type
+                and "GPUAMD" not in hardware_type
+                and "GPUINTEL" not in hardware_type
+                and "GPUNVIDIA" not in hardware_type
             ):
                 continue
 
