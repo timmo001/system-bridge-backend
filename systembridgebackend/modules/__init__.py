@@ -90,7 +90,7 @@ class ModulesUpdate(Base):
 
         for module_class in self._classes:
             # If the class has a sensors attribute, set it
-            if module_class.name == "system":
+            if hasattr(module_class.cls, "sensors"):
                 module_class.cls.sensors = sensors_data
 
             # If the task is already running, skip it
