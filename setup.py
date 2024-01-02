@@ -16,19 +16,22 @@ if platform.system() == "Windows":
     with open("requirements_windows.txt", encoding="utf-8") as f:
         requirements.extend(f.read().splitlines())
 
-
+with open("README.md", encoding="utf-8") as f:
+    readme = f.read()
 
 setup(
     name="systembridgebackend",
-    description="System Bridge Backend",
-    keywords="system-bridge",
     author="Aidan Timson (Timmo)",
     author_email="aidan@timmo.dev",
+    description="System Bridge Backend",
+    keywords="system-bridge",
     license="Apache-2.0",
+    long_description=readme,
+    long_description_content_type="text/markdown",
     url="https://github.com/timmo001/system-bridge-backend",
-    packages=find_packages(exclude=["tests", "generator"]),
-    python_requires=">=3.11.0",
     install_requires=requirements,
+    packages=find_packages(exclude=["tests", "generator"]),
+    python_requires=">=3.11",
     setup_requires=requirements_setup,
     use_incremental=True,
 )
