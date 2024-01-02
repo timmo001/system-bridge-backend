@@ -10,11 +10,11 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      id-token: write
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       module-name: systembridgebackend
       use-incremental: true
