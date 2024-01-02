@@ -25,8 +25,10 @@ class BatteryUpdate(ModuleUpdateBase):
             return Battery(
                 is_charging=None,
                 percentage=None,
+                time_remaining=None,
             )
         return Battery(
             is_charging=status["isCharging"],
             percentage=status["percentage"],
+            time_remaining=status["timeRemaining"],
         )
