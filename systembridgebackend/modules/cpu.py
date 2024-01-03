@@ -15,7 +15,7 @@ from psutil import (
 )
 from psutil._common import pcputimes, scpufreq, scpustats
 
-from systembridgemodels.modules.cpu import CPU, CPUFrequency, CPUStats, CPUTimes
+from systembridgemodels.modules.cpu import CPU, CPUFrequency, CPUStats, CPUTimes, PerCPU
 from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
@@ -27,11 +27,10 @@ class CPUUpdate(ModuleUpdateBase):
     def __init__(self) -> None:
         """Initialise."""
         super().__init__()
-        self.sensors: Sensors | None = None
 
-    async def _get_count(self) -> int:
-        """CPU count."""
-        return cpu_count()
+        self._count: int = cpu_count()
+
+        self.sensors: Sensors | None = None
 
     async def _get_frequency(self) -> scpufreq:
         """CPU frequency."""
@@ -39,7 +38,7 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_frequency_per_cpu(
         self,
-    ) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
+    ) -> list[scpufreq]:
         """CPU frequency per CPU."""
         return cpu_freq(percpu=True)  # type: ignore
 
@@ -79,8 +78,7 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_power_per_cpu(self) -> list[float] | None:
         """CPU package power."""
-        count = await self._get_count()
-        powers: list[float] = [-1] * count
+        powers: list[float] = [-1] * self._count
         if (
             self.sensors is None
             or self.sensors.windows_sensors is None
@@ -166,13 +164,13 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_times_per_cpu(
         self,
-    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
+    ) -> list[pcputimes]:
         """CPU times per CPU."""
         return cpu_times(percpu=True)
 
     async def _get_times_per_cpu_percent(
         self,
-    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
+    ) -> list[pcputimes]:
         """CPU times per CPU percent."""
         return cpu_times_percent(interval=1, percpu=True)
 
@@ -182,15 +180,14 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_usage_per_cpu(
         self,
-    ) -> list[float]:  # pylint: disable=unsubscriptable-object
+    ) -> list[float]:
         """CPU usage per CPU."""
         return cpu_percent(interval=1, percpu=True)  # type: ignore
 
     async def _get_voltages(self) -> tuple[float | None, list[float]]:
         """CPU voltage."""
-        count = await self._get_count()
         voltage: float | None = None
-        voltages: list[float] = [-1] * count
+        voltages: list[float] = [-1] * self._count
         voltage_sensors = []
         if (
             self.sensors is None
@@ -226,14 +223,14 @@ class CPUUpdate(ModuleUpdateBase):
                     # "/amdcpu/0/voltage/16" -> 16
                     # Get the last part of the id
                     index = int(sensor.id.split("/")[-1])
-                    if 0 <= index < count:
+                    if 0 <= index < self._count:
                         voltages[index] = float(sensor.value)
             voltage_sum = 0
             for voltage in voltages:
                 if voltage is not None:
                     voltage_sum += voltage
             if voltage_sum > 0:
-                voltage = voltage_sum / count
+                voltage = voltage_sum / self._count
             else:
                 # If we can't get the average, just use the first value
                 voltage = voltage_sensors[0].value
@@ -244,8 +241,10 @@ class CPUUpdate(ModuleUpdateBase):
     async def update_all_data(self) -> CPU:
         """Update all data."""
         self._logger.debug("Update all data")
+
+        self._count = cpu_count()
+
         (
-            count,
             frequency,
             frequency_per_cpu,
             load_average,
@@ -262,7 +261,6 @@ class CPUUpdate(ModuleUpdateBase):
             [voltage, voltages],
         ) = await asyncio.gather(
             *[
-                self._get_count(),
                 self._get_frequency(),
                 self._get_frequency_per_cpu(),
                 self._get_load_average(),
@@ -281,23 +279,58 @@ class CPUUpdate(ModuleUpdateBase):
         )
 
         return CPU(
-            count=count,
+            count=self._count,
             frequency=CPUFrequency(
                 current=frequency.current,
                 min=frequency.min,
                 max=frequency.max,
             ),
-            frequency_per_cpu=[
-                CPUFrequency(
-                    current=item.current,
-                    min=item.min,
-                    max=item.max,
-                )
-                for item in frequency_per_cpu
-            ],
             load_average=load_average,
-            power_package=power_package,
-            power_per_cpu=power_per_cpu,
+            per_cpu=[
+                PerCPU(
+                    id=index,
+                    frequency=CPUFrequency(
+                        current=freq.current,
+                        min=freq.min,
+                        max=freq.max,
+                    ),
+                    power=power,
+                    times=CPUTimes(
+                        user=times.user,
+                        system=times.system,
+                        idle=times.idle,
+                        interrupt=times.interrupt,
+                        dpc=times.dpc,
+                    ),
+                    times_percent=CPUTimes(
+                        user=times_percent.user,
+                        system=times_percent.system,
+                        idle=times_percent.idle,
+                        interrupt=times_percent.interrupt,
+                        dpc=times_percent.dpc,
+                    ),
+                    usage=usage,
+                    voltage=voltage,
+                )
+                for index, (
+                    freq,
+                    power,
+                    times,
+                    times_percent,
+                    usage,
+                    voltage,
+                ) in enumerate(
+                    zip(
+                        frequency_per_cpu,
+                        power_per_cpu,
+                        times_per_cpu,
+                        times_per_cpu_percent,
+                        usage_per_cpu,
+                        voltages,
+                    )
+                )
+            ],
+            power=power_package,
             stats=CPUStats(
                 ctx_switches=stats.ctx_switches,
                 interrupts=stats.interrupts,
@@ -312,16 +345,6 @@ class CPUUpdate(ModuleUpdateBase):
                 interrupt=times.interrupt,
                 dpc=times.dpc,
             ),
-            times_per_cpu=[
-                CPUTimes(
-                    user=item.user,
-                    system=item.system,
-                    idle=item.idle,
-                    interrupt=item.interrupt,
-                    dpc=item.dpc,
-                )
-                for item in times_per_cpu
-            ],
             times_percent=CPUTimes(
                 user=times_percent.user,
                 system=times_percent.system,
@@ -329,18 +352,6 @@ class CPUUpdate(ModuleUpdateBase):
                 interrupt=times_percent.interrupt,
                 dpc=times_percent.dpc,
             ),
-            times_percent_per_cpu=[
-                CPUTimes(
-                    user=item.user,
-                    system=item.system,
-                    idle=item.idle,
-                    interrupt=item.interrupt,
-                    dpc=item.dpc,
-                )
-                for item in times_per_cpu_percent
-            ],
             usage=usage,
-            usage_per_cpu=usage_per_cpu,
             voltage=voltage,
-            voltage_per_cpu=voltages,
         )

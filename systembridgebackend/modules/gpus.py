@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import override
 
-from systembridgemodels.modules.gpus import GPU, GPUs
+from systembridgemodels.modules.gpus import GPU
 from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
@@ -18,7 +18,7 @@ class GPUsUpdate(ModuleUpdateBase):
         self.sensors: Sensors | None = None
 
     @override
-    async def update_all_data(self) -> GPUs:
+    async def update_all_data(self) -> list[GPU]:
         """Update all data."""
         self._logger.debug("Update all data")
 
@@ -29,7 +29,7 @@ class GPUsUpdate(ModuleUpdateBase):
         ):
             return []
 
-        gpus: GPUs = []
+        gpus: list[GPU] = []
 
         for hardware in self.sensors.windows_sensors.hardware:
             hardware_type = hardware.type.upper()
@@ -38,7 +38,10 @@ class GPUsUpdate(ModuleUpdateBase):
 
             self._logger.debug("Found GPU: %s (%s)", hardware.name, hardware.type)
 
-            gpu = GPU(name=hardware.name)
+            gpu = GPU(
+                id=hardware.id,
+                name=hardware.name,
+            )
 
             for sensor in hardware.sensors:
                 sensor_name = sensor.name.upper()

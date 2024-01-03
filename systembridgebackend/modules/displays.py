@@ -5,7 +5,7 @@ from typing import override
 
 from screeninfo import get_monitors
 
-from systembridgemodels.modules.displays import Display, Displays
+from systembridgemodels.modules.displays import Display
 from systembridgemodels.modules.sensors import Sensors
 
 from .base import ModuleUpdateBase
@@ -144,12 +144,13 @@ class DisplaysUpdate(ModuleUpdateBase):
         return None
 
     @override
-    async def update_all_data(self) -> Displays:
+    async def update_all_data(self) -> list[Display]:
         """Update all data."""
         self._logger.debug("Update all data")
 
         return [
             Display(
+                id=str(key),
                 name=monitor.name if monitor.name is not None else str(key),
                 resolution_horizontal=monitor.width,
                 resolution_vertical=monitor.height,

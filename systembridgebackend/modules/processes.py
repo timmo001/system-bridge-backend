@@ -5,7 +5,7 @@ from typing import override
 
 from psutil import AccessDenied, NoSuchProcess, process_iter
 
-from systembridgemodels.modules.processes import Process, Processes
+from systembridgemodels.modules.processes import Process
 
 from .base import ModuleUpdateBase
 
@@ -14,7 +14,7 @@ class ProcessesUpdate(ModuleUpdateBase):
     """Processes Update."""
 
     @override
-    async def update_all_data(self) -> Processes:
+    async def update_all_data(self) -> list[Process]:
         """Update all data."""
         self._logger.debug("Update all data")
 
