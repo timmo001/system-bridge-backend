@@ -297,7 +297,9 @@ class CPUUpdate(ModuleUpdateBase):
                     if frequency_per_cpu is not None and index < len(frequency_per_cpu)
                     else None,
                     power=power_per_cpu[index]
-                    if power_per_cpu is not None and index < len(power_per_cpu)
+                    if power_per_cpu is not None
+                    and index < len(power_per_cpu)
+                    and power_per_cpu[index] > 0
                     else None,
                     times=CPUTimes(
                         user=times_per_cpu[index].user,
@@ -322,7 +324,9 @@ class CPUUpdate(ModuleUpdateBase):
                     if usage_per_cpu is not None and index < len(usage_per_cpu)
                     else None,
                     voltage=voltages[index]
-                    if voltages is not None and index < len(voltages)
+                    if voltages is not None
+                    and index < len(voltages)
+                    and voltages[index] > 0
                     else None,
                 )
                 for index in range(self._count)
