@@ -290,45 +290,42 @@ class CPUUpdate(ModuleUpdateBase):
                 PerCPU(
                     id=index,
                     frequency=CPUFrequency(
-                        current=freq.current,
-                        min=freq.min,
-                        max=freq.max,
-                    ),
-                    power=power,
-                    times=CPUTimes(
-                        user=times.user,
-                        system=times.system,
-                        idle=times.idle,
-                        interrupt=times.interrupt,
-                        dpc=times.dpc,
-                    ),
-                    times_percent=CPUTimes(
-                        user=times_percent.user,
-                        system=times_percent.system,
-                        idle=times_percent.idle,
-                        interrupt=times_percent.interrupt,
-                        dpc=times_percent.dpc,
-                    ),
-                    usage=usage,
-                    voltage=voltage,
-                )
-                for index, (
-                    freq,
-                    power,
-                    times,
-                    times_percent,
-                    usage,
-                    voltage,
-                ) in enumerate(
-                    zip(
-                        frequency_per_cpu,
-                        power_per_cpu,
-                        times_per_cpu,
-                        times_per_cpu_percent,
-                        usage_per_cpu,
-                        voltages,
+                        current=frequency_per_cpu[index].current,
+                        min=frequency_per_cpu[index].min,
+                        max=frequency_per_cpu[index].max,
                     )
+                    if frequency_per_cpu is not None and index < len(frequency_per_cpu)
+                    else None,
+                    power=power_per_cpu[index]
+                    if power_per_cpu is not None and index < len(power_per_cpu)
+                    else None,
+                    times=CPUTimes(
+                        user=times_per_cpu[index].user,
+                        system=times_per_cpu[index].system,
+                        idle=times_per_cpu[index].idle,
+                        interrupt=times_per_cpu[index].interrupt,
+                        dpc=times_per_cpu[index].dpc,
+                    )
+                    if times_per_cpu is not None and index < len(times_per_cpu)
+                    else None,
+                    times_percent=CPUTimes(
+                        user=times_per_cpu_percent[index].user,
+                        system=times_per_cpu_percent[index].system,
+                        idle=times_per_cpu_percent[index].idle,
+                        interrupt=times_per_cpu_percent[index].interrupt,
+                        dpc=times_per_cpu_percent[index].dpc,
+                    )
+                    if times_per_cpu_percent is not None
+                    and index < len(times_per_cpu_percent)
+                    else None,
+                    usage=usage_per_cpu[index]
+                    if usage_per_cpu is not None and index < len(usage_per_cpu)
+                    else None,
+                    voltage=voltages[index]
+                    if voltages is not None and index < len(voltages)
+                    else None,
                 )
+                for index in range(self._count)
             ],
             power=power_package,
             stats=CPUStats(
