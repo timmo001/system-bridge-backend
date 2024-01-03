@@ -7,8 +7,8 @@ plyer==2.1.0
 psutil==5.9.7
 python-multipart==0.0.6
 screeninfo==0.8.1
-systembridgeconnector>=4.0.0.dev6
-systembridgemodels>=4.0.0.dev13
+systembridgeconnector>=4.0.0.dev7
+systembridgemodels>=4.0.0.dev14
 systembridgeshared>=4.0.0.dev10
 typer==0.9.0
 uvicorn[standard]==0.25.0
