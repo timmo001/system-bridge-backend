@@ -1,6 +1,7 @@
 """Battery."""
 from __future__ import annotations
 
+from multiprocessing import Value
 from typing import override
 
 from plyer import battery
@@ -32,17 +33,25 @@ class BatteryUpdate(ModuleUpdateBase):
             else None
         )
 
-        status = battery.status
-        if (status) is None or (
-            status["percentage"] == 255 and status["isCharging"] is False
-        ):
+        try:
+            status = battery.status
+            if (status) is None or (
+                status["percentage"] == 255 and status["isCharging"] is False
+            ):
+                return Battery(
+                    is_charging=None,
+                    percentage=None,
+                    time_remaining=time_remaining,
+                )
+            return Battery(
+                is_charging=status["isCharging"],
+                percentage=status["percentage"],
+                time_remaining=time_remaining,
+            )
+        except ValueError as exception:
+            self._logger.error(exception)
             return Battery(
                 is_charging=None,
                 percentage=None,
                 time_remaining=time_remaining,
             )
-        return Battery(
-            is_charging=status["isCharging"],
-            percentage=status["percentage"],
-            time_remaining=time_remaining,
-        )
