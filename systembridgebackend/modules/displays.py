@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import override
 
-from screeninfo import get_monitors
+from screeninfo import ScreenInfoError, get_monitors
 
 from systembridgemodels.modules.displays import Display
 from systembridgemodels.modules.sensors import Sensors
@@ -148,19 +148,23 @@ class DisplaysUpdate(ModuleUpdateBase):
         """Update all data."""
         self._logger.debug("Update all data")
 
-        return [
-            Display(
-                id=str(key),
-                name=monitor.name if monitor.name is not None else str(key),
-                resolution_horizontal=monitor.width,
-                resolution_vertical=monitor.height,
-                x=monitor.x,
-                y=monitor.y,
-                width=monitor.width_mm,
-                height=monitor.height_mm,
-                is_primary=monitor.is_primary,
-                pixel_clock=self._get_pixel_clock(str(key)),
-                refresh_rate=self.sensors_refresh_rate(str(key)),
-            )
-            for key, monitor in enumerate(get_monitors())
-        ]
+        try:
+            return [
+                Display(
+                    id=str(key),
+                    name=monitor.name if monitor.name is not None else str(key),
+                    resolution_horizontal=monitor.width,
+                    resolution_vertical=monitor.height,
+                    x=monitor.x,
+                    y=monitor.y,
+                    width=monitor.width_mm,
+                    height=monitor.height_mm,
+                    is_primary=monitor.is_primary,
+                    pixel_clock=self._get_pixel_clock(str(key)),
+                    refresh_rate=self.sensors_refresh_rate(str(key)),
+                )
+                for key, monitor in enumerate(get_monitors())
+            ]
+        except ScreenInfoError as error:
+            self._logger.error(error)
+            return []
