@@ -305,8 +305,8 @@ class CPUUpdate(ModuleUpdateBase):
                         user=times_per_cpu[index].user,
                         system=times_per_cpu[index].system,
                         idle=times_per_cpu[index].idle,
-                        interrupt=times_per_cpu[index].interrupt,
-                        dpc=times_per_cpu[index].dpc,
+                        interrupt=times_per_cpu[index].get("interrupt"),
+                        dpc=times_per_cpu[index].get("dpc"),
                     )
                     if times_per_cpu is not None and index < len(times_per_cpu)
                     else None,
@@ -314,8 +314,8 @@ class CPUUpdate(ModuleUpdateBase):
                         user=times_per_cpu_percent[index].user,
                         system=times_per_cpu_percent[index].system,
                         idle=times_per_cpu_percent[index].idle,
-                        interrupt=times_per_cpu_percent[index].interrupt,
-                        dpc=times_per_cpu_percent[index].dpc,
+                        interrupt=times_per_cpu_percent[index].get("interrupt"),
+                        dpc=times_per_cpu_percent[index].get("dpc"),
                     )
                     if times_per_cpu_percent is not None
                     and index < len(times_per_cpu_percent)
@@ -343,15 +343,15 @@ class CPUUpdate(ModuleUpdateBase):
                 user=times.user,
                 system=times.system,
                 idle=times.idle,
-                interrupt=times.interrupt,
-                dpc=times.dpc,
+                interrupt=times.get("interrupt"),
+                dpc=times.get("dpc"),
             ),
             times_percent=CPUTimes(
                 user=times_percent.user,
                 system=times_percent.system,
                 idle=times_percent.idle,
-                interrupt=times_percent.interrupt,
-                dpc=times_percent.dpc,
+                interrupt=times_percent.get("interrupt"),
+                dpc=times_percent.get("dpc"),
             ),
             usage=usage,
             voltage=voltage,
