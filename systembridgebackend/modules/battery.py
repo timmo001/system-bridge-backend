@@ -1,7 +1,6 @@
 """Battery."""
 from __future__ import annotations
 
-from multiprocessing import Value
 from typing import override
 
 from plyer import battery
