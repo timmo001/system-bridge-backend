@@ -183,7 +183,7 @@ class WebSocketHandler(Base):
         """Handle event."""
         if request.event == TYPE_APPLICATION_UPDATE:
             try:
-                model = UpdateModel(**response_data)
+                model = UpdateModel(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -214,7 +214,7 @@ class WebSocketHandler(Base):
             self._logger.info("Exit application called")
         elif request.event == TYPE_KEYBOARD_KEYPRESS:
             try:
-                model = KeyboardKey(**response_data)
+                model = KeyboardKey(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -265,7 +265,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_KEYBOARD_TEXT:
             try:
-                model = KeyboardText(**response_data)
+                model = KeyboardText(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -302,7 +302,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_MEDIA_CONTROL:
             try:
-                model = MediaControl(**response_data)
+                model = MediaControl(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -405,7 +405,7 @@ class WebSocketHandler(Base):
 
         elif request.event == TYPE_NOTIFICATION:
             try:
-                model = Notification(**response_data)
+                model = Notification(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -443,9 +443,9 @@ class WebSocketHandler(Base):
                 )
             )
         elif request.event == TYPE_OPEN:
-            if "path" in response_data:
+            if "path" in response_data[EVENT_DATA]:
                 try:
-                    model = OpenPath(**response_data)
+                    model = OpenPath(**response_data[EVENT_DATA])
                 except ValueError as error:
                     message = f"Invalid request: {error}"
                     self._logger.warning(message, exc_info=error)
@@ -470,9 +470,9 @@ class WebSocketHandler(Base):
                     )
                 )
                 return
-            if "url" in response_data:
+            if "url" in response_data[EVENT_DATA]:
                 try:
-                    model = OpenUrl(**response_data)
+                    model = OpenUrl(**response_data[EVENT_DATA])
                 except ValueError as error:
                     message = f"Invalid request: {error}"
                     self._logger.warning(message, exc_info=error)
@@ -653,7 +653,7 @@ class WebSocketHandler(Base):
                             type=TYPE_DATA_UPDATE,
                             message="Data received",
                             module=str(module),
-                            data=response_data,
+                            data=response_data[EVENT_DATA],
                         )
                     )
 
@@ -668,7 +668,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_GET_FILES:
             try:
-                model = MediaGetFiles(**response_data)
+                model = MediaGetFiles(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -750,7 +750,7 @@ class WebSocketHandler(Base):
             )
         elif request.event == TYPE_GET_FILE:
             try:
-                model = MediaGetFile(**response_data)
+                model = MediaGetFile(**response_data[EVENT_DATA])
             except ValueError as error:
                 message = f"Invalid request: {error}"
                 self._logger.warning(message, exc_info=error)
@@ -828,7 +828,7 @@ class WebSocketHandler(Base):
                     id=request.id,
                     type=TYPE_FILE,
                     message="Got file",
-                    data=response_data,
+                    data=response_data[EVENT_DATA],
                 )
             )
         elif request.event == TYPE_GET_SETTINGS:
