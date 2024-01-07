@@ -32,6 +32,9 @@ class UpdateThread(BaseThread):
                 )
                 time.sleep(interval)
 
+            if self.stopping:
+                return
+
             # Update the next run before running the update
             self.update_next_run()
 
