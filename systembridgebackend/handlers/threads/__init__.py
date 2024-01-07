@@ -18,10 +18,7 @@ class BaseThread(Thread, Base):
         Base.__init__(self)
         self.stopping = False
 
-    def run(
-        self,
-        *args,
-    ) -> None:
+    def run(self) -> None:
         """Run."""
         raise NotImplementedError
 

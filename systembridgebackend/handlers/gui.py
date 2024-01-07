@@ -31,9 +31,9 @@ class GUI(Base):
 
     async def start(
         self,
-        *args,
-        failed_callback: Callable[[], None] | None = None,
         command: str = GUICommand.MAIN.value,
+        data: str | None = None,
+        failed_callback: Callable[[], None] | None = None,
     ) -> None:
         """Start the GUI."""
         if self._thread is not None:
@@ -45,11 +45,9 @@ class GUI(Base):
         self._logger.info("Starting GUI thread: %s", command)
         self._name = command
         self._thread = GUIThread(
-            args=(
-                *args,
-                failed_callback,
-                command,
-            ),
+            command=command,
+            data=data,
+            failed_callback=failed_callback,
         )
         self._thread.start()
 

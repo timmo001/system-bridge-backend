@@ -61,10 +61,7 @@ class UpdateThread(BaseThread):
         self._logger.info("Updated update interval to: %s", self.interval)
 
     @override
-    def run(
-        self,
-        *_,
-    ) -> None:
+    def run(self) -> None:
         """Run."""
         # Start the automatic update in a separate thread
         self._thread = threading.Thread(target=self._run)

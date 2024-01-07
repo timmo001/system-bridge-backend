@@ -13,19 +13,20 @@ class GUIThread(BaseThread):
 
     def __init__(
         self,
-        *args,
-        **kwargs,
+        command: str = "main",
+        data: str | None = None,
+        failed_callback: Callable[[], None] | None = None,
     ) -> None:
         """Initialise the thread."""
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self._process: subprocess.Popen | None = None
+        self._command = command
+        self._data = data
+        self._failed_callback = failed_callback
 
     async def _start(
         self,
-        *args,
         attempt: int = 1,
-        command: str = "main",
-        failed_callback: Callable[[], None] | None = None,
     ) -> None:
         """Start the GUI."""
         if self.stopping:
@@ -34,8 +35,8 @@ class GUIThread(BaseThread):
 
         if attempt > 2:
             self._logger.error("Failed to start GUI after 2 attempts")
-            if failed_callback is not None:
-                failed_callback()
+            if self._failed_callback is not None:
+                self._failed_callback()
             return
 
         pgm_args = (
@@ -43,17 +44,19 @@ class GUIThread(BaseThread):
                 sys.executable,
                 "-m",
                 "systembridgegui",
-                command,
-                *args,
+                self._command,
             ]
             if "python" in sys.executable
             else [
                 sys.executable,
                 "gui",
-                command,
-                *args,
+                self._command,
             ]
         )
+
+        # Add data if it is not None
+        if self._data is not None:
+            pgm_args.append(self._data)
 
         self._logger.info("Starting GUI: %s", pgm_args)
         with subprocess.Popen(pgm_args) as self._process:
@@ -61,35 +64,18 @@ class GUIThread(BaseThread):
             if (exit_code := self._process.wait()) != 0:
                 if not self.stopping:
                     self._logger.error("GUI exited abnormally with code: %s", exit_code)
-                    await self._start(
-                        *args,
-                        failed_callback=failed_callback,
-                        attempt=attempt + 1,
-                        command=command,
-                    )
+                    await self._start(attempt=attempt + 1)
                     return
             self._logger.info("GUI exited normally with code: %s", exit_code)
 
     @override
-    def run(
-        self,
-        *args,
-        command: str = "main",
-        failed_callback: Callable[[], None] | None = None,
-    ) -> None:
+    def run(self) -> None:
         """Run the thread."""
         if self.stopping:
             self._logger.warning("Thread is stopping, cannot start GUI")
             return
 
-        asyncio.run(
-            self._start(
-                *args,
-                attempt=1,
-                command=command,
-                failed_callback=failed_callback,
-            )
-        )
+        asyncio.run(self._start(attempt=1))
 
         self.stopping = True
 
