@@ -111,7 +111,7 @@ class Server(Base):
 
         # Start the GUI
         if not self.no_gui:
-            self.open_gui(GUICommand.MAIN, "")
+            self.open_gui(GUICommand.MAIN.value, "")
 
         await asyncio.wait(self._tasks)
 
@@ -127,11 +127,11 @@ class Server(Base):
 
     def open_gui(
         self,
-        command: GUICommand,
+        command: str,
         data: str,
     ) -> None:
         """Open GUI."""
-        if command == GUICommand.MAIN:
+        if command == GUICommand.MAIN.value:
             self._logger.info("Launch Main GUI as a detached process")
             if self._gui_main is not None:
                 self._gui_main.stop()
@@ -146,7 +146,7 @@ class Server(Base):
                     name="GUI Main",
                 )
             )
-        elif command == GUICommand.NOTIFICATION:
+        elif command == GUICommand.NOTIFICATION.value:
             self._logger.info("Launch Notification GUI as a detached process")
             if self._gui_notification is not None:
                 self._gui_notification.stop()
@@ -161,7 +161,7 @@ class Server(Base):
                     name="GUI Notification",
                 )
             )
-        elif command == GUICommand.PLAYER:
+        elif command == GUICommand.PLAYER.value:
             self._logger.info("Launch Player GUI as a detached process")
             if self._gui_player:
                 self._gui_player.stop()
