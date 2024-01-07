@@ -1,7 +1,6 @@
 """System Bridge: Server."""
 import asyncio
 from collections.abc import Callable
-import sys
 
 import uvicorn
 
