@@ -5,6 +5,7 @@ import asyncio
 import sys
 
 from systembridgeshared.base import Base
+from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 from ._version import __version__
@@ -23,6 +24,7 @@ class Application(Base):
         no_gui: bool = False,
     ) -> None:
         """Initialise."""
+        setup_logger(settings.data.log_level, "system-bridge-backend")
         super().__init__()
         if init:
             self._logger.info("Initialised application. Exiting now.")
