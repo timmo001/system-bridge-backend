@@ -216,10 +216,6 @@ class Server(Base):
         loop.stop()
         self._logger.info("Event loop stopped")
 
-        # Exit the application
-        self._logger.info("Exit Application")
-        sys.exit(0)
-
     async def register_hotkeys(self) -> None:
         """Register hotkeys."""
         self._logger.info("Register hotkeys")
