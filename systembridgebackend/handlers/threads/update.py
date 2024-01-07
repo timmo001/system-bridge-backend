@@ -44,6 +44,9 @@ class UpdateThread(BaseThread):
             except Exception as exception:  # pylint: disable=broad-except
                 self._logger.exception(exception)
 
+            if self.stopping:
+                return
+
             self._logger.info("Update finished, next run will be at: %s", self.next_run)
 
     def _update_interval(
@@ -85,6 +88,9 @@ class UpdateThread(BaseThread):
 
     def update_next_run(self) -> None:
         """Update next run."""
+        if self.stopping:
+            return
+
         # Log how long the update took
         time_taken = datetime.now() - self.next_run
         self._logger.info("Update took %s seconds", round(time_taken.seconds, 2))
