@@ -9,6 +9,15 @@
       "preLaunchTask": "pip install",
       "justMyCode": false,
       "args": []
+    },
+    {
+      "name": "Python: Module - No GUI",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgebackend",
+      "preLaunchTask": "pip install",
+      "justMyCode": false,
+      "args": ["--no-gui"]
     }
   ]
 }
