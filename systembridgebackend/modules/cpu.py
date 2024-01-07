@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import override
 
 from psutil import (
@@ -305,8 +306,12 @@ class CPUUpdate(ModuleUpdateBase):
                         user=times_per_cpu[index].user,
                         system=times_per_cpu[index].system,
                         idle=times_per_cpu[index].idle,
-                        interrupt=getattr(times_per_cpu[index], "interrupt"),
-                        dpc=getattr(times_per_cpu[index], "dpc"),
+                        interrupt=times_per_cpu[index].interrupt
+                        if hasattr(times_per_cpu[index], "interrupt")
+                        else None,
+                        dpc=times_per_cpu[index].dpc
+                        if hasattr(times_per_cpu[index], "dpc")
+                        else None,
                     )
                     if times_per_cpu is not None and index < len(times_per_cpu)
                     else None,
@@ -314,8 +319,12 @@ class CPUUpdate(ModuleUpdateBase):
                         user=times_per_cpu_percent[index].user,
                         system=times_per_cpu_percent[index].system,
                         idle=times_per_cpu_percent[index].idle,
-                        interrupt=getattr(times_per_cpu_percent[index], "interrupt"),
-                        dpc=getattr(times_per_cpu_percent[index], "dpc"),
+                        interrupt=times_per_cpu_percent[index].interrupt
+                        if hasattr(times_per_cpu_percent[index], "interrupt")
+                        else None,
+                        dpc=times_per_cpu_percent[index].dpc
+                        if hasattr(times_per_cpu_percent[index], "dpc")
+                        else None,
                     )
                     if times_per_cpu_percent is not None
                     and index < len(times_per_cpu_percent)
@@ -343,15 +352,17 @@ class CPUUpdate(ModuleUpdateBase):
                 user=times.user,
                 system=times.system,
                 idle=times.idle,
-                interrupt=getattr(times, "interrupt"),
-                dpc=getattr(times, "dpc"),
+                interrupt=times.interrupt if hasattr(times, "interrupt") else None,
+                dpc=times.dpc if hasattr(times, "dpc") else None,
             ),
             times_percent=CPUTimes(
                 user=times_percent.user,
                 system=times_percent.system,
                 idle=times_percent.idle,
-                interrupt=getattr(times_percent, "interrupt"),
-                dpc=getattr(times_percent, "dpc"),
+                interrupt=times_percent.interrupt
+                if hasattr(times_percent, "interrupt")
+                else None,
+                dpc=times_percent.dpc if hasattr(times_percent, "dpc") else None,
             ),
             usage=usage,
             voltage=voltage,
