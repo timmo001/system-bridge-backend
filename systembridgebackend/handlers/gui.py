@@ -33,7 +33,7 @@ class GUI(Base):
         self,
         *args,
         failed_callback: Callable[[], None] | None = None,
-        command: GUICommand = GUICommand.MAIN,
+        command: str = GUICommand.MAIN.value,
     ) -> None:
         """Start the GUI."""
         if self._thread is not None:
@@ -43,7 +43,7 @@ class GUI(Base):
             return
 
         self._logger.info("Starting GUI thread: %s", command)
-        self._name = command.value
+        self._name = command
         self._thread = GUIThread(
             args=(
                 *args,
