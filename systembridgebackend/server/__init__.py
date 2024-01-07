@@ -197,7 +197,6 @@ class Server(Base):
 
         # Stop the API server
         self._logger.info("Stop API server")
-        self._api_server.should_exit = True
         self._api_server.force_exit = True
         self._logger.info("API server stopped")
 
@@ -217,6 +216,7 @@ class Server(Base):
         loop.stop()
         self._logger.info("Event loop stopped")
 
+        # Exit the application
         self._logger.info("Exit Application")
         sys.exit(0)
 
