@@ -653,7 +653,7 @@ class WebSocketHandler(Base):
                             type=TYPE_DATA_UPDATE,
                             message="Data received",
                             module=str(module),
-                            data=response_data[EVENT_DATA],
+                            data=response_data,
                         )
                     )
 
