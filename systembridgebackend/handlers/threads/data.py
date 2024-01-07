@@ -22,4 +22,7 @@ class DataUpdateThread(UpdateThread):
     @override
     async def update(self) -> None:
         """Update."""
+        if self.stopping:
+            return
+
         await self._update_cls.update_data()
