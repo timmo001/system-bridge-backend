@@ -10,6 +10,7 @@ from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
 from ..handlers.action import ActionHandler
+from ..handlers.autostart import autostart_disable, autostart_enable
 from ..handlers.data import DataUpdate
 from ..handlers.gui import GUI, GUICommand
 from ..handlers.keyboard import keyboard_hotkey_register
@@ -72,6 +73,12 @@ class Server(Base):
         api_app.data_update = DataUpdate(self.data_updated)
         api_app.listeners = listeners
         api_app.loop = asyncio.get_event_loop()
+
+        self._logger.info("Autostart enabled: %s", self._settings.data.autostart)
+        if self._settings.data.autostart:
+            autostart_enable()
+        else:
+            autostart_disable()
 
         self._logger.info("Setup API server")
         self._api_server = APIServer(
