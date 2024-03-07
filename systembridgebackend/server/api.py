@@ -3,14 +3,17 @@ import asyncio
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 import logging
+import os
 import sys
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, Query, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from systembridgebackend.handlers.media import get_directories, get_file_data
 from systembridgeshared.common import asyncio_get_loop
 from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN
 from systembridgeshared.settings import Settings
@@ -155,6 +158,48 @@ def get_data_by_key(
     return {
         key: data[key],
     }
+
+
+@app.get("/api/media/file/data", dependencies=[Depends(security_token)])
+def get_media_file_data(
+    query_base: str = Query(..., alias="base"),
+    query_path: str = Query(..., alias="path"),
+) -> FileResponse:
+    """Get media file data."""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": "Cannot find base", "base": query_base},
+        )
+
+    path = os.path.join(root_path, query_path) if query_path else root_path
+    if not os.path.exists(path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot find path", "path": path},
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+        )
+    if not os.path.isfile(path):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {"message": "Path is not a file", "path": path},
+        )
+
+    return get_file_data(path)
 
 
 @app.websocket("/api/websocket")
