@@ -566,10 +566,8 @@ class WebSocketHandler(Base):
                 Response(
                     id=request.id,
                     type=TYPE_DATA_LISTENER_REGISTERED,
-                    data={
-                        EVENT_MESSAGE: "Data listener registered",
-                        EVENT_MODULES: model.modules,
-                    },
+                    message="Data listener registered",
+                    data={EVENT_MODULES: model.modules},
                 )
             )
         elif request.event == TYPE_UNREGISTER_DATA_LISTENER:
