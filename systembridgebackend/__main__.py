@@ -3,10 +3,9 @@ import logging
 
 import typer
 
+from systembridgebackend import Application
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
-
-from . import Application
 
 app = typer.Typer()
 
