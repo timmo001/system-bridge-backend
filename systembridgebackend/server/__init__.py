@@ -1,4 +1,5 @@
 """System Bridge: Server."""
+
 import asyncio
 from collections.abc import Callable
 
@@ -12,7 +13,6 @@ from systembridgeshared.settings import Settings
 from ..handlers.action import ActionHandler
 from ..handlers.autostart import autostart_disable, autostart_enable
 from ..handlers.data import DataUpdate
-from ..handlers.gui import GUI, GUICommand
 from ..handlers.keyboard import keyboard_hotkey_register
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
@@ -49,20 +49,14 @@ class Server(Base):
         settings: Settings,
         listeners: Listeners,
         no_frontend: bool = False,
-        no_gui: bool = False,
     ) -> None:
         """Initialise."""
         super().__init__()
         self.no_frontend = no_frontend
-        self.no_gui = no_gui
 
         self._listeners = listeners
         self._settings = settings
         self._tasks: list[asyncio.Task] = []
-
-        self._gui_main: GUI | None = None
-        self._gui_notification: GUI | None = None
-        self._gui_player: GUI | None = None
 
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
@@ -115,10 +109,6 @@ class Server(Base):
         api_app.data_update.request_update_data()
         api_app.data_update.request_update_media_data()
 
-        # Start the GUI
-        if not self.no_gui:
-            self.open_gui(GUICommand.MAIN.value)
-
         await asyncio.wait(self._tasks)
 
     async def data_updated(
@@ -138,51 +128,7 @@ class Server(Base):
     ) -> None:
         """Open GUI."""
         self._logger.info("Open GUI: %s", command)
-        if command == GUICommand.MAIN.value:
-            self._logger.info("Launch Main GUI as a detached process")
-            if self._gui_main is not None:
-                self._gui_main.stop()
-            self._gui_main = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui_main.start(
-                        command=command,
-                        data=data,
-                        failed_callback=self.exit_application,
-                    ),
-                    name="GUI Main",
-                )
-            )
-        elif command == GUICommand.NOTIFICATION.value:
-            self._logger.info("Launch Notification GUI as a detached process")
-            if self._gui_notification is not None:
-                self._gui_notification.stop()
-            self._gui_notification = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui_notification.start(
-                        command=command,
-                        data=data,
-                    ),
-                    name="GUI Notification",
-                )
-            )
-        elif command == GUICommand.PLAYER.value:
-            self._logger.info("Launch Player GUI as a detached process")
-            if self._gui_player:
-                self._gui_player.stop()
-            self._gui_player = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui_player.start(
-                        command=command,
-                        data=data,
-                    ),
-                    name="GUI Media Player",
-                )
-            )
-        else:
-            raise NotImplementedError(f"Command not implemented: {command}")
+        raise NotImplementedError(f"Command not implemented: {command}")
 
     def exit_application(self) -> None:
         """Exit application."""
@@ -204,15 +150,6 @@ class Server(Base):
         self._logger.info("Stop API server")
         self._api_server.force_exit = True
         self._logger.info("API server stopped")
-
-        # Stop GUI threads
-        if self._gui_main is not None:
-            self._gui_main.stop()
-        if self._gui_notification is not None:
-            self._gui_notification.stop()
-        if self._gui_player is not None:
-            self._gui_player.stop()
-        self._logger.info("GUI threads joined")
 
         # Stop the event loop
         loop = asyncio.get_event_loop()

@@ -15,7 +15,6 @@ app = typer.Typer()
 def main(
     init: bool = typer.Option(False, "--init", help="Initialise"),
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
-    no_gui: bool = typer.Option(False, "--no-gui", help="No GUI"),
 ) -> None:
     """Run the main application."""
     settings = Settings()
@@ -28,7 +27,6 @@ def main(
             settings,
             init=init,
             no_frontend=no_frontend,
-            no_gui=no_gui,
         )
     except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
