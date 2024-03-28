@@ -212,7 +212,6 @@ known-first-party = [
     "systembridgecli",
     "systembridgeconnector",
     "systembridgefrontend",
-    "systembridgegui",
     "systembridgemodels",
     "systembridgeshared",
     "systembridgewindowssensors",
