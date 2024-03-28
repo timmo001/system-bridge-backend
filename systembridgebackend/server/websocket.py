@@ -435,7 +435,7 @@ class WebSocketHandler(Base):
             await self._send_response(
                 Response(
                     id=request.id,
-                    type="CREATE_NOTIFICATION",
+                    type=TYPE_NOTIFICATION,
                     data=asdict(model),
                 )
             )
