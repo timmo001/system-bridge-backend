@@ -63,7 +63,6 @@ class Server(Base):
 
         self._logger.info("Setup API app")
         api_app.callback_exit = self.exit_application
-        api_app.callback_open_gui = self.open_gui
         api_app.data_update = DataUpdate(self.data_updated)
         api_app.listeners = listeners
         api_app.loop = asyncio.get_event_loop()
@@ -120,15 +119,6 @@ class Server(Base):
             api_app.data_update.data,
             module,
         )
-
-    def open_gui(
-        self,
-        command: str,
-        data: str | None = None,
-    ) -> None:
-        """Open GUI."""
-        self._logger.info("Open GUI: %s", command)
-        raise NotImplementedError(f"Command not implemented: {command}")
 
     def exit_application(self) -> None:
         """Exit application."""
