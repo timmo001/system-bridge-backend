@@ -1,4 +1,5 @@
 """API."""
+
 import asyncio
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
@@ -212,7 +213,6 @@ async def websocket_endpoint(websocket: WebSocket):
         app.listeners,
         websocket,
         app.callback_exit,
-        app.callback_open_gui,
     )
     await websocket_handler.handler()
 

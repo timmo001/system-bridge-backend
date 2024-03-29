@@ -1,7 +1,8 @@
 """WebSocket Handler."""
+
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
-from json import JSONDecodeError, dumps
+from json import JSONDecodeError
 import os
 from uuid import uuid4
 
@@ -128,7 +129,6 @@ class WebSocketHandler(Base):
         listeners: Listeners,
         websocket: WebSocket,
         callback_exit_application: Callable[[], None],
-        callback_open_gui: Callable[[str, str], None],
     ) -> None:
         """Initialise."""
         super().__init__()
@@ -137,7 +137,6 @@ class WebSocketHandler(Base):
         self._listeners = listeners
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
-        self._callback_open_gui = callback_open_gui
         self._active = True
 
     async def _send_response(
@@ -433,14 +432,25 @@ class WebSocketHandler(Base):
                 )
                 return
 
-            self._callback_open_gui("notification", dumps(asdict(model)))
+            self._logger.warning("Sending notification: %s", model.title)
+            for listener in self._listeners.registered_listeners:
+                self._logger.warning(
+                    "Sending notification to listener: %s", listener.id
+                )
+                await listener.send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_NOTIFICATION,
+                        data=asdict(model),
+                    )
+                )
 
             await self._send_response(
                 Response(
                     id=request.id,
                     type=TYPE_NOTIFICATION_SENT,
                     message="Notification sent",
-                    data={},
+                    data=asdict(model),
                 )
             )
         elif request.event == TYPE_OPEN:
@@ -546,6 +556,7 @@ class WebSocketHandler(Base):
 
             if await self._listeners.add_listener(
                 listener_id,
+                self._send_response,
                 self._data_changed,
                 model.modules,
             ):
