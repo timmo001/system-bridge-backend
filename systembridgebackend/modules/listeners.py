@@ -1,7 +1,9 @@
 """Modules Listeners."""
+
 from collections.abc import Awaitable, Callable
 
 from systembridgemodels.modules import ModulesData
+from systembridgemodels.response import Response
 from systembridgeshared.base import Base
 
 from . import MODULES
@@ -13,11 +15,13 @@ class Listener:
     def __init__(
         self,
         listener_id: str,
+        send_response: Callable[[Response], None],
         data_changed_callback: Callable[[str, ModulesData], Awaitable[None]],
         modules: list[str],
     ) -> None:
         """Initialise."""
         self.id = listener_id
+        self.send_response = send_response
         self.data_changed_callback = data_changed_callback
         self.modules = modules
 
@@ -28,22 +32,23 @@ class Listeners(Base):
     def __init__(self) -> None:
         """Initialise."""
         super().__init__()
-        self._registered_listeners: list[Listener] = []
+        self.registered_listeners: list[Listener] = []
 
     async def add_listener(
         self,
         listener_id: str,
+        send_response: Callable[[dict[str, str]], None],
         data_changed_callback: Callable[[str, ModulesData], Awaitable[None]],
         modules: list[str],
     ) -> bool:
         """Add modules to listener."""
-        for listner in self._registered_listeners:
+        for listner in self.registered_listeners:
             if listner.id == listener_id:
                 self._logger.warning("Listener already registered: %s", listener_id)
                 return True
 
-        self._registered_listeners.append(
-            Listener(listener_id, data_changed_callback, modules)
+        self.registered_listeners.append(
+            Listener(listener_id, send_response, data_changed_callback, modules)
         )
         self._logger.info("Added listener: %s", listener_id)
 
@@ -60,7 +65,7 @@ class Listeners(Base):
             self._logger.warning("Module to refresh not implemented: %s", module)
             return
 
-        for listener in self._registered_listeners:
+        for listener in self.registered_listeners:
             self._logger.info("Listener: %s - %s", listener.id, listener.modules)
             if module in listener.modules:
                 self._logger.info(
@@ -70,16 +75,16 @@ class Listeners(Base):
 
     def remove_all_listeners(self) -> None:
         """Remove all listeners."""
-        self._registered_listeners.clear()
+        self.registered_listeners.clear()
 
     def remove_listener(
         self,
         listener_id: str,
     ) -> bool:
         """Remove listener."""
-        for listener in self._registered_listeners:
+        for listener in self.registered_listeners:
             if listener.id == listener_id:
-                self._registered_listeners.remove(listener)
+                self.registered_listeners.remove(listener)
                 self._logger.info("Removed listener: %s", listener_id)
                 return True
 

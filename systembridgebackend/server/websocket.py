@@ -432,13 +432,18 @@ class WebSocketHandler(Base):
                 )
                 return
 
-            await self._send_response(
-                Response(
-                    id=request.id,
-                    type=TYPE_NOTIFICATION,
-                    data=asdict(model),
+            self._logger.warning("Sending notification: %s", model.title)
+            for listener in self._listeners.registered_listeners:
+                self._logger.warning(
+                    "Sending notification to listener: %s", listener.id
                 )
-            )
+                await listener.send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_NOTIFICATION,
+                        data=asdict(model),
+                    )
+                )
 
             await self._send_response(
                 Response(
@@ -551,6 +556,7 @@ class WebSocketHandler(Base):
 
             if await self._listeners.add_listener(
                 listener_id,
+                self._send_response,
                 self._data_changed,
                 model.modules,
             ):
