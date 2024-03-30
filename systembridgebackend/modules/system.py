@@ -1,4 +1,5 @@
 """System."""
+
 from __future__ import annotations
 
 import asyncio
@@ -211,7 +212,21 @@ class SystemUpdate(ModuleUpdateBase):
     @property
     def _uuid(self) -> str:
         """Get UUID."""
-        return uniqueid.id or self._mac_address
+        # cat /var/lib/dbus/machine-id
+        if sys.platform == "linux":
+            try:
+                with open(
+                    "/var/lib/dbus/machine-id",
+                    encoding="utf8",
+                ) as file:
+                    return file.read().strip()
+            except FileNotFoundError:
+                return self._mac_address
+
+        try:
+            return uniqueid.id or self._mac_address
+        except Exception:  # pylint: disable=broad-except
+            return self._mac_address
 
     async def _get_version_latest(self) -> Any | None:
         """Get latest version from GitHub."""
