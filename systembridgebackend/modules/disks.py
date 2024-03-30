@@ -1,4 +1,5 @@
 """Disks."""
+
 from __future__ import annotations
 
 import asyncio
@@ -37,8 +38,12 @@ class DisksUpdate(ModuleUpdateBase):
         """Disk usage."""
         try:
             return disk_usage(path)
-        except PermissionError as error:
-            self._logger.error("PermissionError", exc_info=error)
+        except (FileNotFoundError, PermissionError) as error:
+            self._logger.error(
+                "Error getting disk usage for: %s",
+                path,
+                exc_info=error,
+            )
             return None
 
     @override
