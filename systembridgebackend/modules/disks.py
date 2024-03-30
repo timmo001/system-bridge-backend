@@ -39,7 +39,7 @@ class DisksUpdate(ModuleUpdateBase):
         try:
             return disk_usage(path)
         except (FileNotFoundError, PermissionError) as error:
-            self._logger.error(
+            self._logger.warning(
                 "Error getting disk usage for: %s",
                 path,
                 exc_info=error,
