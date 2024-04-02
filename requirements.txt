@@ -1,5 +1,5 @@
 aiofiles==23.2.1
-fastapi==0.110.0
+fastapi==0.110.1
 incremental==22.10.0
 keyboard==0.13.5
 mutagen==1.47.0
