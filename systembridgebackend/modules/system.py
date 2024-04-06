@@ -12,7 +12,7 @@ from typing import Any, override
 import uuid
 
 import aiohttp
-from pkg_resources import parse_version
+from packaging.version import parse
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
@@ -245,7 +245,7 @@ class SystemUpdate(ModuleUpdateBase):
     async def _get_version_newer_available(self) -> bool | None:
         """Check if newer version is available."""
         if self._version_latest is not None:
-            return parse_version(self._version_latest) > parse_version(self._version)
+            return parse(self._version_latest) > parse(self._version)
         return None
 
     @override
