@@ -1,4 +1,5 @@
 """System Bridge."""
+
 from __future__ import annotations
 
 import asyncio
@@ -23,13 +24,13 @@ class Application(Base):
         no_frontend: bool = False,
     ) -> None:
         """Initialise."""
-        setup_logger(settings.data.log_level, "system-bridge-backend")
+        setup_logger(settings.data.log_level, "systembridgebackend")
         super().__init__()
         if init:
             self._logger.info("Initialised application. Exiting now.")
             sys.exit(0)
 
-        self._logger.info("System Bridge %s: Startup", __version__.public())
+        self._logger.info("System Bridge Backend (%s)", __version__.public())
 
         self._logger.info("Your token is: %s", settings.data.api.token)
 
