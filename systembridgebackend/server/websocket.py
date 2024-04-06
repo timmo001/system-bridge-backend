@@ -92,7 +92,6 @@ from systembridgeshared.const import (
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
-from ..handlers.autostart import autostart_disable, autostart_enable
 from ..handlers.data import DataUpdate
 from ..handlers.keyboard import keyboard_keypress, keyboard_text
 from ..handlers.media import (
@@ -862,14 +861,6 @@ class WebSocketHandler(Base):
                     data=asdict(self._settings.data),
                 )
             )
-
-            # Update autostart
-            self._logger.info("Setting autostart to %s", self._settings.data.autostart)
-            if self._settings.data.autostart:
-                autostart_enable()
-            else:
-                autostart_disable()
-
         elif request.event == TYPE_POWER_SLEEP:
             self._logger.info("Sleeping")
             await self._send_response(
