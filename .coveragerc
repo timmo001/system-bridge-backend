@@ -1,0 +1,41 @@
+[run]
+source = systembridgebackend
+omit =
+    systembridgebackend/__init__.py
+    systembridgebackend/__main__.py
+
+    systembridgebackend/handlers/__init__.py
+    systembridgebackend/handlers/action.py
+    systembridgebackend/handlers/data.py
+    systembridgebackend/handlers/keyboard.py
+    systembridgebackend/handlers/open.py
+    systembridgebackend/handlers/power.py
+    systembridgebackend/handlers/update.py
+
+    systembridgebackend/handlers/media/__init__.py
+    systembridgebackend/handlers/media/windows.py
+
+    systembridgebackend/handlers/threads/__init__.py
+    systembridgebackend/handlers/threads/data.py
+    systembridgebackend/handlers/threads/media.py
+    systembridgebackend/handlers/threads/update.py
+
+    systembridgebackend/modules/__init__.py
+    systembridgebackend/modules/base.py
+    systembridgebackend/modules/battery.py
+    systembridgebackend/modules/cpu.py
+    systembridgebackend/modules/disks.py
+    systembridgebackend/modules/displays.py
+    systembridgebackend/modules/gpus.py
+    systembridgebackend/modules/listeners.py
+    systembridgebackend/modules/media.py
+    systembridgebackend/modules/memory.py
+    systembridgebackend/modules/networks.py
+    systembridgebackend/modules/processes.py
+    systembridgebackend/modules/sensors.py
+    systembridgebackend/modules/system.py
+
+    systembridgebackend/server/__init__.py
+    systembridgebackend/server/api.py
+    systembridgebackend/server/mdns.py
+    systembridgebackend/server/websocket.py
