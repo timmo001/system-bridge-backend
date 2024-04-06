@@ -39,7 +39,24 @@ class SystemUpdate(ModuleUpdateBase):
 
     async def _get_active_user_name(self) -> str:
         """Get active user."""
-        return os.getlogin()
+        try:
+            return os.getlogin()
+        except OSError:
+            self._logger.warning(
+                "Unable to get active user using os module.",
+                exc_info=True,
+            )
+        if sys.platform == "linux":
+            try:
+                import pwd  # pylint: disable=import-error,import-outside-toplevel
+
+                return pwd.getpwuid(os.getuid())[0]
+            except ImportError:
+                self._logger.warning(
+                    "Unable to get active user using pwd module.",
+                    exc_info=True,
+                )
+        return ""
 
     async def _get_boot_time(self) -> float:
         """Get boot time."""
