@@ -22,6 +22,7 @@ class Application(Base):
         no_frontend: bool = False,
     ) -> None:
         """Initialise."""
+        print
         setup_logger(settings.data.log_level, "systembridgebackend")
         super().__init__()
         if init:

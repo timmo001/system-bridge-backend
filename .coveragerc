@@ -1,7 +1,6 @@
 [run]
 source = systembridgebackend
 omit =
-    systembridgebackend/__init__.py
     systembridgebackend/__main__.py
 
     systembridgebackend/handlers/__init__.py
