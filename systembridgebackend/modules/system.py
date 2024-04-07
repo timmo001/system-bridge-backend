@@ -18,6 +18,7 @@ from psutil import boot_time, users
 from psutil._common import suser
 
 from systembridgemodels.modules.system import System, SystemUser
+from systembridgeshared.common import get_user_data_directory
 
 from .._version import __version__
 from .base import ModuleUpdateBase
@@ -30,7 +31,29 @@ class SystemUpdate(ModuleUpdateBase):
         """Initialise."""
         super().__init__()
         self._mac_address: str = self._get_mac_address()
-        self._version: str = __version__.public()
+
+        # Determine the run mode based on the running executable
+        self._run_mode: str = (
+            "python" if "python" in sys.executable.lower() else "standalone"
+        )
+        self._logger.info("Run mode: %s", self._run_mode)
+
+        # Get the version
+        self._version: str | None = None
+        if self._run_mode == "python":
+            self._version = __version__.public()
+        if self._run_mode == "standalone":
+            # Read the version file from the package
+            with open(
+                os.path.join(
+                    get_user_data_directory(),
+                    "systembridge-version.txt",
+                ),
+                encoding="utf-8",
+            ) as version_file:
+                self._version = version_file.read().strip()
+        self._logger.info("Version: %s", self._version)
+
         self._version_latest: str | None = None
 
     async def _get_active_user_id(self) -> int:
@@ -251,7 +274,7 @@ class SystemUpdate(ModuleUpdateBase):
 
     async def _get_version_newer_available(self) -> bool | None:
         """Check if newer version is available."""
-        if self._version_latest is not None:
+        if self._version_latest is not None and self._version is not None:
             return parse(self._version_latest) > parse(self._version)
         return None
 
@@ -313,7 +336,7 @@ class SystemUpdate(ModuleUpdateBase):
                 for user in users_result
             ],
             uuid=self._uuid,
-            version=self._version,
+            version=self._version or "",
             camera_usage=camera_usage,
             ip_address_6=ip_address_6,
             pending_reboot=pending_reboot,
