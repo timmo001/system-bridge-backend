@@ -37,9 +37,16 @@ class SystemUpdate(ModuleUpdateBase):
         """Get active user ID."""
         return os.getpid()
 
-    async def _get_active_user_name(self) -> str:
+    async def _get_active_user_name(self) -> str | None:
         """Get active user."""
-        return os.getlogin()
+        try:
+            return os.getlogin()
+        except OSError:
+            self._logger.warning(
+                "Unable to get active user using os module.",
+                exc_info=True,
+            )
+        return None
 
     async def _get_boot_time(self) -> float:
         """Get boot time."""
