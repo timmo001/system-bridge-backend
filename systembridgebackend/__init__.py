@@ -1,6 +1,7 @@
 """System Bridge."""
 
 import asyncio
+import logging
 import sys
 
 from systembridgeshared.base import Base
@@ -20,9 +21,12 @@ class Application(Base):
         settings: Settings,
         init: bool = False,
         no_frontend: bool = False,
+        logger: logging.Logger | None = None,
     ) -> None:
         """Initialise."""
-        setup_logger(settings.data.log_level, "systembridgebackend")
+        if logger is None:
+            setup_logger(settings.data.log_level, "systembridgebackend")
+            logging.getLogger("zeroconf").setLevel(logging.ERROR)
         super().__init__()
         if init:
             self._logger.info("Initialised application. Exiting now.")

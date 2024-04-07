@@ -27,6 +27,7 @@ def main(
             settings,
             init=init,
             no_frontend=no_frontend,
+            logger=logger,
         )
     except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
