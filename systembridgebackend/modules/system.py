@@ -39,9 +39,9 @@ class SystemUpdate(ModuleUpdateBase):
 
         # Get the version
         self._version: str | None = None
-        if self._run_mode == "python":
+        if self._run_mode == RunMode.PYTHON:
             self._version = __version__.public()
-        if self._run_mode == "standalone":
+        if self._run_mode == RunMode.STANDALONE:
             # Read the version file from the package
             with open(
                 os.path.join(
@@ -54,7 +54,7 @@ class SystemUpdate(ModuleUpdateBase):
         self._logger.info("Version: %s", self._version)
 
         # Determine the latest version URL based on the run mode
-        self._version_latest_url = f"https://api.github.com/repos/timmo001/{(
+        self._version_latest_url = f"https://github.com/timmo001/{(
             'system-bridge' if self._run_mode == RunMode.STANDALONE else 'system-bridge-backend'
         )}/releases/latest"
 
@@ -277,15 +277,18 @@ class SystemUpdate(ModuleUpdateBase):
             self._logger.warning("Rate limit exceeded. Skipping request.")
             return self._version_latest
 
+        url = f"https://api.github.com/repos/timmo001/{(
+            'system-bridge' if self._run_mode == RunMode.STANDALONE else 'system-bridge-backend'
+        )}/releases/latest"
+        self._logger.debug("GitHub API URL: %s", url)
+
         # Use the GitHub API to get the latest release
-        self._logger.debug("URL: %s", self._version_latest_url)
-        async with aiohttp.ClientSession() as session, session.get(
-            self._version_latest_url
-        ) as response:
+        async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
                 if data is not None and (tag_name := data.get("tag_name")) is not None:
                     self._version_latest = tag_name.replace("v", "")
+                    self._logger.info("Latest version: %s", self._version_latest)
 
         return self._version_latest
 
