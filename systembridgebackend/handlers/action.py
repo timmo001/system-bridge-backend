@@ -1,4 +1,5 @@
 """Action Utilities."""
+
 from typing import Any
 
 from systembridgeconnector.exceptions import (

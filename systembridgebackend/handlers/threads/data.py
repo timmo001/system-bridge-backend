@@ -1,4 +1,5 @@
 """Data update thread handler."""
+
 from collections.abc import Awaitable, Callable
 from typing import Any, Final, override
 

@@ -1,8 +1,7 @@
 """System."""
 
-from __future__ import annotations
-
 import asyncio
+import getpass
 import os
 import platform
 import re
@@ -10,7 +9,6 @@ import socket
 import sys
 from typing import Any, override
 import uuid
-import getpass
 
 import aiohttp
 from packaging.version import parse

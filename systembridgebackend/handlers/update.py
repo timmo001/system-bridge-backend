@@ -1,4 +1,5 @@
 """Update handlers."""
+
 from systembridgeshared.update import Update
 
 

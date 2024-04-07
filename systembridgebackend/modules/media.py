@@ -1,7 +1,6 @@
 """Media."""
-# pylint: disable=import-error
-from __future__ import annotations
 
+# pylint: disable=import-error
 import asyncio
 from collections.abc import Awaitable, Callable
 import datetime
@@ -16,6 +15,7 @@ from systembridgeshared.base import Base
 
 IDLE_UPDATE_INTERVAL: Final[int] = 20
 PLAYING_UPDATE_INTERVAL: Final[int] = 5
+
 
 class Media(Base):
     """Media."""
@@ -153,7 +153,8 @@ class Media(Base):
                 media_info.position = timeline.position.total_seconds()
 
             if (
-                properties := await self.current_session.try_get_media_properties_async()
+                properties
+                := await self.current_session.try_get_media_properties_async()
             ):
                 media_info.title = properties.title
                 media_info.subtitle = properties.subtitle
