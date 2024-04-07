@@ -17,7 +17,7 @@ from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
 
-from systembridgemodels.modules.system import System, SystemUser
+from systembridgemodels.modules.system import RunMode, System, SystemUser
 from systembridgeshared.common import get_user_data_directory
 
 from .._version import __version__
@@ -33,8 +33,8 @@ class SystemUpdate(ModuleUpdateBase):
         self._mac_address: str = self._get_mac_address()
 
         # Determine the run mode based on the running executable
-        self._run_mode: str = (
-            "python" if "python" in sys.executable.lower() else "standalone"
+        self._run_mode: RunMode = (
+            RunMode.PYTHON if "python" in sys.executable.lower() else RunMode.STANDALONE
         )
         self._logger.info("Run mode: %s", self._run_mode)
 
@@ -53,6 +53,11 @@ class SystemUpdate(ModuleUpdateBase):
             ) as version_file:
                 self._version = version_file.read().strip()
         self._logger.info("Version: %s", self._version)
+
+        # Determine the latest version URL based on the run mode
+        self._version_latest_url = f"https://api.github.com/repos/timmo001/{(
+            'system-bridge' if self._run_mode == RunMode.STANDALONE else 'system-bridge-backend'
+        )}/releases/latest"
 
         self._version_latest: str | None = None
 
@@ -280,14 +285,11 @@ class SystemUpdate(ModuleUpdateBase):
             self._logger.warning("Rate limit exceeded. Skipping request.")
             return self._version_latest
 
-        # Determine the URL based on the run mode
-        url = f"https://api.github.com/repos/timmo001/{(
-            'system-bridge' if self._run_mode == "standalone" else 'system-bridge-backend'
-        )}/releases/latest"
-        self._logger.debug("URL: %s", url)
-
         # Use the GitHub API to get the latest release
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        self._logger.debug("URL: %s", self._version_latest_url)
+        async with aiohttp.ClientSession() as session, session.get(
+            self._version_latest_url
+        ) as response:
             if response.status == 200:
                 data = await response.json()
                 if data is not None and (tag_name := data.get("tag_name")) is not None:
@@ -347,6 +349,7 @@ class SystemUpdate(ModuleUpdateBase):
             platform_version=platform_version,
             platform=platform_result,
             uptime=uptime,
+            run_mode=self._run_mode,
             users=[
                 SystemUser(
                     name=user.name,
@@ -363,6 +366,7 @@ class SystemUpdate(ModuleUpdateBase):
             camera_usage=camera_usage,
             ip_address_6=ip_address_6,
             pending_reboot=pending_reboot,
+            version_latest_url=self._version_latest_url,
             version_latest=version_latest,
             version_newer_available=await self._get_version_newer_available(),
         )
