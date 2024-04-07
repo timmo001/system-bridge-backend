@@ -99,7 +99,7 @@ class API(FastAPI):
 
 
 app = API(
-    title="System Bridge",
+    title="System Bridge Backend",
     version=__version__.public(),
 )
 
