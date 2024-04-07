@@ -238,9 +238,9 @@ class SystemUpdate(ModuleUpdateBase):
             if response.status == 200:
                 data = await response.json()
                 if data is not None and (tag_name := data.get("tag_name")) is not None:
-                    return tag_name.replace("v", "")
+                    self._version_latest = tag_name.replace("v", "")
 
-        return None
+        return self._version_latest
 
     async def _get_version_newer_available(self) -> bool | None:
         """Check if newer version is available."""
