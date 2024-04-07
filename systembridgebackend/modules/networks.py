@@ -1,4 +1,5 @@
 """Network."""
+
 import asyncio
 from typing import override
 

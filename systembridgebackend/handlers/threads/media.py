@@ -1,4 +1,5 @@
 """Media update thread handler."""
+
 from collections.abc import Awaitable, Callable
 import platform
 from typing import Final, override

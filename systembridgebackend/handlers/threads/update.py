@@ -1,4 +1,5 @@
 """Update thread handler."""
+
 import asyncio
 from datetime import datetime, timedelta
 import threading

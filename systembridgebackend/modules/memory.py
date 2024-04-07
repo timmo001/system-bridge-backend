@@ -1,4 +1,5 @@
 """Memory."""
+
 import asyncio
 from typing import NamedTuple, override
 

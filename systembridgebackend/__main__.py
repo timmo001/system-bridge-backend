@@ -1,4 +1,5 @@
 """Main."""
+
 import logging
 
 import typer

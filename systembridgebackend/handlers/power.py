@@ -1,4 +1,5 @@
 """Power handlers."""
+
 import asyncio
 from collections.abc import Callable
 import os

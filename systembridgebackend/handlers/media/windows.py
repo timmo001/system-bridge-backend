@@ -1,4 +1,5 @@
 """Windows Media handler."""
+
 from winsdk.windows.media import (  # pylint: disable=import-error
     MediaPlaybackAutoRepeatMode,
     control as wmc,  # pylint: disable=import-error
