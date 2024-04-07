@@ -271,9 +271,9 @@ class SystemUpdate(ModuleUpdateBase):
         self._logger.info("Get latest version from GitHub")
 
         # Check if the rate limit allows the request
-        rate_limit = await self._check_rate_limit()
-        self._logger.debug("Rate limit: %s", rate_limit)
-        if rate_limit < 1:
+        rate_limit_remaining = await self._check_rate_limit()
+        self._logger.debug("Rate limit: %s", rate_limit_remaining)
+        if rate_limit_remaining < 1:
             self._logger.warning("Rate limit exceeded. Skipping request.")
             return self._version_latest
 
