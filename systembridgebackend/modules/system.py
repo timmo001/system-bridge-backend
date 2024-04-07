@@ -258,14 +258,31 @@ class SystemUpdate(ModuleUpdateBase):
         except Exception:  # pylint: disable=broad-except
             return self._mac_address
 
+    async def _check_rate_limit(self) -> int:
+        """Check the GitHub API rate limit."""
+        async with aiohttp.ClientSession() as session, session.get(
+            "https://api.github.com/rate_limit"
+        ) as response:
+            if response.status == 200:
+                data = await response.json()
+                rate_limit = data.get("rate", {})
+                return rate_limit.get("remaining", 0)
+        return 0
+
     async def _get_version_latest(self) -> Any | None:
         """Get latest version from GitHub."""
         self._logger.info("Get latest version from GitHub")
+
+        # Check if the rate limit allows the request
+        if (await self._check_rate_limit()) < 1:
+            self._logger.warning("Rate limit exceeded. Skipping request.")
+            return self._version_latest
 
         # Determine the URL based on the run mode
         url = f"https://api.github.com/repos/timmo001/{(
             'system-bridge' if self._run_mode == "standalone" else 'system-bridge-backend'
         )}/releases/latest"
+        self._logger.debug("URL: %s", url)
 
         # Use the GitHub API to get the latest release
         async with aiohttp.ClientSession() as session, session.get(url) as response:
