@@ -262,9 +262,13 @@ class SystemUpdate(ModuleUpdateBase):
         """Get latest version from GitHub."""
         self._logger.info("Get latest version from GitHub")
 
-        async with aiohttp.ClientSession() as session, session.get(
-            "https://api.github.com/repos/timmo001/system-bridge/releases/latest"
-        ) as response:
+        # Determine the URL based on the run mode
+        url = f"https://api.github.com/repos/timmo001/{(
+            'system-bridge' if self._run_mode == "standalone" else 'system-bridge-backend'
+        )}/releases/latest"
+
+        # Use the GitHub API to get the latest release
+        async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
                 if data is not None and (tag_name := data.get("tag_name")) is not None:
