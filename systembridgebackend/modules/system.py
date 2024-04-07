@@ -39,9 +39,9 @@ class SystemUpdate(ModuleUpdateBase):
 
         # Get the version
         self._version: str | None = None
-        if self._run_mode == "python":
+        if self._run_mode == RunMode.PYTHON:
             self._version = __version__.public()
-        if self._run_mode == "standalone":
+        if self._run_mode == RunMode.STANDALONE:
             # Read the version file from the package
             with open(
                 os.path.join(
