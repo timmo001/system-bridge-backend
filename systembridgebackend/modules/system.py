@@ -1,6 +1,7 @@
 """System."""
 
 import asyncio
+from enum import StrEnum
 import getpass
 import os
 import platform
@@ -16,11 +17,19 @@ from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
 
-from systembridgemodels.modules.system import RunMode, System, SystemUser
+from systembridgemodels.modules.system import System, SystemUser
 from systembridgeshared.common import get_user_data_directory
 
 from .._version import __version__
 from .base import ModuleUpdateBase
+
+
+# Replace this with systembridgebackend.modules.system.RunMode when possible
+class RunMode(StrEnum):
+    """Run Mode."""
+
+    STANDALONE = "standalone"
+    PYTHON = "python"
 
 
 class SystemUpdate(ModuleUpdateBase):
@@ -344,7 +353,7 @@ class SystemUpdate(ModuleUpdateBase):
             platform_version=platform_version,
             platform=platform_result,
             uptime=uptime,
-            run_mode=self._run_mode,
+            # run_mode=self._run_mode,
             users=[
                 SystemUser(
                     name=user.name,
@@ -361,7 +370,7 @@ class SystemUpdate(ModuleUpdateBase):
             camera_usage=camera_usage,
             ip_address_6=ip_address_6,
             pending_reboot=pending_reboot,
-            version_latest_url=self._version_latest_url,
+            # version_latest_url=self._version_latest_url,
             version_latest=version_latest,
             version_newer_available=await self._get_version_newer_available(),
         )
