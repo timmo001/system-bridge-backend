@@ -32,7 +32,7 @@ class SensorsUpdate(ModuleUpdateBase):
             return None
         return psutil.sensors_fans()  # type: ignore
 
-    async def _get_temperatures(self) -> list[shwtemp] | None:
+    async def _get_temperatures(self) -> dict[str, list[shwtemp]] | None:
         """Get temperatures."""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
