@@ -130,6 +130,7 @@ class CPUUpdate(ModuleUpdateBase):
                 temperatures: dict[str, list[shwtemp]] = self.sensors.temperatures
                 if "k10temp" in temperatures:
                     for sensor in self.sensors.temperatures["k10temp"]:
+                        self._logger.debug("k10temp: %s", sensor)
                         if "Tdie" in sensor or "Tctl" in sensor or "Tccd1" in sensor:
                             self._logger.debug(
                                 "Found CPU temperature (k10temp): %s",
@@ -138,7 +139,7 @@ class CPUUpdate(ModuleUpdateBase):
                             return sensor.current
                 if "coretemp" in self.sensors.temperatures:
                     for sensor in self.sensors.temperatures["coretemp"]:
-                        self._logger.warning("coretemp: %s", sensor)
+                        self._logger.debug("coretemp: %s", sensor)
                         if (
                             "Package id 0" in sensor
                             or "Physical id 0" in sensor
