@@ -5,12 +5,18 @@
       "type": "shell",
       "label": "pip install",
       "command": "uv pip install .",
-      "dependsOn": ["pip install requirements"]
+      "dependsOn": ["pip install requirements", "pip install frontend"]
     },
     {
       "type": "shell",
       "label": "pip install requirements",
       "command": "uv pip sync requirements.txt",
+      "dependsOn": []
+    },
+    {
+      "type": "shell",
+      "label": "pip install frontend",
+      "command": "uv pip install systembridgefrontend",
       "dependsOn": []
     },
     {
