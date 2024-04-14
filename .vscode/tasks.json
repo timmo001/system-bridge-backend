@@ -5,12 +5,18 @@
       "type": "shell",
       "label": "pip install",
       "command": "uv pip install .",
+      "dependsOn": ["pip install requirements"]
+    },
+    {
+      "type": "shell",
+      "label": "pip install requirements",
+      "command": "uv pip sync requirements.txt",
       "dependsOn": []
     },
     {
       "type": "shell",
       "label": "pip install test requirements",
-      "command": "uv pip install -r requirements_test.txt",
+      "command": "uv pip sync requirements_test.txt",
       "dependsOn": ["pip install"]
     },
     {
