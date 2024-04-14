@@ -12,7 +12,7 @@ from psutil import (
     cpu_times_percent,
     getloadavg,
 )
-from psutil._common import pcputimes, scpufreq, scpustats
+from psutil._common import pcputimes, scpufreq, scpustats, shwtemp
 
 from systembridgemodels.modules.cpu import CPU, CPUFrequency, CPUStats, CPUTimes, PerCPU
 from systembridgemodels.modules.sensors import Sensors
@@ -125,32 +125,57 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def _get_temperature(self) -> float | None:
         """CPU temperature."""
-        if (
-            self.sensors is None
-            or self.sensors.windows_sensors is None
-            or self.sensors.windows_sensors.hardware is None
-        ):
-            return None
-        for hardware in self.sensors.windows_sensors.hardware:
-            # Find type "CPU"
-            if "CPU" not in hardware.type.upper():
-                continue
-            for sensor in hardware.sensors:
-                name = sensor.name.upper()
-                # Find type "TEMPERATURE" and name "PACKAGE" or "AVERAGE"
-                if (
-                    "TEMPERATURE" in sensor.type.upper()
-                    and ("PACKAGE" in name or "AVERAGE" in name)
-                    and sensor.value is not None
-                ):
-                    self._logger.debug(
-                        "Found CPU temperature: %s = %s", sensor.name, sensor.value
-                    )
-                    return (
-                        float(sensor.value)
-                        if isinstance(sensor.value, (int, float, str))
-                        else None
-                    )
+        if self.sensors is not None:
+            if self.sensors.temperatures is not None:
+                temperatures: dict[str, list[shwtemp]] = self.sensors.temperatures
+                if "k10temp" in temperatures:
+                    for sensor in self.sensors.temperatures["k10temp"]:
+                        self._logger.debug("k10temp: %s", sensor)
+                        if "Tdie" in sensor or "Tctl" in sensor or "Tccd1" in sensor:
+                            self._logger.debug(
+                                "Found CPU temperature (k10temp): %s",
+                                sensor,
+                            )
+                            return sensor.current
+                if "coretemp" in self.sensors.temperatures:
+                    for sensor in self.sensors.temperatures["coretemp"]:
+                        self._logger.debug("coretemp: %s", sensor)
+                        if (
+                            "Package id 0" in sensor
+                            or "Physical id 0" in sensor
+                            or "Core 0" in sensor
+                        ):
+                            self._logger.debug(
+                                "Found CPU temperature (coretemp): %s",
+                                sensor,
+                            )
+                            return sensor.current
+            if (
+                self.sensors.windows_sensors is not None
+                and self.sensors.windows_sensors.hardware is not None
+            ):
+                for hardware in self.sensors.windows_sensors.hardware:
+                    # Find type "CPU"
+                    if "CPU" not in hardware.type.upper():
+                        continue
+                    for sensor in hardware.sensors:
+                        name = sensor.name.upper()
+                        # Find type "TEMPERATURE" and name "PACKAGE" or "AVERAGE"
+                        if (
+                            "TEMPERATURE" in sensor.type.upper()
+                            and ("PACKAGE" in name or "AVERAGE" in name)
+                            and sensor.value is not None
+                        ):
+                            self._logger.debug(
+                                "Found CPU temperature: %s = %s",
+                                sensor.name,
+                                sensor.value,
+                            )
+                            return (
+                                float(sensor.value)
+                                if isinstance(sensor.value, (int, float, str))
+                                else None
+                            )
         return None
 
     async def _get_times(self) -> pcputimes:
