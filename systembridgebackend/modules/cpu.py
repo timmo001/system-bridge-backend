@@ -159,6 +159,13 @@ class CPUUpdate(ModuleUpdateBase):
                                 sensor,
                             )
                             return sensor.current
+                # Use the first temperature sensor key
+                for key in temperatures:
+                    for sensor in temperatures[key]:
+                        self._logger.warning(
+                            "Unknown sensor used (may not be correct): %s", sensor
+                        )
+                        return sensor.current
             if (
                 self.sensors.windows_sensors is not None
                 and self.sensors.windows_sensors.hardware is not None
