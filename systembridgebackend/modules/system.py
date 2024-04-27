@@ -161,8 +161,7 @@ class SystemUpdate(ModuleUpdateBase):
 
     def _get_mac_address(self) -> str:
         """Get MAC address."""
-        # pylint: disable=consider-using-f-string
-        return ":".join(re.findall("..", "%012x" % uuid.getnode()))
+        return ":".join(re.findall("..", f"{uuid.getnode():012x}"))
 
     async def _get_pending_reboot(self) -> bool:
         """Check if there is a pending reboot."""
