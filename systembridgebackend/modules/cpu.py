@@ -150,6 +150,15 @@ class CPUUpdate(ModuleUpdateBase):
                                 sensor,
                             )
                             return sensor.current
+                if "atk0110" in self.sensors.temperatures:
+                    for sensor in self.sensors.temperatures["atk0110"]:
+                        self._logger.debug("atk0110: %s", sensor)
+                        if "CPU" in sensor:
+                            self._logger.debug(
+                                "Found CPU temperature (atk0110): %s",
+                                sensor,
+                            )
+                            return sensor.current
             if (
                 self.sensors.windows_sensors is not None
                 and self.sensors.windows_sensors.hardware is not None
