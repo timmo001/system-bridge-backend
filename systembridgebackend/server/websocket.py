@@ -20,7 +20,6 @@ from systembridgemodels.open_path import OpenPath
 from systembridgemodels.open_url import OpenUrl
 from systembridgemodels.request import Request
 from systembridgemodels.response import Response
-from systembridgemodels.update import Update as UpdateModel
 from systembridgeshared.base import Base
 from systembridgeshared.settings import Settings
 
@@ -49,8 +48,6 @@ from ..const import (
     SUBTYPE_MISSING_TITLE,
     SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
-    TYPE_APPLICATION_UPDATE,
-    TYPE_APPLICATION_UPDATING,
     TYPE_DATA_GET,
     TYPE_DATA_LISTENER_REGISTERED,
     TYPE_DATA_LISTENER_UNREGISTERED,
@@ -179,35 +176,7 @@ class WebSocketHandler(Base):
         request: Request,
     ) -> None:
         """Handle event."""
-        if request.event == TYPE_APPLICATION_UPDATE:
-            try:
-                model = UpdateModel(**response_data[EVENT_DATA])
-            except ValueError as error:
-                message = f"Invalid request: {error}"
-                self._logger.warning(message, exc_info=error)
-                await self._send_response(
-                    Response(
-                        id=request.id,
-                        type=TYPE_ERROR,
-                        subtype=SUBTYPE_BAD_REQUEST,
-                        message=message,
-                        data={},
-                    )
-                )
-                return
-            versions = Update().update(
-                model.version,
-                wait=False,
-            )
-            await self._send_response(
-                Response(
-                    id=request.id,
-                    type=TYPE_APPLICATION_UPDATING,
-                    message="Updating application",
-                    data=versions,
-                )
-            )
-        elif request.event == TYPE_EXIT_APPLICATION:
+        if request.event == TYPE_EXIT_APPLICATION:
             self._callback_exit_application()
             self._logger.info("Exit application called")
         elif request.event == TYPE_KEYBOARD_KEYPRESS:
