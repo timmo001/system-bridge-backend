@@ -1,7 +1,6 @@
 """System."""
 
 import asyncio
-from enum import StrEnum
 import getpass
 import os
 import platform
