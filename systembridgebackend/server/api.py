@@ -16,10 +16,10 @@ from fastapi.staticfiles import StaticFiles
 
 from systembridgebackend.handlers.media import get_directories, get_file_data
 from systembridgeshared.common import asyncio_get_loop
-from systembridgeshared.const import HEADER_TOKEN, QUERY_TOKEN
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
+from ..const import HEADER_TOKEN, QUERY_TOKEN
 from ..handlers.data import DataUpdate
 from ..modules import MODULES
 from ..modules.listeners import Listeners

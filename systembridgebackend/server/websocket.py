@@ -22,7 +22,9 @@ from systembridgemodels.request import Request
 from systembridgemodels.response import Response
 from systembridgemodels.update import Update as UpdateModel
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
+from systembridgeshared.settings import Settings
+
+from ..const import (
     EVENT_BASE,
     EVENT_DATA,
     EVENT_EVENT,
@@ -89,9 +91,6 @@ from systembridgeshared.const import (
     TYPE_UNREGISTER_DATA_LISTENER,
     TYPE_UPDATE_SETTINGS,
 )
-from systembridgeshared.settings import Settings
-from systembridgeshared.update import Update
-
 from ..handlers.data import DataUpdate
 from ..handlers.keyboard import keyboard_keypress, keyboard_text
 from ..handlers.media import (

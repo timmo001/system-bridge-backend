@@ -63,8 +63,12 @@ class DisksUpdate(ModuleUpdateBase):
                 mount_point=partition.mountpoint,
                 filesystem_type=partition.fstype,
                 options=partition.opts,
-                max_file_size=partition.maxfile,
-                max_path_length=partition.maxpath,
+                max_file_size=partition.maxfile
+                if hasattr(partition, "maxfile")
+                else -1,
+                max_path_length=partition.maxpath
+                if hasattr(partition, "maxpath")
+                else -1,
                 usage=DiskUsage(
                     free=usage.free,
                     total=usage.total,

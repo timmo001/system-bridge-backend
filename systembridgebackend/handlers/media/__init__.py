@@ -22,7 +22,9 @@ from plyer import storagepath
 
 from systembridgemodels.media_files import MediaFile
 from systembridgemodels.media_play import MediaPlay
-from systembridgeshared.const import (
+from systembridgeshared.settings import Settings
+
+from ...const import (
     QUERY_API_PORT,
     QUERY_AUTOPLAY,
     QUERY_BASE,
@@ -31,8 +33,6 @@ from systembridgeshared.const import (
     QUERY_URL,
     QUERY_VOLUME,
 )
-from systembridgeshared.settings import Settings
-
 from ..keyboard import keyboard_keypress
 
 
