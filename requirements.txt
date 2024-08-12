@@ -10,7 +10,7 @@ psutil==6.0.0
 python-multipart==0.0.9
 screeninfo==0.8.1
 systembridgeconnector==4.1.2
-systembridgemodels==4.1.0
+systembridgemodels==4.2.1
 systembridgeshared==4.0.4
 typer==0.12.3
 uvicorn[standard]==0.30.5
