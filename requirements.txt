@@ -13,5 +13,5 @@ systembridgeconnector==4.1.4
 systembridgemodels==4.2.2
 systembridgeshared==4.0.5
 typer==0.12.3
-uvicorn[standard]==0.30.5
+uvicorn[standard]==0.30.6
 zeroconf==0.132.2
