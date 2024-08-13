@@ -176,5 +176,5 @@ class Media(Base):
                 await self._update_data(
                     MediaInfo(updated_at=datetime.datetime.now().timestamp())
                 )
-        except (OSError, Exception) as error:
+        except OSError as error:
             self._logger.error("Error updating media info: %s", error)
