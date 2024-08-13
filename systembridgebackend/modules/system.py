@@ -343,7 +343,7 @@ class SystemUpdate(ModuleUpdateBase):
             platform_version=platform_version,
             platform=platform_result,
             uptime=uptime,
-            # run_mode=self._run_mode,
+            run_mode=self._run_mode,
             users=[
                 SystemUser(
                     name=user.name,
