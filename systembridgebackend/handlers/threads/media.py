@@ -20,9 +20,9 @@ class MediaUpdateThread(UpdateThread):
     ) -> None:
         """Initialise."""
         super().__init__(UPDATE_INTERVAL)
+        self._updated_callback = updated_callback
 
         if platform.system() != "Windows":
-            updated_callback("media", MediaInfo())
             return
 
         from ...modules.media import (  # pylint: disable=import-outside-toplevel, import-error
@@ -30,14 +30,18 @@ class MediaUpdateThread(UpdateThread):
         )
 
         self._update_cls = Media(
-            changed_callback=updated_callback,
+            changed_callback=self._updated_callback,
             update_media_info_interval=self._update_interval,
         )
 
     @override
     async def update(self) -> None:
         """Update."""
-        if self.stopping or platform.system() != "Windows" or self._update_cls is None:
+        if self.stopping:
+            return
+
+        if platform.system() != "Windows" or self._update_cls is None:
+            self._updated_callback("media", MediaInfo())
             return
 
         await self._update_cls.update_media_info()
