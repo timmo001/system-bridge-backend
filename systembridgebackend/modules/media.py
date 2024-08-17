@@ -4,7 +4,6 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 import datetime
-import platform
 from typing import Final
 
 from winsdk.windows.foundation import EventRegistrationToken
