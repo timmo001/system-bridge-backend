@@ -46,7 +46,7 @@ class BatteryUpdate(ModuleUpdateBase):
                 percentage=status["percentage"],
                 time_remaining=time_remaining,
             )
-        except ValueError as exception:
+        except (NotImplementedError, ValueError) as exception:
             self._logger.error(exception)
             return Battery(
                 is_charging=None,
