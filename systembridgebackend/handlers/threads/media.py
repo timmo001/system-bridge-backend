@@ -22,6 +22,7 @@ class MediaUpdateThread(UpdateThread):
         super().__init__(UPDATE_INTERVAL)
 
         if platform.system() != "Windows":
+            updated_callback("media", MediaInfo())
             return
 
         from ...modules.media import (  # pylint: disable=import-outside-toplevel, import-error
