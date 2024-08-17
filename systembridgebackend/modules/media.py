@@ -83,9 +83,6 @@ class Media(Base):
 
     async def update_media_info(self) -> None:
         """Update media info from the current session."""
-        if platform.system() != "Windows":
-            return
-
         try:
             if (
                 self.sessions is not None
@@ -124,7 +121,7 @@ class Media(Base):
                         self._playback_info_changed_handler
                     )
                 )
-                media_info = MediaInfo()
+                media_info = MediaInfo(updated_at=datetime.datetime.now().timestamp())
                 if info := self.current_session.get_playback_info():
                     media_info.status = info.playback_status.name
                     media_info.playback_rate = info.playback_rate
