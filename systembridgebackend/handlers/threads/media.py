@@ -1,6 +1,7 @@
 """Media update thread handler."""
 
 from collections.abc import Awaitable, Callable
+import datetime
 import platform
 from typing import Final, override
 
@@ -41,7 +42,9 @@ class MediaUpdateThread(UpdateThread):
             return
 
         if platform.system() != "Windows" or self._update_cls is None:
-            await self._updated_callback("media", MediaInfo())
+            await self._updated_callback(
+                "media", MediaInfo(updated_at=datetime.datetime.now().timestamp())
+            )
             return
 
         await self._update_cls.update_media_info()
