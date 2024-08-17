@@ -41,7 +41,7 @@ class MediaUpdateThread(UpdateThread):
             return
 
         if platform.system() != "Windows" or self._update_cls is None:
-            self._updated_callback("media", MediaInfo())
+            await self._updated_callback("media", MediaInfo())
             return
 
         await self._update_cls.update_media_info()
