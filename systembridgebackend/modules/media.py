@@ -84,7 +84,9 @@ class Media(Base):
     async def update_media_info(self) -> None:
         """Update media info from the current session."""
         if platform.system() != "Windows":
-            await self._update_data(MediaInfo())
+            await self._update_data(
+                MediaInfo(updated_at=datetime.datetime.now().timestamp())
+            )
             return
 
         try:
