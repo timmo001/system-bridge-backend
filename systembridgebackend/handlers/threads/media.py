@@ -36,7 +36,7 @@ class MediaUpdateThread(UpdateThread):
     @override
     async def update(self) -> None:
         """Update."""
-        if platform.system() != "Windows" or self.stopping:
+        if self.stopping:
             return
 
         await self._update_cls.update_media_info()
