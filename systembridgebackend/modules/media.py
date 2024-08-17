@@ -75,12 +75,9 @@ class Media(Base):
 
     async def _update_data(
         self,
-        media_info: MediaInfo | None = None,
+        media_info: MediaInfo,
     ) -> None:
         """Update data."""
-        if media_info is None:
-            media_info = MediaInfo(updated_at=datetime.datetime.now().timestamp())
-
         self._logger.info("Updating media data")
         await self._changed_callback("media", media_info)
 
