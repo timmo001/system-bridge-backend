@@ -87,6 +87,7 @@ class Media(Base):
     async def update_media_info(self) -> None:
         """Update media info from the current session."""
         if platform.system() != "Windows":
+            await self._update_data(MediaInfo())
             return
 
         try:
@@ -98,9 +99,7 @@ class Media(Base):
                     self.current_session_changed_handler_token
                 )
 
-            self.sessions = (
-                await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
-            )
+            self.sessions = await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
             self.current_session_changed_handler_token = (
                 self.sessions.add_current_session_changed(
                     self._current_session_changed_handler
@@ -145,7 +144,9 @@ class Media(Base):
                         media_info.is_next_enabled = info.controls.is_next_enabled
                         media_info.is_pause_enabled = info.controls.is_pause_enabled
                         media_info.is_play_enabled = info.controls.is_play_enabled
-                        media_info.is_previous_enabled = info.controls.is_previous_enabled
+                        media_info.is_previous_enabled = (
+                            info.controls.is_previous_enabled
+                        )
                         media_info.is_rewind_enabled = info.controls.is_rewind_enabled
                         media_info.is_stop_enabled = info.controls.is_stop_enabled
 
@@ -178,3 +179,6 @@ class Media(Base):
                 )
         except OSError as error:
             self._logger.error("Error updating media info: %s", error)
+            await self._update_data(
+                MediaInfo(updated_at=datetime.datetime.now().timestamp())
+            )
