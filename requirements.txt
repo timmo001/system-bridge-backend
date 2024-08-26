@@ -1,6 +1,6 @@
 aiofiles==24.1.0
 aiohttp>=3.9.0b0
-fastapi==0.112.1
+fastapi==0.112.2
 incremental>=24.7.2
 keyboard==0.13.5
 mutagen==1.47.0
