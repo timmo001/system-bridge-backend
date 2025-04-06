@@ -23,12 +23,18 @@ class BaseThread(Thread, Base):
         """Run."""
         raise NotImplementedError
 
-    def join(
+    def interrupt(
         self,
         timeout: float | None = None,
     ) -> None:
-        """Join."""
-        self._logger.info("Stopping thread")
+        """
+        Interrupt thread running by setting the `self.stopping` flag.
+        Child classes should check `self.stopping` in its `run()` implementation
+        to support this feature.
+
+        Should be called instead of `BaseThread.join()`.
+        """
+        self._logger.info("Interrupting %s", self.__class__.__name__)
         self.stopping = True
         loop = asyncio.get_event_loop()
         asyncio.tasks.all_tasks(loop).clear()

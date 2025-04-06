@@ -3,6 +3,7 @@
 from collections.abc import Awaitable, Callable
 import datetime
 import platform
+from queue import Queue
 from typing import Final, override
 
 from systembridgemodels.modules.media import Media as MediaInfo
@@ -18,9 +19,10 @@ class MediaUpdateThread(UpdateThread):
     def __init__(
         self,
         updated_callback: Callable[[str, MediaInfo], Awaitable[None]],
+        update_queue: Queue[str],
     ) -> None:
         """Initialise."""
-        super().__init__(UPDATE_INTERVAL)
+        super().__init__(UPDATE_INTERVAL, update_queue)
         self._updated_callback = updated_callback
 
         if platform.system() != "Windows":

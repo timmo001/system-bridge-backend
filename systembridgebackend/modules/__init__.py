@@ -3,6 +3,8 @@ import asyncio
 from asyncio import Task
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from queue import Queue
+import time
 from typing import Any
 
 from systembridgeshared.base import Base
@@ -52,7 +54,7 @@ class ModulesUpdate(Base):
         super().__init__()
         self._updated_callback = updated_callback
 
-        self._classes: list[ModuleClass] = [
+        self._classes: dict[str, ModuleClass] = dict((m.name, m) for m in [
             ModuleClass(name="system", cls=SystemUpdate()),
             ModuleClass(name="battery", cls=BatteryUpdate()),
             ModuleClass(name="cpu", cls=CPUUpdate()),
@@ -62,13 +64,14 @@ class ModulesUpdate(Base):
             ModuleClass(name="memory", cls=MemoryUpdate()),
             ModuleClass(name="networks", cls=NetworksUpdate()),
             ModuleClass(name="processes", cls=ProcessesUpdate()),
-        ]
+        ])
 
         self.tasks: dict[str, Task] = {}
 
     async def update_module(self, module_class: ModuleClass) -> None:
         """Update Module."""
-        self._logger.info("Request update module: %s", module_class.name)
+        time_update_start  = time.perf_counter()
+        self._logger.debug("Start update module: %s", module_class.name)
 
         try:
             module_data = await module_class.cls.update_all_data()
@@ -79,16 +82,26 @@ class ModulesUpdate(Base):
                 module_class.name,
                 exc_info=exception,
             )
+        self._logger.info(
+            "Module updated: %s time=%0.3fs",
+            module_class.name,
+            time.perf_counter() - time_update_start,
+        )
 
-    async def update_data(self) -> None:
+    async def update_data(self, modules: list[str] | None = None) -> None:
         """Update Data."""
-        self._logger.info("Update data")
+        self._logger.info("Update data, modules=%s", modules or 'ALL')
 
         sensors_update = SensorsUpdate()
         sensors_data = await sensors_update.update_all_data()
         await self._updated_callback("sensors", sensors_data)
 
-        for module_class in self._classes:
+        if modules:
+            classes = (self._classes[cls] for cls in modules)
+        else:
+            classes = self._classes.values()
+
+        for module_class in classes:
             # If the class has a sensors attribute, set it
             if hasattr(module_class.cls, "sensors"):
                 module_class.cls.sensors = sensors_data
@@ -98,6 +111,7 @@ class ModulesUpdate(Base):
                 module_class.name in self.tasks
                 and not self.tasks[module_class.name].done()
             ):
+                self._logger.debug("Skip already running task %s", module_class.name)
                 continue
 
             # Start the task

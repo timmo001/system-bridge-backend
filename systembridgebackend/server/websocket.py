@@ -7,8 +7,10 @@ import os
 from uuid import uuid4
 
 from fastapi import WebSocket
+from monitorcontrol.vcp.vcp_abc import VCPError
 from starlette.websockets import WebSocketDisconnect
 
+from systembridgemodels.display import DisplaySetting, DisplayUpdateSettingOp
 from systembridgemodels.keyboard_key import KeyboardKey
 from systembridgemodels.keyboard_text import KeyboardText
 from systembridgemodels.media_control import MediaAction, MediaControl
@@ -47,6 +49,7 @@ from ..const import (
     SUBTYPE_MISSING_TEXT,
     SUBTYPE_MISSING_TITLE,
     SUBTYPE_MISSING_VALUE,
+    SUBTYPE_OPERATION_FAILED,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_DATA_GET,
     TYPE_DATA_LISTENER_REGISTERED,
@@ -87,8 +90,18 @@ from ..const import (
     TYPE_SETTINGS_RESULT,
     TYPE_UNREGISTER_DATA_LISTENER,
     TYPE_UPDATE_SETTINGS,
+    TYPE_DISPLAY_UPDATE_SETTING,
+    TYPE_DISPLAY_SETTING_UPDATED,
+
 )
 from ..handlers.data import DataUpdate
+from ..handlers.display import (
+    set_brightness,
+    set_contrast,
+    set_volume,
+    set_power_state,
+    set_input_source,
+)
 from ..handlers.keyboard import keyboard_keypress, keyboard_text
 from ..handlers.media import (
     control_fastforward,
@@ -895,6 +908,74 @@ class WebSocketHandler(Base):
                 )
             )
             logout()
+        elif request.event == TYPE_DISPLAY_UPDATE_SETTING:
+            try:
+                model = DisplayUpdateSettingOp(**response_data[EVENT_DATA])
+            except ValueError as error:
+                message = f"DisplayUpdateSettingOp parse error: {error}"
+                self._logger.warning(message, exc_info=error)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_BAD_REQUEST,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
+            if model.setting not in DisplaySetting or not isinstance(model.monitor_id, int) or not isinstance(model.value, int):
+                self._logger.warning("Invalid parameters: %s", model)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_INVALID_ACTION,
+                        message="Invalid parameters",
+                        data={},
+                    )
+                )
+                return
+
+            try:
+                self._logger.info("Updating display %d %s to %d", model.monitor_id, model.setting, model.value)
+                if model.setting == DisplaySetting.BRIGHTNESS:
+                    set_brightness(model.monitor_id, model.value)
+                elif model.setting == DisplaySetting.CONTRAST:
+                    set_contrast(model.monitor_id, model.value)
+                elif model.setting == DisplaySetting.VOLUME:
+                    set_volume(model.monitor_id, model.value)
+                elif model.setting == DisplaySetting.POWER_STATE:
+                    set_power_state(model.monitor_id, model.value)
+                elif model.setting == DisplaySetting.INPUT_SOURCE:
+                    set_input_source(model.monitor_id, model.value)
+                else:
+                    raise NotImplementedError(f"{model.setting} not implemented")
+
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_DISPLAY_SETTING_UPDATED,
+                        message=f"Display setting {model.setting} updated",
+                        data=asdict(model),
+                    )
+                )
+                self._data_update.request_update_data(modules=["displays"])
+                self._logger.info("display %d updated", model.monitor_id)
+            except (VCPError, NotImplementedError) as e:
+                message = f"{e.__class__.__name__}: {str(e)}"
+                self._logger.warning(message, exc_info=e)
+                await self._send_response(
+                    Response(
+                        id=request.id,
+                        type=TYPE_ERROR,
+                        subtype=SUBTYPE_OPERATION_FAILED,
+                        message=message,
+                        data={},
+                    )
+                )
+                return
+
         else:
             self._logger.warning("Unknown event: %s", request.event)
             await self._send_response(
